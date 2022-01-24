@@ -1,4 +1,4 @@
-name: geog0133
+name: uclnceo
 channels:
   - conda-forge
   - defaults
