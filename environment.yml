@@ -1,0 +1,29 @@
+name: geog0133
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pyephem
+  - git
+  - python>=3.7
+  - nomkl
+  - scipy
+  - numpy
+  - matplotlib
+  - pandas
+  - ipython
+  - astropy
+  - jupyter_console
+  - jupyter_contrib_nbextensions
+  - pip
+  - matplotlib
+  - python>=3
+  - sphinx>=1.6
+  - nbsphinx
+  - numpydoc
+  - xlrd
+  - scipy
+  - pip:
+    - sphinx_rtd_theme
+    - netCDF4
+    - urlpath
