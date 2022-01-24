@@ -1,0 +1,11 @@
+nbsphinx
+matplotlib
+ipython
+numpy
+astropy
+xlrd
+pyephem
+scipy
+netCDF4
+numpydoc
+urlpath
