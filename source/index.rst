@@ -6,10 +6,10 @@
 .. figure:: figures/ucl_logo.png
    :alt: UCL
 
-GEOG0133 Terrestrial Carbon: modelling and monitoring 
+Workshop 2022 Notes 
 =====================================================
 
-Course Convenor 
+Authors
 ----------------
 
 `Prof. P. Lewis`_
