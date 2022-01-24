@@ -6,12 +6,14 @@ __pycache__/
 */.DS_Store
 data/cru_ts4*
 *.swp
+
 #docs/source
-docs/*.html
-docs/_*
-docs/notebooks
-docs/*.inv
-docs/*.js
+# github serving
+#docs/*.html
+#docs/_*
+#docs/notebooks
+#docs/*.inv
+#docs/*.js
 
 # C extensions
 *.so
