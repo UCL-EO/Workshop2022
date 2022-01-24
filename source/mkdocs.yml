@@ -6,9 +6,6 @@ extra:
     link: https://github.com/UCL-EO/Workshop2022
 extra_javascript:
 - javascripts/config.js
-google_analytics:
-- UA-1347772-1
-- auto
 markdown_extensions:
 - pymdownx.arithmatex:
     generic: true

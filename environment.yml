@@ -28,3 +28,9 @@ dependencies:
     - netCDF4
     - urlpath
     - mkdocs
+    - mkdocs-material
+    - mkdocs-exclude
+    - mknotebooks
+    - jupyter_contrib_nbextensions
+    - mkdocs-jupyter
+    - mkdocs-git-revision-date-localized-plugin
