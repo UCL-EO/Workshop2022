@@ -76,7 +76,7 @@ You should see:
     Install.md		data			postBuild
     LICENSE			environment.yml		python
     Makefile		figures			requirements.txt
-    README.md		make.bat		source
+    README.md		make.bat		docs
     notebooks
 
 

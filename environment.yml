@@ -27,10 +27,7 @@ dependencies:
     - sphinx_rtd_theme
     - netCDF4
     - urlpath
-    - mkdocs
-    - mkdocs-material
-    - mkdocs-exclude
     - mknotebooks
     - jupyter_contrib_nbextensions
     - mkdocs-jupyter
-    - mkdocs-git-revision-date-localized-plugin
+    - pymdown-extensions

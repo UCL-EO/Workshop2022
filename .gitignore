@@ -6,7 +6,7 @@ __pycache__/
 */.DS_Store
 data/cru_ts4*
 *.swp
-source/docs
+docs/source
 
 
 # C extensions
