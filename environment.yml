@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - geemap
+  - cartopy
   - localtileserver
   - git
   - jupyterlab
