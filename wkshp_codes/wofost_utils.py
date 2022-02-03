@@ -129,7 +129,7 @@ def change_sowing_slider():
             n_days = widgets.IntSlider(min=1, max=20, value=10),
             crop=fixed("maize"),
             variety=fixed("Maize_VanHeemst_1988"),
-            soil=fixed("../carto/ec4.new"),
+            soil=fixed("../data/carto/ec4.new"),
             mgmt=fixed("ghana_maize.amgt"))
 
 
@@ -138,7 +138,7 @@ def wofost_parameter_sweep_func(crop_start_date=dt.date(2011, 7, 1),
                   span=40.0, tdwi=20., tsum1=750., tsum2=859.,
                   tsumem=70,rgrlai=0.05,cvo=0.05, cvl=0.05,
                   meteo="Upper_East", crop="maize",
-                  variety="Maize_VanHeemst_1988", soil="../carto/ec4.new",
+                  variety="Maize_VanHeemst_1988", soil="../data/carto/ec4.new",
                   wav=100, co2=400, rdmsol=100., potential=False):
     cropdata = YAMLCropDataProvider()
     cropdata.set_active_crop(crop, variety)
@@ -196,7 +196,7 @@ def wofost_parameter_sweep():
                   meteo=widgets.fixed("Upper_East"),
                   crop=widgets.fixed("maize"),
                   variety=widgets.fixed("Maize_VanHeemst_1988"),
-                  soil=widgets.fixed("../carto/ec4.new"),
+                  soil=widgets.fixed("../data/carto/ec4.new"),
                   wav=widgets.FloatSlider(value=5, min=0, max=100),
                   co2=widgets.fixed(400),
                   rdmsol=widgets.fixed(100.),

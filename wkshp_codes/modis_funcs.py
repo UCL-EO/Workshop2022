@@ -23,7 +23,7 @@ except ImportError:
 import ipywidgets as widgets
 from IPython.display import display
 
-districts_list = json.load(open("../carto/Ghana_districts.geojson", "r"))
+districts_list = json.load(open("../data/carto/Ghana_districts.geojson", "r"))
 district_names = [feat["properties"]["NAME"] for feat in districts_list["features"]]
 
 landcover_types = [
@@ -55,7 +55,7 @@ def extract_avg_par(
     years=(2015, 2017),
     mcd15_url="http://gws-access.ceda.ac.uk/public/odanceo/MCD15",
     mcd12_url="http://gws-access.ceda.ac.uk/public/odanceo/MCD12",
-    cutline_ds="../carto/Map_of_Districts_216.shp",
+    cutline_ds="../data/carto/Map_of_Districts_216.shp",
     field_name="NAME",
 ):
     start_year = years[0]
@@ -208,7 +208,7 @@ def select_region_modis_lai():
         district=widgets.Dropdown(options=district_names, value="Garu Tempane"),
         mcd15_url=widgets.fixed("http://gws-access.ceda.ac.uk/public/odanceo/MCD15"),
         mcd12_url=widgets.fixed("http://gws-access.ceda.ac.uk/public/odanceo/MCD12"),
-        cutline_ds=widgets.fixed("../carto/Map_of_Districts_216.shp"),
+        cutline_ds=widgets.fixed("../data/carto/Map_of_Districts_216.shp"),
         field_name=widgets.fixed("NAME"),
     )
     return w
