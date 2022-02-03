@@ -1,12 +1,15 @@
 # run any scripts to get data or things like that
-
-#geog0133/grab_data.py
+pip install git+https://github.com/jgomezdans/GomezEngine.git
 jupyter contrib nbextension install --user
-#jupyter nbextension enable --py widgetsnbextension
+jupyter nbextension enable --py widgetsnbextension
 jupyter nbextension enable python-markdown/main
 
-# Notebooks w/ extensions that auto-run code must be "trusted" to work the first time
-jupyter trust notebooks/*.ipynb
+# Install a JupyterLab extension for demonstration purposes
+jupyter labextension install @jupyterlab/geojson-extension 
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install jupyter-leaflet
+jupyter trust *.ipynb
+jupyter trust ntoebooks/*.ipynb
 
 # kernel setup
 python -m ipykernel install --name=conda-env-uclnceo  --display-name 'conda env:uclnceo' --user

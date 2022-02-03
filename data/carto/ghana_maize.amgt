@@ -1,0 +1,13 @@
+Version: 1.0
+AgroManagement:
+- 2011-01-01:
+    CropCalendar:
+        crop_name: 'maize'
+        variety_name: 'Maize_VanHeemst_1988'
+        crop_start_date: 2011-07-12
+        crop_start_type: sowing
+        crop_end_date: 2011-10-30
+        crop_end_type: harvest
+        max_duration: 150
+    TimedEvents: null
+    StateEvents: null
