@@ -5,6 +5,7 @@ channels:
 dependencies:
   - geemap
   - cartopy
+  - folium
   - localtileserver
   - git
   - jupyterlab
