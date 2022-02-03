@@ -20,7 +20,7 @@ dependencies:
   - geopandas
   - tqdm
   - jupyter_contrib_nbextensions
-  - python>=3.9
+  - python=3.9
   - nomkl
   - netCDF4
   - scipy
