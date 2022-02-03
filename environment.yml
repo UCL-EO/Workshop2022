@@ -3,21 +3,35 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - pyephem
+  - geemap
+  - cartopy
+  - localtileserver
   - git
-  - python>=3.7
+  - jupyterlab
+  - nbconvert
+  - ipywidgets
+  - ipyleaflet
+  - widgetsnbextension
+  - gdal
+  - rasterio
+  - xarray
+  - fiona
+  - shapely
+  - geopandas
+  - tqdm
+  - jupyter_contrib_nbextensions
+  - python>=3.9
   - nomkl
+  - netCDF4
   - scipy
   - numpy
   - matplotlib
   - pandas
   - ipython
-  - astropy
   - jupyter_console
   - jupyter_contrib_nbextensions
   - pip
   - matplotlib
-  - python>=3
   - sphinx>=1.6
   - nbsphinx
   - numpydoc
@@ -25,9 +39,10 @@ dependencies:
   - scipy
   - pip:
     - sphinx_rtd_theme
-    - netCDF4
     - urlpath
     - mknotebooks
     - jupyter_contrib_nbextensions
     - mkdocs-jupyter
     - pymdown-extensions
+    - pcse
+    - pygeotile
