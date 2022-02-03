@@ -37,6 +37,8 @@ dependencies:
   - numpydoc
   - xlrd
   - scipy
+  - stackstac
+  - satsearch
   - pip:
     - sphinx_rtd_theme
     - urlpath
