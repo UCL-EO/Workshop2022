@@ -37,8 +37,8 @@ dependencies:
   - numpydoc
   - xlrd
   - scipy
-  - stackstac
-  - satsearch
+  - dask
+  - pyproj
   - pip:
     - sphinx_rtd_theme
     - urlpath
@@ -48,3 +48,5 @@ dependencies:
     - pymdown-extensions
     - pcse
     - pygeotile
+    - pystac-client
+    - stackstac
