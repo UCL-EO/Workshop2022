@@ -44,8 +44,9 @@ def get_pixel(location, field_name):
     sels = f.f.unique_neighbour_s2_refs[:, :, inds][[0, 1, 2, 7]]
     bios = f.f.unique_neighbour_orig_bios[:, :, inds][[1, 4]]
     sels = np.concatenate([sels, bios])
+    planet_sur = f.f.s2_sur_all[:, :, mm].squeeze()
              
-    return doys, lai[mm].ravel(), cab[mm].ravel(), sels, lai
+    return doys, lai[mm].ravel(), cab[mm].ravel(), sels, lai, planet_sur
 
 def get_lai_gif(field_name):
     npz_name = '%s_bios_planet_only_v5.npz'%field_name
