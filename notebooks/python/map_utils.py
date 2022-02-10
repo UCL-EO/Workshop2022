@@ -190,6 +190,47 @@ def get_field_bounds(field_name):
 
     return bounds, doys
 
+
+def da_pix(sels, planet_sur, u_thresh = 2):
+    sel_s2_refs_med = np.nanmedian(sels[:4], axis=2) 
+    residuals = planet_sur - sel_s2_refs_med
+    residuals_abs = abs(residuals)
+    MAD = np.nanmedian(residuals_abs, axis=1)
+    S = MAD /  0.6745
+    u = residuals_abs / S[:, None]
+    u_mask = (u <= u_thresh).all(axis=0)
+
+    sel_s2_refs = sels[:4, u_mask]
+    s2_sur = planet_sur[:, u_mask]
+    s2_sur_unc = planet_sur[:, u_mask] * 0.10
+
+
+    # s2_sur[~u_mask] = np.nan
+
+    diff = (s2_sur[:, :, None] - sel_s2_refs)
+    diff = np.nansum(diff**2 * s2_sur_unc[:, :, None]**2, axis=(0,1))
+    inds = np.argsort(diff)
+
+    sel_nums = 10
+    sel_inds = inds[:sel_nums]
+    diff = diff[inds][:sel_nums]
+
+    weight = 1 / diff
+    # weight = np.exp(-1 * diff / 2)
+
+    weight = weight / weight.sum()
+
+    mean_ref        = np.sum(sel_s2_refs[:, :, sel_inds] * weight[None, None], axis=2) 
+    mean_bios       = np.sum(sels[4:][:, :, sel_inds] * weight[None, None], axis=2)
+
+    correction = sel_nums / (sel_nums - 1)
+    weight = weight * correction
+
+    std_ref        = np.sqrt(np.sum((sel_s2_refs[:, :, sel_inds] - mean_ref [:, :, None])**2 * weight[None, None], axis=2))
+    std_bios       = np.sqrt(np.sum((sels[4:][:, :, sel_inds] - mean_bios[:, :, None])**2 * weight[None, None], axis=2))
+
+    return mean_ref, mean_bios, std_ref, std_bios, sel_inds, u_mask
+
 # from PIL import Image
 
 # def gen_frame(path):
