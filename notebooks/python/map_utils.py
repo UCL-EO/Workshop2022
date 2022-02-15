@@ -6,10 +6,25 @@ import matplotlib.cm as cm
 import numpy as np
 import pyproj
 # import imageio
+import io
+import pylab as plt
+import matplotlib as mpl
 from pyproj import Proj, Transformer
 from PIL import Image, ImageFont, ImageDraw 
 
+
+def get_lai_color_bar():
     
+    fig = plt.figure(figsize=(5, 2))
+    ax = fig.add_axes([0.05, 0.8, 0.5, 0.07])
+    cmap = plt.cm.Greens
+    norm = mpl.colors.Normalize(vmin=0, vmax=2.5)
+    cbar = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='horizontal')
+    lai_colorbar_f = io.BytesIO()
+    plt.savefig(lai_colorbar_f, bbox_inches='tight', format='png', pad_inches=0)
+    plt.close()
+    return lai_colorbar_f
+
 
 def get_pixel(location, field_name):
     lat, lon = location
@@ -66,9 +81,49 @@ def get_lai_gif(field_name):
     valid_mask = f.f.valid_mask
     alpha = (valid_mask * 255.).astype(np.uint8)
     lai = f.f.mean_bios_all[:, 4]
+    lai_scale = f.f.mean_bio_scales_all[:, 4]
+    
+    max_lai = np.zeros(valid_mask.shape)
+    max_lai[valid_mask] = lai_scale
+    
+    yld = max_lai * 5000 - 1500
+    yld = np.maximum(yld, 0)
+    
+    fig = plt.figure(figsize=(8, 3))
+    ax = fig.add_axes([0.05, 0.8, 0.5, 0.07])
+    cmap = plt.cm.RdYlGn
+    norm = mpl.colors.Normalize(vmin=yld[valid_mask].min(), vmax= yld[valid_mask].max())
+    cbar = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='horizontal')
+    yield_colorbar_f = io.BytesIO()
+    plt.savefig(yield_colorbar_f, bbox_inches='tight', format='png', pad_inches=0)
+    plt.close()
 
+    
+    norm_yld = (yld - yld[valid_mask].min()) / (yld[valid_mask].max() - yld[valid_mask].min())
+    cmap = cm.RdYlGn
+    greyscale = cmap(norm_yld, bytes=True)
+    greyscale[:, :, -1] = alpha
+    # greyscale = np.concatenate([greyscale, alpha[:, :, None]])
+    
+    img = Image.fromarray(greyscale, mode='RGBA')
+    
+    scale = 256 / img.height
+    new_height = int(scale * img.height)
+    new_width = int(scale * img.width)
 
+    img = img.resize(( new_width, new_height), resample = Image.NEAREST)
+    this_alpha = img.getchannel('A')
+    img = img.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+    mask = Image.eval(this_alpha, lambda a: 255 if a <= 5 else 0)
 
+    # Paste the color of index 255 and use alpha as a mask
+    img.paste(255, mask)
+    img.info['transparency'] = 255
+
+    fname = './data/S2_thumbs/S2_%s_yield.png'%(field_name)
+    img.save(fname)
+    
+    
     pj1 = pyproj.Proj(projectionRef)
     transformer = Transformer.from_crs(pj1.crs, 'EPSG:4326')
 
@@ -93,7 +148,7 @@ def get_lai_gif(field_name):
     for i in range(len(doys)):
         lai_map = np.zeros(valid_mask.shape)
         lai_map[valid_mask] = lai[:, i]
-        greyscale = cmap(lai_map / 2, bytes=True)
+        greyscale = cmap(lai_map / 2.5, bytes=True)
         greyscale[:, :, -1] = alpha
         # greyscale = np.concatenate([greyscale, alpha[:, :, None]])
         date = datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(doys[i]) -1)
@@ -147,7 +202,7 @@ def get_lai_gif(field_name):
     
     frames[0].save(fp_out, save_all=True, append_images=frames[1:], loop=0, duration=200, optimize=False)
     
-    return 'data/S2_thumbs/S2_%s_lai.gif'%field_name, bounds, doys
+    return 'data/S2_thumbs/S2_%s_lai.gif'%field_name, bounds, doys, yield_colorbar_f
     # print(bounds)
     
 def get_field_bounds(field_name):

@@ -1,4 +1,4 @@
-﻿CODE,DATE,LAI 1,LAI 2,LAI 3,LAI 4,PLT. CHLRO 1,PLT. CHLOR 2,PLT CHLOR 3,PLT. CHLOR 4,PLT. CHLOR 5,District,Lattitde,Longitude,Farm size,Expected yield,Phynology Data,COMMENTS
+CODE,DATE,LAI 1,LAI 2,LAI 3,LAI 4,PLT. CHLRO 1,PLT. CHLOR 2,PLT CHLOR 3,PLT. CHLOR 4,PLT. CHLOR 5,District,Lattitde,Longitude,Farm size,Expected yield,Phynology Data,COMMENTS
 7010SAM,06/09/2021,1.11,0.321,1.49,0.907,37.1,45,46.7,41.7,49.8,Gushegu,9.7951,-0.39869,,,Vegetative phase,
 7020YAM,06/09/2021,0.764,1.64,1.51,1.13,46.4,50,43.6,44.9,47.2,Gushegu,9.72244,-0.51189,5,600,Vegetative phase,
 7021YAM,06/09/2021,0.909,1.44,1.01,1.57,32.8,42.9,43.8,51.3,50.7,Gushegu,9.7005,-0.54113,105,1000,Tasseling/Anthesis,
@@ -51,12 +51,12 @@
 7073ZIN,10/09/2021,1.18,1.58,1.48,0.682,43,54.4,43.85,39.05,44.85,Nanton,9.61572,-0.56823,1.5,800,Vegetative phase,
 7074ZIN,10/09/2021,0.679,1.28,1.27,0.978,39.3,48.2,38.15,57.25,43.8,Nanton,9.61832,-0.5668,1.5,900,Vegetative phase,
 1055ZIN,10/09/2021,1.37,1.91,1.59,1.48,53.05,44.05,42.8,48.05,54.8,Nanton,9.61066,-0.57844,,3400,Vegetative phase,
-7010SAM,06/09/2021,1.87,0.529,1.68,1.98,32.05,49.45,42.6,40.5,49.05,Gushegu,9.7951,-0.39869,5,600,Vegetative phase,
-7020YAM,06/09/2021,0.971,2.53,1.78,0.885,50.9,50.7,44.6,41.1,53.7,Gushegu,9.72244,-0.51189,105,1000,Silking,
-7021YAM,06/09/2021,1.15,1.93,1.39,2.69,50.1,50.85,51.75,56,53.25,Gushegu,9.7005,-0.54113,4,1500,Tasseling/Anthesis,
-1061ZIN,06/09/2021,1.21,0.958,0.984,1.16,42.1,38.3,38.65,38.25,57.05,Gushegu,9.6342,-0.5124,2,700,Vegetative phase,The reading was taking after a  heavy rain and the sky was still not clear
-1067ZIN,06/09/2021,1.28,1.29,0.834,1.07,33.65,52,34.35,39.25,47.3,Gushegu,9.62592,-0.55281,2,500,Vegetative phase,The reading was taking after a  heavy rain and the sky was still not clear
-1056ZIN,06/09/2021,0.845,1.84,1.99,1.63,44.1,39.35,46.55,35.6,38.1,Gushegu,9.58751,-0.56415,3,800,Tasseling/Anthesis,The reading was taking after a  heavy rain and the sky was still not clear
+7010SAM,13/09/2021,1.87,0.529,1.68,1.98,32.05,49.45,42.6,40.5,49.05,Gushegu,9.7951,-0.39869,5,600,Vegetative phase,
+7020YAM,13/09/2021,0.971,2.53,1.78,0.885,50.9,50.7,44.6,41.1,53.7,Gushegu,9.72244,-0.51189,105,1000,Silking,
+7021YAM,13/09/2021,1.15,1.93,1.39,2.69,50.1,50.85,51.75,56,53.25,Gushegu,9.7005,-0.54113,4,1500,Tasseling/Anthesis,
+1061ZIN,13/09/2021,1.21,0.958,0.984,1.16,42.1,38.3,38.65,38.25,57.05,Gushegu,9.6342,-0.5124,2,700,Vegetative phase,The reading was taking after a  heavy rain and the sky was still not clear
+1067ZIN,13/09/2021,1.28,1.29,0.834,1.07,33.65,52,34.35,39.25,47.3,Gushegu,9.62592,-0.55281,2,500,Vegetative phase,The reading was taking after a  heavy rain and the sky was still not clear
+1056ZIN,13/09/2021,0.845,1.84,1.99,1.63,44.1,39.35,46.55,35.6,38.1,Gushegu,9.58751,-0.56415,3,800,Tasseling/Anthesis,The reading was taking after a  heavy rain and the sky was still not clear
 7014SAM,13/09/2021,1.72,1.43,1.7,1.27,35.7,39.6,34.85,41.25,43.5,Gushegu,9.7246,-0.39502,1,500,Vegetative phase,No measurement was taken last week (Week one)
 7015SAM,13/09/2021,0.857,1.88,1.23,1.63,44.2,44.6,39.25,41,48.7,Gushegu,9.7853,-0.39296,1.5,400,Vegetative phase,No measurement was taken last week (Week one)
 7016SAM,13/09/2021,0.632,0.706,0.319,0.468,49.1,39.6,39.25,43.55,40.35,Gushegu,9.7819,-0.3951,2,500,Vegetative phase,No measurement was taken last week (Week one)
@@ -107,85 +107,85 @@
 7073ZIN,17/09/2021,1.66,1.72,1.76,0.725,44.15,44.85,43.95,41.7,49.2,Gushegu,9.61572,-0.56823,1.5,800,Tasseling,
 7074ZIN,17/09/2021,0.679,1.28,1.27,0.978,39.3,48.2,38.15,57.25,43.8,Gushegu,9.61832,-0.5668,1.5,900,Vegetative phase,
 1055ZIN,17/09/2021,1.37,1.91,1.59,1.48,53.05,44.05,42.8,48.05,54.8,Gushegu,9.61066,-0.57844,10,1300,Silking,
-7010SAM,20/9/2021,1.39,1.11,1.93,2.12,37.35,46.15,39.45,43.05,51.95,Gushegu,9.7951,-0.39869,5,600,Tasseling/anthesis,
-7020YAM,20/9/2022,2.08,2.08,1.71,1.91,55.8,53,41.1,44.8,52.85,Gushegu,9.72244,-0.51189,105,1000,Grain filling,
-7021YAM,20/9/2023,1.1,1.94,1.2,2.86,48.4,53.4,50.65,58.2,53.85,Gushegu,9.7005,-0.54113,4,1500,Silking,
-1061ZIN,20/9/2024,1.42,0.61,1.58,1.03,41.5,42.55,40.9,33.55,60.3,Gushegu,9.6342,-0.5124,2,700,Vegetative phase,
-1067ZIN,20/9/2025,1.37,1.54,1.29,1.01,36.5,29.25,30.4,34.43,45.35,Gushegu,9.62592,-0.55281,2,500,Vegetative phase,
-1056ZIN,20/9/2026,0.905,1.95,1.96,1.51,44,29.2,43.5,42,45.2,Gushegu,9.58751,-0.56415,3,800,Silking,
-7014SAM,20/9/2027,0.953,1.19,1.15,1.4,31.9,40.05,43.65,41.85,40.7,Gushegu,9.7246,-0.39502,1,500,Tasseling/anthesis,
-7015SAM,20/9/2028,1.54,2.37,1.82,1.94,27.95,42.85,38.25,49.7,42.8,Gushegu,9.7853,-0.39296,1.5,400,Silking,
-7016SAM,20/9/2029,1.07,0.844,0.892,0.71,56.65,39.8,38.8,39.9,45.75,Gushegu,9.7819,-0.3951,2,500,Vegetative phase,
-7017SAM,20/9/2030,1.64,1.26,0.904,0.953,38.5,47.5,40.35,38.75,50.3,Gushegu,9.1823,-0.39434,5,700,Tasseling/anthesis,
-7036FUU,21/9/2021,0.832,0.739,0.878,0.813,34.95,36.85,40.05,42.65,46.55,Salaga N,9.26855,-0.61097,1,400,Vegetative phase,
-7035FUU,21/9/2021,2.01,1.84,1.63,1.81,52,49.05,39.8,46.8,49.4,Salaga N,9.2673,-0.6149,1,500,Silking,
-4020FUU,21/9/2021,0.618,0.634,1.09,0.753,30.75,38.3,39.65,27.25,38.5,Salaga N,9.26789,-0.61545,1,500,Vegetative phase,
-7034FUU,21/9/2021,0.761,0.978,1.38,2.85,44.25,42.4,47.3,39.55,47.45,Salaga N,9.25341,-0.62473,1,600,Tasseling/Anthesis,"Did not continue this week,farmer planted sorghum in the field"
-7033FUU,21/9/2021,1.34,0.657,0.795,0.438,27.7,35.3,33.45,37.05,26.6,Salaga N,9.21881,-0.59813,1,600,Vegetative phase,
-7022FUU,21/9/2021,1.12,1.08,0.609,0.971,46.55,41.15,48.9,29.75,44.75,Salaga N,9.24841,-0.62784,2,500,Vegetative phase,
-3030TIN,21/9/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
-3014TIN,21/9/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
-3028TIN,21/9/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
-3075TAM,21/9/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
-3074TAM,21/9/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
-3080TAM,21/9/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
-5032TUG,22/9/2021,0.5,1.18,1.48,,26.5,25.45,30.7,30.45,27,Tamale,9.367064,-0.623289,1,400,Vegetative phase,
-5036TUG,22/9/2022,1.77,0.695,1.39,,41.25,54.55,48.4,37.15,48,Tamale,9.376,-0.60521,4,500,Tasseling/anthesis,
-5037TUG,22/9/2023,1.52,2.43,2.58,,41.9,40.95,20.2,51.5,46.85,Tamale,9.37583,-0.6048,2,700,Silking,
-5034TUG,22/9/2024,2.36,2.16,2.23,,39,38.15,4.65,37.5,46.65,Tamale,9.3851,-0.59437,2,400,Grain filling,
-5033TUG,22/9/2025,1.35,1.82,1.58,,33.3,49.7,51.85,35.45,45.95,Tamale,9.38583,-0.59402,2,500,Silking,
-5011LAB,22/9/2026,2.1,2.22,1.16,,58.8,59.65,34.15,43.05,50.55,Tamale,9.42975,-0.59437,3,1000,Silking,
-5012LAB,22/9/2027,2.04,1.78,1.52,,29.95,45.35,38.85,0,47.75,Tamale,9.42617,-0.5993,3,600,Silking,The 4th could not be located due to removal of pegs
-5014LAB,22/9/2028,0.78,0.788,1.05,,41.8,36.05,25.4,40.05,44.25,Tamale,9.42669,-0.59782,2,500,Tasseling/anthesis,
-5002LAB,22/9/2029,1.63,1.12,1.62,,34.2,38.2,8,35.05,40.1,Tamale,9.424268483,-0.596185328,5,400,Tasseling/anthesis,
-2053KPA,22/9/2030,1.47,1.32,0.806,,36.9,49.95,35.65,36.8,43.8,Mion,N9*24'21.54,W0*30'51.65,1,500,Silking,
-2050KPA,22/9/2031,2.6,0.87,2.12,,30.6,35.85,34.55,39.4,29.5,Mion,N9*24'12.15,W0*30'56.49,1,500,Tasseling/anthesis,
-2048KPA,22/9/2032,0.1,0.31,0.54,,37.05,27.6,43.6,32.7,47,Mion,9.39508,-0.51427,2,600,Vegetative phase,Animals are destroying the field
-5016ZOR,22/9/2033,1.34,1.14,1.71,,35.95,52.65,42.15,56.25,44,Tamale,9.37939,-0.67121,1,500,Tasseling/anthesis,
-5017ZOR,22/9/2034,1.4,1.41,1.16,,36.9,34.9,49.45,33.5,41.8,Tamale,9.37939,-0.67121,1.5,500,Tasseling/anthesis,
-5057PAG,22/9/2035,3.22,2.49,2.04,,40.2,50.75,50.8,44.75,41.3,Tamale,9.37753,-0.70846,1,800,Grain filling,
-7058CHE,23/9/2021,1.12,0.777,1.25,1.42,43.3,38.3,42.05,54.7,36.25,Mion,9.34499,-0.43791,5,600,Silking,
-7059CHE,23/9/2022,1.19,0.63,1.27,0.981,46.65,16.7,25.6,38.5,31.35,Mion,9.34613,-0.43771,105,1000,Grain filling,
-7061CHE,23/9/2023,1.51,2.36,2.29,2.92,51.45,42.4,39,47.05,39.2,Mion,9.35552,-0.43689,4,1500,Tasseling/Anthesis,
-7062CHE,23/9/2024,1.35,0.815,0.55,1.01,39.15,43.6,40.4,40.65,56.65,Mion,9.35716,-0.4376,2,700,Tasseling/Anthesis,
-7036SAN,23/9/2025,1.4,1.55,1.43,1.52,48.1,59.15,54.95,53.55,49.25,Mion,9.42049,-0.2341,2,500,Silking,
-2002ALH,23/9/2026,1.65,1.04,2.26,2.06,48.7,53.1,57.6,49.35,51.4,Mion,9.64854,-0.25249,3,800,Silking,
-7015ALH,23/9/2027,0.678,0.535,0.564,0.418,43.9,32.2,40.7,28.8,49.6,Mion,9.64544,-0.25215,1,500,Vegetative phase,
-7016ALH,23/9/2028,0.559,0.575,0.336,0.813,35.95,44.95,35.45,34.9,42.5,Mion,9.64602,-0.25434,1.5,400,Vegetative phase,
-7018ALH,23/9/2029,0.728,0.66,0.524,0.829,42.75,33.1,44.05,38.05,42.05,Mion,9.64675,-0.25559,2,500,Vegetative phase,
-7019ZOR,23/9/2021,1.53,2.12,1.96,1.92,36.15,44.8,49.1,39.35,47,Tamale,9.38746,-0.6669,5,700,Silking,
-1029ZIN,24/9/2021,2.13,1.71,2.44,3.2,45.5,56.2,51.85,52.4,36.3,Gushegu,9.64904,-0.58895,16,1500,Grain filling,
-7068ZIN,24/9/2021,2.06,2.04,1.99,2.17,40.85,43.85,42.1,45.25,41.9,Gushegu,9.60022,-0.5659,2,1400,Vegetative phase,
-7069ZIN,24/9/2021,2.44,1.18,1.68,2.51,49.9,33.9,46.2,44.1,34.15,Gushegu,9.60362,-0.57012,2,900,Tasseling,On the console data the code for this is 7073ZIN  not 7069ZIN
-7070ZIN,24/9/2021,0.872,1.34,0.645,0.839,30.7,36,41.5,47.9,43.2,Gushegu,9.6079,-0.56814,1.5,800,Vegetative phase,Code on console is 7069ZIN  not 7070ZIN
-7071ZIN,24/9/2021,1.95,0.756,0.706,1.29,46,35.1,41.8,36.05,54.2,Gushegu,9.606023,-0.56747,1,600,Vegetative phase,Code on console is 7070ZIN  not 7071ZIN
-7072ZIN,24/9/2021,1.65,1.29,1.11,1.5,47.15,36.95,39.15,40.2,43.45,Gushegu,9.607,-0.56913,2,1000,Vegetative phase,Code on console is 7071ZIN  not 7072ZIN
-7073ZIN,24/9/2021,1.56,1.41,1.6,1.11,38.15,44.1,44.8,43.3,45.7,Gushegu,9.61572,-0.56823,1.5,800,Silking,Code on console is 7069ZIN  not 7073ZIN
-7074ZIN,24/9/2021,1.87,0.327,1.32,1.28,46.25,34.1,52.5,43.9,46.4,Gushegu,9.61832,-0.5668,1.5,900,Vegetative phase,
-1055ZIN,24/9/2021,2.07,2.04,1.94,1.79,39.75,35.3,47.3,36.75,41.9,Gushegu,9.61066,-0.57844,10,1300,Silking,
-7010SAM,27/9/2021,1.28,0.791,1.722,1.69,34,41.55,29.5,34.6,44.35,Gushegu,9.7951,-0.39869,5,600,Tasseling/anthesis,Drought is affecting the crops
-7020YAM,27/9/2022,0.517,1.31,1.377,0.869,46.15,42.95,43.4,36.15,54.25,Gushegu,9.72244,-0.51189,105,1000,Physiological maturty,Drought is affecting the crops
-7021YAM,27/9/2023,1.42,2.43,1.64,2.44,51.2,51.3,48.35,47.9,51.45,Gushegu,9.7005,-0.54113,4,1500,Grain filling,Drought is affecting the crops
-1061ZIN,27/9/2024,1.78,0.88,0.355,1.82,44.65,42.95,40.1,34.35,51.4,Gushegu,9.6342,-0.5124,2,700,Tasseling/anthesis,Drought is affecting the crops
-1067ZIN,27/9/2025,1.5,1.34,1.18,1.11,36.6,21.25,26.9,29.45,36.5,Gushegu,9.62592,-0.55281,2,500,Tasseling/anthesis,Drought is affecting the crops
-1056ZIN,27/9/2026,0.772,1.65,1.27,1.43,55.85,31.95,37.7,42.2,30.95,Gushegu,9.58751,-0.56415,3,800,Physiological maturty,Drought is affecting the crops
-7014SAM,27/9/2027,1.23,1.01,1.38,1.48,24.75,33.6,37.85,40.85,34.6,Gushegu,9.7246,-0.39502,1,500,Tasseling/anthesis,Drought is affecting the crops
-7015SAM,27/9/2028,0.737,2.29,1.62,1.53,39.7,40.15,41.4,43.75,47.65,Gushegu,9.7853,-0.39296,1.5,400,Silking,Drought is affecting the crops
-7016SAM,27/9/2029,1.42,1.11,0.694,0.871,52.05,45.25,37.15,38.2,42.15,Gushegu,9.7819,-0.3951,2,500,Tasseling/anthesis,Drought is affecting the crops
-7017SAM,27/9/2030,2.32,1.48,1.54,1.67,35.1,45.4,37.1,30.35,50.75,Gushegu,9.1823,-0.39434,5,700,Tasseling/anthesis,Drought is affecting the crops
-7036FUU,28/9/2021,2.49,0.92,1.9,0.856,35.45,38.1,44.6,44.45,47.75,Salaga N,9.26855,-0.61097,1,400,Vegetative phase,
-7035FUU,28/9/2021,1.73,1.6,1.22,1.37,46.6,49.85,30.05,33.2,46.35,Salaga N,9.2673,-0.6149,1,500,Silking,
-4020FUU,28/9/2021,0.435,0.419,1.09,0.608,28.95,36.25,35.9,38.8,44.55,Salaga N,9.26789,-0.61545,1,500,Vegetative phase,
-7034FUU,28/9/2021,,,,,,,,,,Salaga N,9.25341,-0.62473,1,600,Tasseling/Anthesis,Data collection has been stoped because farmer has intercropped the maize with sorghum
-7033FUU,28/9/2021,0.725,0.479,1.02,0.55,18.85,32.15,30.15,37.8,23.65,Salaga N,9.21881,-0.59813,1,600,Vegetative phase,
-7022FUU,28/9/2021,0.64,1.72,0.779,1.02,49.4,38.35,44.4,31.7,44.6,Salaga N,9.24841,-0.62784,2,500,Vegetative phase,
-3030TIN,28/9/2021,2.71,2.56,1.4,1.95,39.1,42.35,31.75,33.15,47.1,Nanton,9.57118,-0.69651,5,800,Silking,
-3014TIN,28/9/2022,0.493,0.947,1.48,0.913,37.5,40.9,36.1,29.2,35.5,Nanton,9.558792114,-0.695244669,2,400,Tasseling/Anthesis,
-3028TIN,28/9/2023,3.67,1.86,2.31,1.5,47.65,39.05,32.35,53.65,51,Nanton,9.558792114,-0.695244669,2,500,Tasseling/Anthesis,
-3075TAM,28/9/2024,0.97,0.833,1.57,1.25,28.15,21.8,19.6,35.15,45.9,Nanton,9.595,-0.66,1,700,Tasseling/Anthesis,
-3074TAM,28/9/2025,0.994,0.958,1.74,1.36,12.8,27.45,38,30.05,39.7,Nanton,9.589308,-0.661,6,400,Tasseling/Anthesis,
-3080TAM,28/9/2026,1.29,1.04,0.987,1.49,24.15,45.1,45.55,46.15,46.1,Nanton,9.5677,-0.704,2,600,Tasseling/Anthesis,
-5032TUG,29/9/2021,0.624,1.34,1.22,0.906,18.95,28.45,27.25,28.6,19.5,Tamale,9.367064,-0.623289,1,400,Vegetative phase,
+7010SAM,20/09/2021,1.39,1.11,1.93,2.12,37.35,46.15,39.45,43.05,51.95,Gushegu,9.7951,-0.39869,5,600,Tasseling/anthesis,
+7020YAM,20/09/2022,2.08,2.08,1.71,1.91,55.8,53,41.1,44.8,52.85,Gushegu,9.72244,-0.51189,105,1000,Grain filling,
+7021YAM,20/09/2023,1.1,1.94,1.2,2.86,48.4,53.4,50.65,58.2,53.85,Gushegu,9.7005,-0.54113,4,1500,Silking,
+1061ZIN,20/09/2024,1.42,0.61,1.58,1.03,41.5,42.55,40.9,33.55,60.3,Gushegu,9.6342,-0.5124,2,700,Vegetative phase,
+1067ZIN,20/09/2025,1.37,1.54,1.29,1.01,36.5,29.25,30.4,34.43,45.35,Gushegu,9.62592,-0.55281,2,500,Vegetative phase,
+1056ZIN,20/09/2026,0.905,1.95,1.96,1.51,44,29.2,43.5,42,45.2,Gushegu,9.58751,-0.56415,3,800,Silking,
+7014SAM,20/09/2027,0.953,1.19,1.15,1.4,31.9,40.05,43.65,41.85,40.7,Gushegu,9.7246,-0.39502,1,500,Tasseling/anthesis,
+7015SAM,20/09/2028,1.54,2.37,1.82,1.94,27.95,42.85,38.25,49.7,42.8,Gushegu,9.7853,-0.39296,1.5,400,Silking,
+7016SAM,20/09/2029,1.07,0.844,0.892,0.71,56.65,39.8,38.8,39.9,45.75,Gushegu,9.7819,-0.3951,2,500,Vegetative phase,
+7017SAM,20/09/2030,1.64,1.26,0.904,0.953,38.5,47.5,40.35,38.75,50.3,Gushegu,9.1823,-0.39434,5,700,Tasseling/anthesis,
+7036FUU,21/09/2021,0.832,0.739,0.878,0.813,34.95,36.85,40.05,42.65,46.55,Salaga N,9.26855,-0.61097,1,400,Vegetative phase,
+7035FUU,21/09/2021,2.01,1.84,1.63,1.81,52,49.05,39.8,46.8,49.4,Salaga N,9.2673,-0.6149,1,500,Silking,
+4020FUU,21/09/2021,0.618,0.634,1.09,0.753,30.75,38.3,39.65,27.25,38.5,Salaga N,9.26789,-0.61545,1,500,Vegetative phase,
+7034FUU,21/09/2021,0.761,0.978,1.38,2.85,44.25,42.4,47.3,39.55,47.45,Salaga N,9.25341,-0.62473,1,600,Tasseling/Anthesis,"Did not continue this week,farmer planted sorghum in the field"
+7033FUU,21/09/2021,1.34,0.657,0.795,0.438,27.7,35.3,33.45,37.05,26.6,Salaga N,9.21881,-0.59813,1,600,Vegetative phase,
+7022FUU,21/09/2021,1.12,1.08,0.609,0.971,46.55,41.15,48.9,29.75,44.75,Salaga N,9.24841,-0.62784,2,500,Vegetative phase,
+3030TIN,21/09/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
+3014TIN,21/09/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
+3028TIN,21/09/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
+3075TAM,21/09/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
+3074TAM,21/09/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
+3080TAM,21/09/2021,,,,,,,,,,,,,,,,Could not pick data due to ill health
+5032TUG,22/09/2021,0.5,1.18,1.48,,26.5,25.45,30.7,30.45,27,Tamale,9.367064,-0.623289,1,400,Vegetative phase,
+5036TUG,22/09/2022,1.77,0.695,1.39,,41.25,54.55,48.4,37.15,48,Tamale,9.376,-0.60521,4,500,Tasseling/anthesis,
+5037TUG,22/09/2023,1.52,2.43,2.58,,41.9,40.95,20.2,51.5,46.85,Tamale,9.37583,-0.6048,2,700,Silking,
+5034TUG,22/09/2024,2.36,2.16,2.23,,39,38.15,4.65,37.5,46.65,Tamale,9.3851,-0.59437,2,400,Grain filling,
+5033TUG,22/09/2025,1.35,1.82,1.58,,33.3,49.7,51.85,35.45,45.95,Tamale,9.38583,-0.59402,2,500,Silking,
+5011LAB,22/09/2026,2.1,2.22,1.16,,58.8,59.65,34.15,43.05,50.55,Tamale,9.42975,-0.59437,3,1000,Silking,
+5012LAB,22/09/2027,2.04,1.78,1.52,,29.95,45.35,38.85,0,47.75,Tamale,9.42617,-0.5993,3,600,Silking,The 4th could not be located due to removal of pegs
+5014LAB,22/09/2028,0.78,0.788,1.05,,41.8,36.05,25.4,40.05,44.25,Tamale,9.42669,-0.59782,2,500,Tasseling/anthesis,
+5002LAB,22/09/2029,1.63,1.12,1.62,,34.2,38.2,8,35.05,40.1,Tamale,9.424268483,-0.596185328,5,400,Tasseling/anthesis,
+2053KPA,22/09/2030,1.47,1.32,0.806,,36.9,49.95,35.65,36.8,43.8,Mion,N9*24'21.54,W0*30'51.65,1,500,Silking,
+2050KPA,22/09/2031,2.6,0.87,2.12,,30.6,35.85,34.55,39.4,29.5,Mion,N9*24'12.15,W0*30'56.49,1,500,Tasseling/anthesis,
+2048KPA,22/09/2032,0.1,0.31,0.54,,37.05,27.6,43.6,32.7,47,Mion,9.39508,-0.51427,2,600,Vegetative phase,Animals are destroying the field
+5016ZOR,22/09/2033,1.34,1.14,1.71,,35.95,52.65,42.15,56.25,44,Tamale,9.37939,-0.67121,1,500,Tasseling/anthesis,
+5017ZOR,22/09/2034,1.4,1.41,1.16,,36.9,34.9,49.45,33.5,41.8,Tamale,9.37939,-0.67121,1.5,500,Tasseling/anthesis,
+5057PAG,22/09/2035,3.22,2.49,2.04,,40.2,50.75,50.8,44.75,41.3,Tamale,9.37753,-0.70846,1,800,Grain filling,
+7058CHE,23/09/2021,1.12,0.777,1.25,1.42,43.3,38.3,42.05,54.7,36.25,Mion,9.34499,-0.43791,5,600,Silking,
+7059CHE,23/09/2022,1.19,0.63,1.27,0.981,46.65,16.7,25.6,38.5,31.35,Mion,9.34613,-0.43771,105,1000,Grain filling,
+7061CHE,23/09/2023,1.51,2.36,2.29,2.92,51.45,42.4,39,47.05,39.2,Mion,9.35552,-0.43689,4,1500,Tasseling/Anthesis,
+7062CHE,23/09/2024,1.35,0.815,0.55,1.01,39.15,43.6,40.4,40.65,56.65,Mion,9.35716,-0.4376,2,700,Tasseling/Anthesis,
+7036SAN,23/09/2025,1.4,1.55,1.43,1.52,48.1,59.15,54.95,53.55,49.25,Mion,9.42049,-0.2341,2,500,Silking,
+2002ALH,23/09/2026,1.65,1.04,2.26,2.06,48.7,53.1,57.6,49.35,51.4,Mion,9.64854,-0.25249,3,800,Silking,
+7015ALH,23/09/2027,0.678,0.535,0.564,0.418,43.9,32.2,40.7,28.8,49.6,Mion,9.64544,-0.25215,1,500,Vegetative phase,
+7016ALH,23/09/2028,0.559,0.575,0.336,0.813,35.95,44.95,35.45,34.9,42.5,Mion,9.64602,-0.25434,1.5,400,Vegetative phase,
+7018ALH,23/09/2029,0.728,0.66,0.524,0.829,42.75,33.1,44.05,38.05,42.05,Mion,9.64675,-0.25559,2,500,Vegetative phase,
+7019ZOR,23/09/2021,1.53,2.12,1.96,1.92,36.15,44.8,49.1,39.35,47,Tamale,9.38746,-0.6669,5,700,Silking,
+1029ZIN,24/09/2021,2.13,1.71,2.44,3.2,45.5,56.2,51.85,52.4,36.3,Gushegu,9.64904,-0.58895,16,1500,Grain filling,
+7068ZIN,24/09/2021,2.06,2.04,1.99,2.17,40.85,43.85,42.1,45.25,41.9,Gushegu,9.60022,-0.5659,2,1400,Vegetative phase,
+7069ZIN,24/09/2021,2.44,1.18,1.68,2.51,49.9,33.9,46.2,44.1,34.15,Gushegu,9.60362,-0.57012,2,900,Tasseling,On the console data the code for this is 7073ZIN  not 7069ZIN
+7070ZIN,24/09/2021,0.872,1.34,0.645,0.839,30.7,36,41.5,47.9,43.2,Gushegu,9.6079,-0.56814,1.5,800,Vegetative phase,Code on console is 7069ZIN  not 7070ZIN
+7071ZIN,24/09/2021,1.95,0.756,0.706,1.29,46,35.1,41.8,36.05,54.2,Gushegu,9.606023,-0.56747,1,600,Vegetative phase,Code on console is 7070ZIN  not 7071ZIN
+7072ZIN,24/09/2021,1.65,1.29,1.11,1.5,47.15,36.95,39.15,40.2,43.45,Gushegu,9.607,-0.56913,2,1000,Vegetative phase,Code on console is 7071ZIN  not 7072ZIN
+7073ZIN,24/09/2021,1.56,1.41,1.6,1.11,38.15,44.1,44.8,43.3,45.7,Gushegu,9.61572,-0.56823,1.5,800,Silking,Code on console is 7069ZIN  not 7073ZIN
+7074ZIN,24/09/2021,1.87,0.327,1.32,1.28,46.25,34.1,52.5,43.9,46.4,Gushegu,9.61832,-0.5668,1.5,900,Vegetative phase,
+1055ZIN,24/09/2021,2.07,2.04,1.94,1.79,39.75,35.3,47.3,36.75,41.9,Gushegu,9.61066,-0.57844,10,1300,Silking,
+7010SAM,27/09/2021,1.28,0.791,1.722,1.69,34,41.55,29.5,34.6,44.35,Gushegu,9.7951,-0.39869,5,600,Tasseling/anthesis,Drought is affecting the crops
+7020YAM,27/09/2022,0.517,1.31,1.377,0.869,46.15,42.95,43.4,36.15,54.25,Gushegu,9.72244,-0.51189,105,1000,Physiological maturty,Drought is affecting the crops
+7021YAM,27/09/2023,1.42,2.43,1.64,2.44,51.2,51.3,48.35,47.9,51.45,Gushegu,9.7005,-0.54113,4,1500,Grain filling,Drought is affecting the crops
+1061ZIN,27/09/2024,1.78,0.88,0.355,1.82,44.65,42.95,40.1,34.35,51.4,Gushegu,9.6342,-0.5124,2,700,Tasseling/anthesis,Drought is affecting the crops
+1067ZIN,27/09/2025,1.5,1.34,1.18,1.11,36.6,21.25,26.9,29.45,36.5,Gushegu,9.62592,-0.55281,2,500,Tasseling/anthesis,Drought is affecting the crops
+1056ZIN,27/09/2026,0.772,1.65,1.27,1.43,55.85,31.95,37.7,42.2,30.95,Gushegu,9.58751,-0.56415,3,800,Physiological maturty,Drought is affecting the crops
+7014SAM,27/09/2027,1.23,1.01,1.38,1.48,24.75,33.6,37.85,40.85,34.6,Gushegu,9.7246,-0.39502,1,500,Tasseling/anthesis,Drought is affecting the crops
+7015SAM,27/09/2028,0.737,2.29,1.62,1.53,39.7,40.15,41.4,43.75,47.65,Gushegu,9.7853,-0.39296,1.5,400,Silking,Drought is affecting the crops
+7016SAM,27/09/2029,1.42,1.11,0.694,0.871,52.05,45.25,37.15,38.2,42.15,Gushegu,9.7819,-0.3951,2,500,Tasseling/anthesis,Drought is affecting the crops
+7017SAM,27/09/2030,2.32,1.48,1.54,1.67,35.1,45.4,37.1,30.35,50.75,Gushegu,9.1823,-0.39434,5,700,Tasseling/anthesis,Drought is affecting the crops
+7036FUU,28/09/2021,2.49,0.92,1.9,0.856,35.45,38.1,44.6,44.45,47.75,Salaga N,9.26855,-0.61097,1,400,Vegetative phase,
+7035FUU,28/09/2021,1.73,1.6,1.22,1.37,46.6,49.85,30.05,33.2,46.35,Salaga N,9.2673,-0.6149,1,500,Silking,
+4020FUU,28/09/2021,0.435,0.419,1.09,0.608,28.95,36.25,35.9,38.8,44.55,Salaga N,9.26789,-0.61545,1,500,Vegetative phase,
+7034FUU,28/09/2021,,,,,,,,,,Salaga N,9.25341,-0.62473,1,600,Tasseling/Anthesis,Data collection has been stoped because farmer has intercropped the maize with sorghum
+7033FUU,28/09/2021,0.725,0.479,1.02,0.55,18.85,32.15,30.15,37.8,23.65,Salaga N,9.21881,-0.59813,1,600,Vegetative phase,
+7022FUU,28/09/2021,0.64,1.72,0.779,1.02,49.4,38.35,44.4,31.7,44.6,Salaga N,9.24841,-0.62784,2,500,Vegetative phase,
+3030TIN,28/09/2021,2.71,2.56,1.4,1.95,39.1,42.35,31.75,33.15,47.1,Nanton,9.57118,-0.69651,5,800,Silking,
+3014TIN,28/09/2022,0.493,0.947,1.48,0.913,37.5,40.9,36.1,29.2,35.5,Nanton,9.558792114,-0.695244669,2,400,Tasseling/Anthesis,
+3028TIN,28/09/2023,3.67,1.86,2.31,1.5,47.65,39.05,32.35,53.65,51,Nanton,9.558792114,-0.695244669,2,500,Tasseling/Anthesis,
+3075TAM,28/09/2024,0.97,0.833,1.57,1.25,28.15,21.8,19.6,35.15,45.9,Nanton,9.595,-0.66,1,700,Tasseling/Anthesis,
+3074TAM,28/09/2025,0.994,0.958,1.74,1.36,12.8,27.45,38,30.05,39.7,Nanton,9.589308,-0.661,6,400,Tasseling/Anthesis,
+3080TAM,28/09/2026,1.29,1.04,0.987,1.49,24.15,45.1,45.55,46.15,46.1,Nanton,9.5677,-0.704,2,600,Tasseling/Anthesis,
+5032TUG,29/09/2021,0.624,1.34,1.22,0.906,18.95,28.45,27.25,28.6,19.5,Tamale,9.367064,-0.623289,1,400,Vegetative phase,
 5036TUG,29/9/20211,1.43,1.51,1.65,1.25,39.95,44.65,46,44.25,40.85,Tamale,9.376,-0.60521,4,500,Silking,
 5037TUG,29/9/20212,2.74,1.92,2.1,2.97,39.85,30.9,32.1,37.8,50.05,Tamale,9.37583,-0.6048,2,700,Grain filling,
 5034TUG,29/9/20213,1.37,2.24,1.47,1.92,40.85,30.25,44.45,29.95,44.35,Tamale,9.3851,-0.59437,2,400,Physiological maturity,"The leaves for the chlorophyll sampled plant were totally dry. The chlorophyll for this week was therefore taken on an adjacent plant. (The chlorophyll for the original plant for leaves 5 and 6 were 4.2 and 2.9, resepectively)"
@@ -204,21 +204,21 @@
 7059CHE,29/9/20216,1.41,0.368,0.487,0.806,27.95,15.45,30.55,20.65,27.3,Mion,9.34613,-0.43771,105,1000,Grain filling,
 7061CHE,29/9/20217,1.84,2.88,2.82,3.87,42.5,38.15,36.85,45,36.45,Mion,9.35552,-0.43689,4,1500,Silking,
 7062CHE,29/9/20218,0.93,0.802,0.451,1.06,30,48,33.55,38.05,53.85,Mion,9.35716,-0.4376,2,700,Silking,
-7036SAN,30/9/2021,1.56,1.28,0.918,1.8,46.95,58.65,53.4,50.35,38.55,Mion,9.42049,-0.2341,2,500,Grain filling,Bacteria infection detected on the field
-2002ALH,30/9/2021,1.56,1.83,2.81,1.21,39.3,57.1,53.55,39.4,38.2,Mion,9.64854,-0.25249,3,800,Grain filling,
-7015ALH,30/9/2021,1.19,1.43,0.555,0.509,45.4,20.3,43.7,33.2,42.2,Mion,9.64544,-0.25215,1,500,Vegetative phase,
-7016ALH,30/9/2021,0.607,1.28,0.623,0.692,44,38.8,36.9,43.45,36.35,Mion,9.64602,-0.25434,1.5,400,Vegetative phase,
-7018ALH,30/9/2021,0.615,0.872,0.61,0.887,41.3,43.6,36.1,42.45,27.7,Mion,9.64675,-0.25559,2,500,Vegetative phase,
-7019ZOR,29/9/2021,1.75,1.17,1.75,0.871,36.15,44.8,49.1,39.35,47,Tamale,9.38746,-0.6669,5,700,Grain filling,
-1029ZIN,24/9/2021,2.13,1.71,2.44,3.2,45.5,56.2,51.85,52.4,36.3,Nanton,9.64904,-0.58895,16,1500,Physiological maturity,
-7068ZIN,30/9/2021,2.45,1.4,1.9,2.2,34.15,38.3,44.6,45.85,27.85,Gushegu,9.60022,-0.5659,2,1400,Silking,High  incidence of maize streak virus on the field
-7069ZIN,30/9/2021,2.57,1.42,1.98,1.28,52.4,37.25,46.85,38.65,38.7,Gushegu,9.60362,-0.57012,2,900,Silking,High  incidence of maize streak virus on the field
-7070ZIN,30/9/2021,0.978,1.41,0.926,1.84,37.45,28.6,46.3,38.3,43.5,Gushegu,9.6079,-0.56814,1.5,800,Tasseling/anthesis,
-7071ZIN,30/9/2021,1.84,1.17,0.89,1.08,40.85,47.3,46.8,46.5,50.3,Gushegu,9.606023,-0.56747,1,600,Tasseling/anthesis,
-7072ZIN,30/9/2021,2.22,1.68,1.13,1.78,26.4,35.85,36.05,41.2,33.05,Gushegu,9.607,-0.56913,2,1000,Tasseling/anthesis,High  incidence of maize streak virus on the field
-7073ZIN,30/9/2021,2.05,1.86,1.51,1.1,39.35,50.6,24.7,37.5,30.85,Gushegu,9.61572,-0.56823,1.5,800,Graining filling,
-7074ZIN,30/9/2021,2.16,0.463,1.51,1.39,52.75,43.4,47.55,52.7,39.75,Gushegu,9.61832,-0.5668,1.5,900,Vegetative phase,
-1055ZIN,24/9/2021,2.07,2.04,1.94,1.79,39.75,35.3,47.3,36.75,41.9,Nanton,9.61066,-0.57844,10,1300,Silking,
+7036SAN,30/09/2021,1.56,1.28,0.918,1.8,46.95,58.65,53.4,50.35,38.55,Mion,9.42049,-0.2341,2,500,Grain filling,Bacteria infection detected on the field
+2002ALH,30/09/2021,1.56,1.83,2.81,1.21,39.3,57.1,53.55,39.4,38.2,Mion,9.64854,-0.25249,3,800,Grain filling,
+7015ALH,30/09/2021,1.19,1.43,0.555,0.509,45.4,20.3,43.7,33.2,42.2,Mion,9.64544,-0.25215,1,500,Vegetative phase,
+7016ALH,30/09/2021,0.607,1.28,0.623,0.692,44,38.8,36.9,43.45,36.35,Mion,9.64602,-0.25434,1.5,400,Vegetative phase,
+7018ALH,30/09/2021,0.615,0.872,0.61,0.887,41.3,43.6,36.1,42.45,27.7,Mion,9.64675,-0.25559,2,500,Vegetative phase,
+7019ZOR,29/09/2021,1.75,1.17,1.75,0.871,36.15,44.8,49.1,39.35,47,Tamale,9.38746,-0.6669,5,700,Grain filling,
+1029ZIN,24/09/2021,2.13,1.71,2.44,3.2,45.5,56.2,51.85,52.4,36.3,Nanton,9.64904,-0.58895,16,1500,Physiological maturity,
+7068ZIN,30/09/2021,2.45,1.4,1.9,2.2,34.15,38.3,44.6,45.85,27.85,Gushegu,9.60022,-0.5659,2,1400,Silking,High  incidence of maize streak virus on the field
+7069ZIN,30/09/2021,2.57,1.42,1.98,1.28,52.4,37.25,46.85,38.65,38.7,Gushegu,9.60362,-0.57012,2,900,Silking,High  incidence of maize streak virus on the field
+7070ZIN,30/09/2021,0.978,1.41,0.926,1.84,37.45,28.6,46.3,38.3,43.5,Gushegu,9.6079,-0.56814,1.5,800,Tasseling/anthesis,
+7071ZIN,30/09/2021,1.84,1.17,0.89,1.08,40.85,47.3,46.8,46.5,50.3,Gushegu,9.606023,-0.56747,1,600,Tasseling/anthesis,
+7072ZIN,30/09/2021,2.22,1.68,1.13,1.78,26.4,35.85,36.05,41.2,33.05,Gushegu,9.607,-0.56913,2,1000,Tasseling/anthesis,High  incidence of maize streak virus on the field
+7073ZIN,30/09/2021,2.05,1.86,1.51,1.1,39.35,50.6,24.7,37.5,30.85,Gushegu,9.61572,-0.56823,1.5,800,Graining filling,
+7074ZIN,30/09/2021,2.16,0.463,1.51,1.39,52.75,43.4,47.55,52.7,39.75,Gushegu,9.61832,-0.5668,1.5,900,Vegetative phase,
+1055ZIN,24/09/2021,2.07,2.04,1.94,1.79,39.75,35.3,47.3,36.75,41.9,Nanton,9.61066,-0.57844,10,1300,Silking,
 7010SAM,04/10/2021,1.21,0.681,1.34,1.26,28.05,33.25,37.55,32.55,35.9,Gushegu,9.7953,-0.3978,5,600,Grain filling,Drought is affecting the crops
 7020YAM,04/10/2021,0.91,1.58,1.14,0.885,45,40.1,31.45,33.8,48.45,Gushegu,9.72289,-0.51229,105,1000,Physiological maturty,Drought is affecting the crops
 7021YAM,04/10/2021,2.21,2.13,1.76,2.83,45.4,48.9,47.25,50.6,50.55,Gushegu,9.70065,-0.54129,4,1500,Grain filling,Drought is affecting the crops
@@ -443,59 +443,59 @@
 7073ZIN,29/10/2021,1.08,0.986,0.529,0.993,15.6,16.5,20.9,12.3,20.9,Gushegu,9.61538,-0.56813,1.5,800,Grain filling,
 7074ZIN,29/10/2021,0.991,0.217,0.999,0.926,35.9,10.85,22.1,48.35,28.25,Gushegu,9.61817,-0.56694,1.5,900,Grain filling,
 1055ZIN,29/10/2021,0.731,1.01,1.17,0.686,20.6,10.3,11.6,14.2,28.8,Gushegu,9.614985,-0.57245,10,1300,Physiological maturity,Field is dried and ready for harvesting
-7010SAM,01/11/2021,,,,,,,,,,Gushegu,9.7953,-0.3978,5,600,Physiological maturty,Field is ready for harvesting
-7020YAM,01/11/2021,,,,,,,,,,Gushegu,9.72289,-0.51229,105,1000,Physiological maturty,Field is ready for harvesting
-7021YAM,01/11/2021,,,,,,,,,,Gushegu,9.70065,-0.54129,4,1500,Physiological maturty,Field is ready for harvesting
-1061ZIN,01/11/2021,0.287,0.267,0.408,0.677,13.1,22.75,8.1,15.25,30.4,Gushegu,9.62704,-0.55416,2,700,Physiological maturty,Field is ready for harvesting
-1067ZIN,01/11/2021,0.986,0.492,0.277,0.426,7,13.3,12.4,8.7,9.15,Gushegu,9.62606,-0.55322,2,500,Physiological maturty,Field is ready for harvesting
-1056ZIN,01/11/2021,,,,,,,,,,Gushegu,9.60499,-0.56821,3,800,Physiological maturty,Field is ready for harvesting
-7014SAM,01/11/2021,0.35,0.586,1.15,1.86,13.65,9.7,18.4,29.4,13.55,Gushegu,9.79256,-0.39505,1,500,Physiological maturty,Field is ready for harvesting
-7015SAM,01/11/2021,,,,,,,,,,Gushegu,9.78585,-0.39316,1.5,400,Physiological maturty,Field is ready for harvesting
-7016SAM,01/11/2021,,,,,,,,,,Gushegu,9.78442,-0.39488,2,500,Physiological maturty,Field is ready for harvesting
-7017SAM,01/11/2021,0.625,0.476,0.297,0.834,17.1,16.65,13.8,27.25,20.8,Gushegu,9.81155,-0.3948,5,700,Physiological maturty,Field is ready for harvesting
-7036FUU,02/11/2021,0.684,0.584,0.589,0.645,26,19,26.9,23,25.5,Salaga N,9.26862,-0.61104,1,400,Grain filling,
-7035FUU,02/11/2021,,,,,,,,,,Salaga N,9.26734,-0.61419,1,500,Physiological maturity,Field is dried and no was not taken this week
-4020FUU,02/11/2021,0.285,0.277,0.497,0.526,15.8,6,11.15,13.65,23.1,Salaga N,9.26797,-0.61544,1,500,Grain filling,
-7034FUU,02/11/2021,,,,,,,,,,Salaga N,,,1,600,Grain filling,Farmer inter-crop with sorghum so data was not taken
-7033FUU,02/11/2021,0.622,0.45,1.31,0.643,24.8,14.95,10.75,9.05,4.85,Salaga N,9.21888,-0.59834,1,600,Grain filling,
-7022FUU,02/11/2021,0.385,0.648,0.345,1.13,30.95,24,18.75,13.2,23.25,Salaga N,9.26453,-0.61591,2,500,Grain filling,
-3030TIN,02/11/2021,,,,,,,,,,Nanton,9.57115,-0.69643,5,800,Physiological maturity,Field is dried and no was not taken this week
-3014TIN,02/11/2021,,,,,,,,,,Nanton,9.57074,-0.69806,2,400,Physiological maturity,Field is dried and no was not taken this week
-3028TIN,02/11/2021,,,,,,,,,,Nanton,9.56887,-0.69897,2,500,Physiological maturity,Field is dried and no was not taken this week
-3075TAM,02/11/2021,,,,,,,,,,Nanton,9.59514,-0.6634,1,700,Physiological maturity,Field is dried and no was not taken this week
-3074TAM,02/11/2021,,,,,,,,,,Nanton,9.58927,-0.6617,6,400,Physiological maturity,Field is dried and no was not taken this week
-3080TAM,02/11/2021,,,,,,,,,,Nanton,9.58207,-0.67153,2,600,Physiological maturity,Field is dried and no was not taken this week
-5032TUG,03/11/2021,,,,,,,,,,Tamale,9.36713,-0.62363,1,400,Physiological maturity,Field is dried and ready for harvesting
-5036TUG,03/11/2021,0.983,0.494,0.149,1.41,15.65,15.7,15.65,13.95,19.05,Tamale,9.36714,-0.62363,4,500,Physiological maturity,Field is dried and ready for harvesting
-5037TUG,03/11/2021,,,,,,,,,,Tamale,9.37572,-0.60469,2,700,Physiological maturity,Field is dried and ready for harvesting
-5034TUG,03/11/2021,,,,,,,,,,Tamale,9.38492,-0.59441,2,400,Physiological maturity,Field is dried and ready for harvesting
-5033TUG,03/11/2021,,,,,,,,,,Tamale,9.38566,-0.59371,2,500,Physiological maturity,Field is dried and ready for harvesting
-5011LAB,03/11/2021,,,,,,,,,,Tamale,9.43031,-0.59513,3,1000,Physiological maturity,Field is dried and ready for harvesting
-5012LAB,03/11/2021,,,,,,,,,,Tamale,9.42625,-0.59964,3,600,Physiological maturity,Field is dried and ready for harvesting
-5014LAB,03/11/2021,,,,,,,,,,Tamale,9.42672,-0.59772,2,500,Physiological maturity,Field is dried and ready for harvesting
-5002LAB,03/11/2021,0.8,0.69,1.18,0.39,24.7,10.85,7.15,12.25,15.4,Tamale,9.42403,-0.59613,5,400,Physiological maturity,Field is dried and ready for harvesting
-2053KPA,03/11/2021,,,,,,,,,,Mion,9.40619,-0.51421,1,500,Physiological maturity,Field is dried and ready for harvesting
-2050KPA,03/11/2021,,,,,,,,,,Mion,9.40378,-0.51562,1,500,Physiological maturity,Field is dried and ready for harvesting
-2048KPA,03/11/2021,,,,,,,,,,Mion,,,2,600,Tasseling/anthesis,Field has been destroyed by livestock so data for this week was not taken 
-5016ZOR,03/11/2021,1.5,0.618,1,0.69,9.45,27.35,21.8,18.6,19.2,Tamale,9.37954,-0.67105,1,500,Physiological maturity,Field is dried and ready for harvesting
-5017ZOR,03/11/2021,0.772,0.798,0.511,1.13,18.25,24.85,18.9,15.25,14.75,Tamale,9.37925,-0.67317,1.5,500,Physiological maturity,Field is dried and ready for harvesting
-5057PAG,03/11/2021,,,,,,,,,,Tamale,9.37758,-0.70848,1,800,Physiological maturity,Field is dried and ready for harvesting
-7058CHE,04/11/2021,0.589,0.345,0.851,0.431,10.8,12.2,33.4,11.6,15.7,Mion,9.3452,-0.4773,5,600,Physiological Maturity,Field is dried 
-7059CHE,04/11/2021,1.07,0.157,0.502,0.248,14,12.55,15,16.4,21.75,Mion,9.34617,-0.43769,105,1000,Physiological Maturity,Field is dried 
-7061CHE,04/11/2021,1.33,0.853,1.23,1.36,16,11.7,14.35,18.2,27.25,Mion,9.3555,-0.43689,4,1500,Physiological Maturity,
-7062CHE,04/11/2021,0.453,0.638,0.79,1.07,18.65,14.8,22.2,21.4,9.9,Mion,9.3572,-0.43756,2,700,Physiological Maturity,
-7036SAN,04/11/2021,0.9,1.33,0.782,0.911,6.35,12.95,12.6,30.75,14.35,Mion,9.42024,-0.23413,2,500,Physiological Maturity,Field is dried 
-2002ALH,04/11/2021,1.55,1.12,1.77,0.912,28.3,31.95,18.1,10.25,17,Mion,9.64778,-0.25213,3,800,Physiological Maturity,
-7015ALH,04/11/2021,0.764,0.385,0.681,0.648,35.7,18.85,37.45,32.3,41.75,Mion,9.64564,-0.25194,1,500,Grain filling,
-7016ALH,04/11/2021,0.41,0.612,0.347,1.05,33.9,32.55,14.95,21.6,36.7,Mion,9.64613,-0.25423,1.5,400,Grain filling,
-7018ALH,04/11/2021,1.06,1.93,0.801,1.82,16.8,22,25.5,33.4,27,Mion,9.64703,-0.25554,2,500,Grain filling,
-7019ZOR,04/11/2021,1.06,1.08,2.35,0.906,9.8,27.8,33.1,17.65,15.3,Tamale,,,5,700,Grain filling,
-1029ZIN,05/11/2021,1.59,0.485,1.35,1.09,11.65,11.7,17,11.35,13.5,Gushegu,9.61647,-0.58331,16,1500,Physiological maturity,Field is dried and ready for harvesting
-7068ZIN,05/11/2021,0.922,0.863,0.515,0.81,19.95,29,10.7,17.65,6.45,Gushegu,9.60037,-0.5661,2,1400,Grain filling,High  incidence of maize streak virus on the field
-7069ZIN,05/11/2021,2.65,1.07,1.41,107,42,12,39.05,19.1,28.6,Gushegu,9.60346,-0.56982,2,900,Grain filling,High  incidence of maize streak virus on the field
-7070ZIN,05/11/2021,0.567,0.652,0.588,0.482,35.1,11.5,29.35,22.3,26.3,Gushegu,9.60789,-0.56818,1.5,800,Grain filling,
-7071ZIN,05/11/2021,1.55,1.67,1.13,2.02,16.25,12.85,15.95,14.55,14.55,Gushegu,9.60638,-0.5674,1,600,Grain filling,
-7072ZIN,05/11/2021,2.14,2.16,1.38,0.893,36.9,32.55,42.3,25.55,42.15,Gushegu,9.60706,-0.56898,2,1000,Grain filling,High  incidence of maize streak virus on the field
-7073ZIN,05/11/2021,1.08,0.986,0.529,0.993,15.6,16.5,20.9,12.3,420.9,Gushegu,9.61538,-0.56813,1.5,800,Grain filling,
-7074ZIN,05/11/2021,0.991,0.217,0.999,0.926,35.9,10.85,22.1,48.35,28.25,Gushegu,9.61817,-0.56694,1.5,900,Grain filling,
-1055ZIN,05/11/2021,0.731,1.01,1.17,0.686,20.6,10.3,11.6,14.2,28.8,Gushegu,9.614985,-0.57245,10,1300,Physiological maturity,Field is dried and ready for harvesting
+7010SAM,11/01/2021,,,,,,,,,,Gushegu,9.7953,-0.3978,5,600,Physiological maturty,Field is ready for harvesting
+7020YAM,11/01/2021,,,,,,,,,,Gushegu,9.72289,-0.51229,105,1000,Physiological maturty,Field is ready for harvesting
+7021YAM,11/01/2021,,,,,,,,,,Gushegu,9.70065,-0.54129,4,1500,Physiological maturty,Field is ready for harvesting
+1061ZIN,11/01/2021,0.287,0.267,0.408,0.677,13.1,22.75,8.1,15.25,30.4,Gushegu,9.62704,-0.55416,2,700,Physiological maturty,Field is ready for harvesting
+1067ZIN,11/01/2021,0.986,0.492,0.277,0.426,7,13.3,12.4,8.7,9.15,Gushegu,9.62606,-0.55322,2,500,Physiological maturty,Field is ready for harvesting
+1056ZIN,11/01/2021,,,,,,,,,,Gushegu,9.60499,-0.56821,3,800,Physiological maturty,Field is ready for harvesting
+7014SAM,11/01/2021,0.35,0.586,1.15,1.86,13.65,9.7,18.4,29.4,13.55,Gushegu,9.79256,-0.39505,1,500,Physiological maturty,Field is ready for harvesting
+7015SAM,11/01/2021,,,,,,,,,,Gushegu,9.78585,-0.39316,1.5,400,Physiological maturty,Field is ready for harvesting
+7016SAM,11/01/2021,,,,,,,,,,Gushegu,9.78442,-0.39488,2,500,Physiological maturty,Field is ready for harvesting
+7017SAM,11/01/2021,0.625,0.476,0.297,0.834,17.1,16.65,13.8,27.25,20.8,Gushegu,9.81155,-0.3948,5,700,Physiological maturty,Field is ready for harvesting
+7036FUU,11/02/2021,0.684,0.584,0.589,0.645,26,19,26.9,23,25.5,Salaga N,9.26862,-0.61104,1,400,Grain filling,
+7035FUU,11/02/2021,,,,,,,,,,Salaga N,9.26734,-0.61419,1,500,Physiological maturity,Field is dried and no was not taken this week
+4020FUU,11/02/2021,0.285,0.277,0.497,0.526,15.8,6,11.15,13.65,23.1,Salaga N,9.26797,-0.61544,1,500,Grain filling,
+7034FUU,11/02/2021,,,,,,,,,,Salaga N,,,1,600,Grain filling,Farmer inter-crop with sorghum so data was not taken
+7033FUU,11/02/2021,0.622,0.45,1.31,0.643,24.8,14.95,10.75,9.05,4.85,Salaga N,9.21888,-0.59834,1,600,Grain filling,
+7022FUU,11/02/2021,0.385,0.648,0.345,1.13,30.95,24,18.75,13.2,23.25,Salaga N,9.26453,-0.61591,2,500,Grain filling,
+3030TIN,11/02/2021,,,,,,,,,,Nanton,9.57115,-0.69643,5,800,Physiological maturity,Field is dried and no was not taken this week
+3014TIN,11/02/2021,,,,,,,,,,Nanton,9.57074,-0.69806,2,400,Physiological maturity,Field is dried and no was not taken this week
+3028TIN,11/02/2021,,,,,,,,,,Nanton,9.56887,-0.69897,2,500,Physiological maturity,Field is dried and no was not taken this week
+3075TAM,11/02/2021,,,,,,,,,,Nanton,9.59514,-0.6634,1,700,Physiological maturity,Field is dried and no was not taken this week
+3074TAM,11/02/2021,,,,,,,,,,Nanton,9.58927,-0.6617,6,400,Physiological maturity,Field is dried and no was not taken this week
+3080TAM,11/02/2021,,,,,,,,,,Nanton,9.58207,-0.67153,2,600,Physiological maturity,Field is dried and no was not taken this week
+5032TUG,11/03/2021,,,,,,,,,,Tamale,9.36713,-0.62363,1,400,Physiological maturity,Field is dried and ready for harvesting
+5036TUG,11/03/2021,0.983,0.494,0.149,1.41,15.65,15.7,15.65,13.95,19.05,Tamale,9.36714,-0.62363,4,500,Physiological maturity,Field is dried and ready for harvesting
+5037TUG,11/03/2021,,,,,,,,,,Tamale,9.37572,-0.60469,2,700,Physiological maturity,Field is dried and ready for harvesting
+5034TUG,11/03/2021,,,,,,,,,,Tamale,9.38492,-0.59441,2,400,Physiological maturity,Field is dried and ready for harvesting
+5033TUG,11/03/2021,,,,,,,,,,Tamale,9.38566,-0.59371,2,500,Physiological maturity,Field is dried and ready for harvesting
+5011LAB,11/03/2021,,,,,,,,,,Tamale,9.43031,-0.59513,3,1000,Physiological maturity,Field is dried and ready for harvesting
+5012LAB,11/03/2021,,,,,,,,,,Tamale,9.42625,-0.59964,3,600,Physiological maturity,Field is dried and ready for harvesting
+5014LAB,11/03/2021,,,,,,,,,,Tamale,9.42672,-0.59772,2,500,Physiological maturity,Field is dried and ready for harvesting
+5002LAB,11/03/2021,0.8,0.69,1.18,0.39,24.7,10.85,7.15,12.25,15.4,Tamale,9.42403,-0.59613,5,400,Physiological maturity,Field is dried and ready for harvesting
+2053KPA,11/03/2021,,,,,,,,,,Mion,9.40619,-0.51421,1,500,Physiological maturity,Field is dried and ready for harvesting
+2050KPA,11/03/2021,,,,,,,,,,Mion,9.40378,-0.51562,1,500,Physiological maturity,Field is dried and ready for harvesting
+2048KPA,11/03/2021,,,,,,,,,,Mion,,,2,600,Tasseling/anthesis,Field has been destroyed by livestock so data for this week was not taken 
+5016ZOR,11/03/2021,1.5,0.618,1,0.69,9.45,27.35,21.8,18.6,19.2,Tamale,9.37954,-0.67105,1,500,Physiological maturity,Field is dried and ready for harvesting
+5017ZOR,11/03/2021,0.772,0.798,0.511,1.13,18.25,24.85,18.9,15.25,14.75,Tamale,9.37925,-0.67317,1.5,500,Physiological maturity,Field is dried and ready for harvesting
+5057PAG,11/03/2021,,,,,,,,,,Tamale,9.37758,-0.70848,1,800,Physiological maturity,Field is dried and ready for harvesting
+7058CHE,11/04/2021,0.589,0.345,0.851,0.431,10.8,12.2,33.4,11.6,15.7,Mion,9.3452,-0.4773,5,600,Physiological Maturity,Field is dried 
+7059CHE,11/04/2021,1.07,0.157,0.502,0.248,14,12.55,15,16.4,21.75,Mion,9.34617,-0.43769,105,1000,Physiological Maturity,Field is dried 
+7061CHE,11/04/2021,1.33,0.853,1.23,1.36,16,11.7,14.35,18.2,27.25,Mion,9.3555,-0.43689,4,1500,Physiological Maturity,
+7062CHE,11/04/2021,0.453,0.638,0.79,1.07,18.65,14.8,22.2,21.4,9.9,Mion,9.3572,-0.43756,2,700,Physiological Maturity,
+7036SAN,11/04/2021,0.9,1.33,0.782,0.911,6.35,12.95,12.6,30.75,14.35,Mion,9.42024,-0.23413,2,500,Physiological Maturity,Field is dried 
+2002ALH,11/04/2021,1.55,1.12,1.77,0.912,28.3,31.95,18.1,10.25,17,Mion,9.64778,-0.25213,3,800,Physiological Maturity,
+7015ALH,11/04/2021,0.764,0.385,0.681,0.648,35.7,18.85,37.45,32.3,41.75,Mion,9.64564,-0.25194,1,500,Grain filling,
+7016ALH,11/04/2021,0.41,0.612,0.347,1.05,33.9,32.55,14.95,21.6,36.7,Mion,9.64613,-0.25423,1.5,400,Grain filling,
+7018ALH,11/04/2021,1.06,1.93,0.801,1.82,16.8,22,25.5,33.4,27,Mion,9.64703,-0.25554,2,500,Grain filling,
+7019ZOR,11/04/2021,1.06,1.08,2.35,0.906,9.8,27.8,33.1,17.65,15.3,Tamale,,,5,700,Grain filling,
+1029ZIN,11/05/2021,1.59,0.485,1.35,1.09,11.65,11.7,17,11.35,13.5,Gushegu,9.61647,-0.58331,16,1500,Physiological maturity,Field is dried and ready for harvesting
+7068ZIN,11/05/2021,0.922,0.863,0.515,0.81,19.95,29,10.7,17.65,6.45,Gushegu,9.60037,-0.5661,2,1400,Grain filling,High  incidence of maize streak virus on the field
+7069ZIN,11/05/2021,2.65,1.07,1.41,107,42,12,39.05,19.1,28.6,Gushegu,9.60346,-0.56982,2,900,Grain filling,High  incidence of maize streak virus on the field
+7070ZIN,11/05/2021,0.567,0.652,0.588,0.482,35.1,11.5,29.35,22.3,26.3,Gushegu,9.60789,-0.56818,1.5,800,Grain filling,
+7071ZIN,11/05/2021,1.55,1.67,1.13,2.02,16.25,12.85,15.95,14.55,14.55,Gushegu,9.60638,-0.5674,1,600,Grain filling,
+7072ZIN,11/05/2021,2.14,2.16,1.38,0.893,36.9,32.55,42.3,25.55,42.15,Gushegu,9.60706,-0.56898,2,1000,Grain filling,High  incidence of maize streak virus on the field
+7073ZIN,11/05/2021,1.08,0.986,0.529,0.993,15.6,16.5,20.9,12.3,420.9,Gushegu,9.61538,-0.56813,1.5,800,Grain filling,
+7074ZIN,11/05/2021,0.991,0.217,0.999,0.926,35.9,10.85,22.1,48.35,28.25,Gushegu,9.61817,-0.56694,1.5,900,Grain filling,
+1055ZIN,11/05/2021,0.731,1.01,1.17,0.686,20.6,10.3,11.6,14.2,28.8,Gushegu,9.614985,-0.57245,10,1300,Physiological maturity,Field is dried and ready for harvesting
