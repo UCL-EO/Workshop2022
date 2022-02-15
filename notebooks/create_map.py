@@ -281,11 +281,12 @@ field_movie = None
 yield_img = None
 yield_control = None
 daily_img = None
+maize_markers = []
 def on_click(change):
     global field_id
     global field_bounds
     global doys
-    global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img
+    global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img, maize_markers
     field_id = change["new"]
 
     ind = field_ids.index(field_id)
@@ -295,6 +296,7 @@ def on_click(change):
     lon, lat = poly.centroid.coords[0]
     my_map.center = lat, lon
     zoom = 17
+    my_map.zoom = zoom
     tile = Tile.for_latitude_longitude(*my_map.center, zoom)
     x, y = tile.tms
 
@@ -337,7 +339,7 @@ def on_click(change):
 
     cl = st.t.interval(0.95, len(ylds)-1, loc=np.mean(ylds), scale=st.sem(ylds))
     cl = (cl[1] + cl[0]) / 2
-    print(cl)
+    
     yield_label = Label('%s Field yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
     yield_label2 = Label('$$Yield [kg/ha]$$')
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
@@ -408,10 +410,14 @@ def on_click(change):
         my_map.remove_layer(maize_marker)
     except:
         pass
-
+    try:
+        for this_marker, lai_ratio in maize_markers:
+            my_map.remove_layer(this_marker)
+    except:
+        pass
     daily_img = None
     maize_marker = None
-
+    maize_markers = []
     #for layer in my_map.layers:
         #if layer.name == 'S2_%s_lai_movie'%field_id:
             # Connect slider value to opacity property of the Image Layer
@@ -455,11 +461,80 @@ def on_change_slider2(change):
         # maize_marker.icon.icon_size = [(38*lai_ratio), int(95*lai_ratio)]
         if maize_marker is not None:
             lai_ratio = (pix_lai[ind] - 0) / (field_max - 0)
+            
+            
+            lai_ratio = pix_lai[ind] / pix_lai.max()
+            
+            max_ind = np.argmax(pix_lai)
+            max_ratio = pix_lai.max() / field_max
+            
+            if ind < max_ind:
+                
+                img_ind = int(lai_ratio * 5) + 1
+                stage_ratio = lai_ratio / (img_ind / 5)
+                
+                maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Ghana_workshop2022/imgs/maize.png', 
+                            icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
+                            icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
 
-            maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Ghana_workshop2022/imgs/maize.png', 
-                        icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
-                        icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
-            maize_marker.icon = maize_icon
+                maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/maize_s%d.png'%img_ind, 
+                            icon_size=[28.4 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio], 
+                            icon_anchor=[28.4/2 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio])
+                
+                for (this_marker, max_ratio) in maize_markers:
+ 
+                    
+                    maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/maize_s%d.png'%img_ind, 
+                                icon_size=[28.4 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio], 
+                                icon_anchor=[28.4/2 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio])
+
+                    this_marker.icon = maize_icon
+                    
+            elif (lai_ratio > 0.8) & (ind >= max_ind):
+                img_ind = 6
+                stage_ratio = 1
+                maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/maize_s%d.png'%img_ind, 
+                            icon_size=[28.4 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio], 
+                            icon_anchor=[28.4/2 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio])
+            
+                maize_marker.icon = maize_icon
+                
+                    
+                for (this_marker, max_ratio) in maize_markers:
+ 
+                    
+                    maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/maize_s%d.png'%img_ind, 
+                                icon_size=[28.4 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio], 
+                                icon_anchor=[28.4/2 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio])
+
+                    this_marker.icon = maize_icon
+            
+                
+            else:
+                img_ind = np.min([int((1-lai_ratio / 0.8) * 6) + 7, 11])
+                
+                stage_ratio = (1-lai_ratio) / ((img_ind - 7) / 4)
+                
+                maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Ghana_workshop2022/imgs/maize.png', 
+                            icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
+                            icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
+
+                maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/maize_s%d.png'%img_ind, 
+                            icon_size=[28.4 * max_ratio , 82.6 * max_ratio], 
+                            icon_anchor=[28.4/2 * max_ratio , 82.6 * max_ratio])
+            
+                maize_marker.icon = maize_icon
+                
+                stage_ratio = 1
+                for (this_marker, max_ratio) in maize_markers:
+ 
+                    
+                    maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/maize_s%d.png'%img_ind, 
+                                icon_size=[28.4 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio], 
+                                icon_anchor=[28.4/2 * max_ratio * stage_ratio, 82.6 * max_ratio * stage_ratio])
+
+                    this_marker.icon = maize_icon
+                
             lai_dot.x = doys[[ind]]
             lai_dot.y = pix_lai[[ind]]
 
@@ -561,6 +636,7 @@ display(label)
 maize_marker = None
 pix_lai = None
 maize_icon = None
+
 def handle_interaction(**kwargs):
     # if kwargs.get('type') == 'mousemove':
     #     label.value = str(kwargs.get('coordinates'))
@@ -582,7 +658,7 @@ def handle_interaction(**kwargs):
             # marker = Marker(location=location)
 
             global sels, planet_sur, doys
-            global maize_icon, pix_lai, field_max, field_min, maize_marker, field_lai_boxes, lai_dot
+            global maize_icon, pix_lai, field_max, field_min, maize_marker, field_lai_boxes, lai_dot, maize_markers
             doys, pix_lai, pix_cab, sels, lais, planet_sur = get_pixel(location, field_id)
 
             mean_ref, mean_bios, std_ref, std_bios, sel_inds, u_mask = da_pix(sels, planet_sur, u_thresh = k_slider.value)
@@ -608,7 +684,8 @@ def handle_interaction(**kwargs):
                         icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
 
             maize_marker = Marker(location=location, icon=maize_icon, rotation_angle=0, rotation_origin='22px 94px', draggable=False)
-
+            maize_markers.append([maize_marker, lai_ratio])
+            
             my_map.add_layer(maize_marker)                        
 
 
