@@ -28,7 +28,7 @@ def get_lai_color_bar():
 
 def get_pixel(location, field_name):
     lat, lon = location
-    npz_name = '%s_bios_planet_only_v5.npz'%field_name
+    npz_name = '%s_bios_planet_only_v6.npz'%field_name
     if not os.path.exists('./data/' + npz_name):
         tsen_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Tsen/'
         url = tsen_url + npz_name
@@ -64,7 +64,7 @@ def get_pixel(location, field_name):
     return doys, lai[mm].ravel(), cab[mm].ravel(), sels, lai, planet_sur
 
 def get_lai_gif(field_name):
-    npz_name = '%s_bios_planet_only_v5.npz'%field_name
+    npz_name = '%s_bios_planet_only_v6.npz'%field_name
     if not os.path.exists('./data/' + npz_name):
         tsen_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Tsen/'
         url = tsen_url + npz_name
@@ -206,7 +206,7 @@ def get_lai_gif(field_name):
     # print(bounds)
     
 def get_field_bounds(field_name):
-    npz_name = '%s_bios_planet_only_v5.npz'%field_name
+    npz_name = '%s_bios_planet_only_v6.npz'%field_name
     if not os.path.exists('./data/' + npz_name):
         tsen_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Tsen/'
         url = tsen_url + npz_name

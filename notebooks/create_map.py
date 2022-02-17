@@ -21,7 +21,7 @@ from ipywidgets import Image as ImageWidget
 df = pd.read_csv('data/Ghana_ground_data_v2.csv')
 
 yield_df = pd.read_csv('data/Yield_Maize_Biomass_V2.csv').iloc[:, :3]
-codes = np.unique([i[:-2] for i in yield_df.FID])
+codes = np.array([i[:-2] for i in yield_df.FID]).reshape(-1, 3)[:, 0]
 yields = np.array(yield_df.iloc[:, 1]).reshape(-1, 3)
 field_yields = dict(zip(codes, yields.tolist()))
 
