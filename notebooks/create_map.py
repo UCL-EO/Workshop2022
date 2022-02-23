@@ -204,7 +204,9 @@ field_lai_boxes.box_width=5
 
 lai_dot = Lines(x=doys[:1], y=[0,], scales=lai_fig.marks[1].scales,line_style='dotted', marker='circle', marker_size=45, colors = ['red'])
 
-lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot]
+wofost_lai = Lines(x=doys, y=np.zeros_like(doys)*np.nan, scales = lai_fig.marks[1].scales)
+
+lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
 
 
 
@@ -213,6 +215,81 @@ box_layout = Layout(display='flex',
                 align_items='center',
                 width='100%')
 
+from ipywidgets import IntSlider
+def read_wofost_data(fname):
+    f = np.load(fname, allow_pickle=True)
+    parameters = f.f.parameters
+    t_axis = f.f.t_axis
+    samples = f.f.samples
+    lais = f.f.lais
+    yields = f.f.yields
+    DVS = f.f.DVS
+    print("loading simulations")
+    doys = [int(datetime.datetime.utcfromtimestamp(i.tolist()/1e9).strftime('%j')) for i in t_axis]
+    return parameters, t_axis, samples, lais, yields, DVS, doys
+
+parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
+
+k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
+               orientation='horizontal',       # Vertical slider is what we want
+               readout=True,                # No need to show exact value
+               layout=Layout(width='80%'),
+               description='Doy of sowing: ', 
+               style={'description_width': 'initial'}) 
+
+k_slider2 = FloatSlider(min=0.05, max=0.55, value=0.35,       # Opacity is valid in [0,1] range
+               step = 0.0025,
+               orientation='horizontal',       # Vertical slider is what we want
+               readout=True,                # No need to show exact value
+               layout=Layout(width='80%'),
+               description='Early stress level: ', 
+               style={'description_width': 'initial'}) 
+
+k_slider3 = FloatSlider(min=0.05, max=0.55,  value=0.35,       # Opacity is valid in [0,1] range
+               step = 0.0025,
+               orientation='horizontal',       # Vertical slider is what we want
+               readout=True,                # No need to show exact value
+               layout=Layout(width='80%'),
+               description='Late stress level: ', 
+               style={'description_width': 'initial'}) 
+
+def on_change_k_sliders(change):
+
+    if (change['name'] == 'value') & (change['type'] == 'change'):
+        value = change["new"]
+        old = change['old']
+        
+        k1 = k_slider1.value
+        k2 = k_slider2.value
+        k3 = k_slider3.value
+        
+        
+        diff = abs(parameters - np.array([[k1, k2, k3]])).sum(axis=1)
+        ind = np.argmin(diff)
+        
+        simu_lai = lais[ind]
+        
+        
+        # var_line = line_axs[-1]
+        # var_line.scales = line_axs[5][0].scales
+        # field_lai_boxes.scales = var_line.scales
+        # lai_dot.scales = var_line.scales
+
+        wofost_lai.x = simu_doys
+        wofost_lai.y = simu_lai
+        wofost_lai.scales = lai_fig.marks[1].scales
+        wofost_lai.colors = ['red']
+        print(k1, k2, k3)
+        print(parameters[ind])
+        
+        
+        
+k_slider1.observe(on_change_k_sliders)
+k_slider2.observe(on_change_k_sliders)
+k_slider3.observe(on_change_k_sliders)
+
+panel_box = VBox([fig_box, k_slider1, k_slider2, k_slider3], layout = box_layout)
+
 k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1] range
                orientation='horizontal',       # Vertical slider is what we want
                readout=True,                # No need to show exact value
@@ -220,7 +297,7 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
                description='K: ', 
                style={'description_width': 'initial'}) 
 
-panel_box = VBox([fig_box, k_slider], layout = box_layout)
+# panel_box = VBox([fig_box, k_slider], layout = box_layout)
 
 widget_control1 = WidgetControl(widget=panel_box, position='topright')
 my_map.add_control(widget_control1)
@@ -824,7 +901,7 @@ def on_change_k_slider(change):
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = planet_sur[ii][u_mask]
 
-k_slider.observe(on_change_k_slider)
+# k_slider.observe(on_change_k_slider)
 
 my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
