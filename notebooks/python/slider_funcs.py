@@ -60,7 +60,7 @@ def process_field_data(
     return avg_yield, df_lai, fields
 
 
-def read_data(fname=f"data/wofost_sims_dvs125.npz"):
+def read_data(fname=f"data/wofost_sims_dvs125_0.npz"):
     f = np.load(fname, allow_pickle=True)
     parameters = f.f.parameters
     t_axis = f.f.t_axis
@@ -72,10 +72,107 @@ def read_data(fname=f"data/wofost_sims_dvs125.npz"):
     avg_yield, df_lai, fields = process_field_data()
     return parameters, t_axis, samples, lais, yields, DVS, avg_yield, df_lai, fields
 
+def ensemble_assimilation(
+    parameters,
+    cost_prior,
+    t_axis,
+    lais,
+    yields,
+    avg_yield,
+    df_lai,
+    fields,
+    sigma_lai=0.5,
+    fit_yield=True,
+    yield_sigma_scale=0.5,
+):
+
+    sim_times = t_axis
+
+    cost_yield = np.zeros_like(cost_prior)
+    cost_lai = np.zeros_like(cost_prior)
+    yy = []
+    ll = []
+    tt = []
+    SS = []
+    for ii, this_field in enumerate(fields):
+        obs_dates = pd.to_datetime(
+            df_lai[df_lai.field_code == this_field].time.values
+        )
+        obs_lai = df_lai[df_lai.field_code == this_field].lai_mean.values
+        ll.append(obs_lai[::10]) # Only take every 5th LAI observation
+        print(len(obs_lai[::10]))
+        tt.append(obs_dates)
+        if fit_yield:
+            obs_yield = avg_yield[
+                avg_yield.field_code == this_field
+            ].yield_mean.values.squeeze()
+            yy.append(obs_yield)
+            sigma_yield = avg_yield[
+                avg_yield.field_code == this_field
+            ].yield_std.values.squeeze()
+            sigma_yield = sigma_yield * yield_sigma_scale
+            SS.append(sigma_yield)
+        passer = obs_dates <= sim_times.max()
+        obs_dates = obs_dates[passer]
+        obs_lai = obs_lai[passer]
+        doys = obs_dates - sim_times[0]
+        time_index = [x.days for x in doys]
+        work_sim_times = sim_times[time_index]
+        diffs = lais[:, time_index] - obs_lai.squeeze()
+        cost_lai[:, ii] = np.nansum(
+            0.5 * ((lais[:, time_index] - obs_lai) ** 2 / sigma_lai ** 2),
+            axis=1,
+        )
+        if fit_yield:
+            cost_yield[:, ii] = 0.5 * (
+                (yields - obs_yield) ** 2 / (sigma_yield ** 2)
+            )
+
+    posterior = cost_prior + cost_lai
+
+    if fit_yield:
+        posterior += cost_yield
+
+    eposterior = np.exp(-posterior)
+    #ilocs = posterior.argsort(axis=0)[:20]
+    #eposterior= 1./(posterior[ilocs, :])
+    #parameters = parameters[ilocs, :]
+
+
+    sols = np.array(
+        [
+            np.mean(eposterior[:, [ii]] * parameters, axis=0)
+            / np.mean(eposterior[:, [ii]])
+            for ii, _ in enumerate(fields)
+        ]
+    )
+
+#     sols_sd = [
+#         np.cov(parameters.T, aweights=1.0 / posterior[:, ii])
+#         for ii, _ in enumerate(fields)
+#     ]
+    sols_sd = [
+        np.cov(
+            parameters.T,
+            aweights=eposterior[:, ii],
+        )
+        for ii, _ in enumerate(fields)
+     ]
+
+    sols_sd = np.array(sols_sd)
+
+    if fit_yield:
+        return yy, ll, tt, SS, posterior, sols, sols_sd
+    else:
+        return ll, tt, posterior, sols, sols_sd
+
+
+
 
 def slider_plots_func(
     sel_field,
     sel_dos,
+    sel_tdwi,
     sel_beta_early,
     sel_beta_late,
     df_lai,
@@ -96,10 +193,11 @@ def slider_plots_func(
         time_lai, obs_lai_mean - obs_lai_std, obs_lai_mean + obs_lai_std, color="0.8"
     )
 
-    diff = np.abs(parameters - np.array([sel_dos, sel_beta_early, sel_beta_late]))
+    diff = np.abs(parameters - np.array([sel_dos, sel_tdwi, sel_beta_early, sel_beta_late]))
     ilocs = np.abs(diff).sum(axis=1).argmin()
     axs[0].plot(t_axis, lais[ilocs], "o", markerfacecolor="none", label="Modelled")
     axs[0].legend(loc="best", frameon=False)
+    axs[0].set_ylim(0, 3)
 
     yield_mean = avg_yield[avg_yield.field_code == sel_field].yield_mean.values
     yield_std = avg_yield[avg_yield.field_code == sel_field].yield_std.values
@@ -109,9 +207,9 @@ def slider_plots_func(
     axs[1].set_xlim(0, 5000)
     axs[1].set_ylim(0, 5000)
     axs[0].set_ylabel("Leaf Area Index [m2/m2]", fontsize=9)
-    axs[1].set_ylabel("Modelled yield [m2/m2]", fontsize=9)
-    axs[0].set_xlabel("Time", fontsize=9)
-    axs[1].set_xlabel("Observed yield [m2/m2]", fontsize=9)
+    axs[1].set_ylabel("Modelled yield [kg/ha]", fontsize=9)
+    axs[0].set_xlabel("Time [d]", fontsize=9)
+    axs[1].set_xlabel("Observed yield [kg/ha]", fontsize=9)
 
 
 def slider_plots():
@@ -129,9 +227,10 @@ def slider_plots():
     interact(
         slider_plots_func,
         sel_field=widgets.Dropdown(options=fields),
-        sel_dos=widgets.IntSlider(min=181, max=224, value=200),
-        sel_beta_early=widgets.FloatSlider(min=0.05, max=0.55, step=0.001, value=0.35),
-        sel_beta_late=widgets.FloatSlider(min=0.05, max=0.55, step=0.001, value=0.35),
+        sel_dos=widgets.IntSlider(min=191, max=209, value=200),
+        sel_tdwi=widgets.IntSlider(min=1, max=20, step=2, value=5),
+        sel_beta_early=widgets.FloatSlider(min=0.05, max=0.4, step=0.05, value=0.35),
+        sel_beta_late=widgets.FloatSlider(min=0.05, max=0.4, step=0.05, value=0.35),
         df_lai=widgets.fixed(df_lai),
         avg_yield=widgets.fixed(avg_yield),
         t_axis=widgets.fixed(t_axis),
