@@ -6,6 +6,12 @@ Workshop materials for crop monitoring in Ghana
 [docs](https://ucl-eo.github.io/Workshop2022/docs/index.html)
   
 Welcome to the Using Earth observation for Crop Monitoring (iEOCM) Workshop! You will find the following content:  
+
+MORNING SESSION  
+* Keynote lecture by Prof Lewis
+* Keynote lecture by Dr Dilys Maccarthy
+
+AFTERNOON SESSION
 [Crop mapping and visualisation](/blob/main/notebooks/CAU_Interface_Ghana_V1.ipynb)  
 [Yield Estimation using EO]()  
 [Data Assimilation and crop modelling]()  
