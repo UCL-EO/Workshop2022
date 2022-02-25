@@ -29,7 +29,7 @@ AFTERNOON SESSION
 
 ## [Practicals](https://mybinder.org/v2/gh/jgomezdans/binder-sandbox/master?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCL-EO%252FWorkshop2022%26urlpath%3Dlab%252Ftree%252FWorkshop2022%252Fnotebooks%26branch%3Dmain):
 -   DEA showcase
--   Biophysical binder (Feng)
+-   [Biophysical binder (Feng)](https://github.com/UCL-EO/Workshop2022/issues/13#issue-1150356786)
 -   Weather data & LAI/fAPAR (Nicola)
 -   Model data assimilation (Jose)
 -   Baseman / crop typer (GEE) Qingling
