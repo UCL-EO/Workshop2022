@@ -48,7 +48,7 @@ with open('./data/Biophysical_Data_Collection_Polygons_V1.geojson', 'r') as f:
 field_ids = [feat['properties']['Field_ID'] for feat in data['features']]
 
 dropdown = Dropdown(
-    options=codes,
+    options=sorted(codes.tolist()),
     value=codes[0],
     description="Field ID:",
 )
@@ -118,7 +118,7 @@ fig_layout = Layout(width='auto', height='auto', max_height='120px', max_width='
 sels = np.zeros((6, len(doys), 10))
 
 tick_style = {'font-size': 8}
-names = ['B1', 'B2', 'B3', 'B4', 'Cab', 'Lai']
+names = ['B1', 'B2', 'B3', 'B4', 'NDVI', 'Lai']
 line_axs = []
 for ii in range(6):
     y_scale = LinearScale(min = sels[ii].T.min(), max = sels[ii].T.max())
@@ -130,15 +130,14 @@ for ii in range(6):
     line_axs.append([line, ax_x, ax_y])
 
 ref_lines = []
-
-for ii in range(4):
+for ii in range(5):
     line, ax_x, ax_y = line_axs[ii]
     ref_line = Lines(x=doys, y=np.ones_like(doys) * np.nan, scales = line.scales, line_style='dotted', marker='circle', marker_size=4, colors = ['#c0c0c0'])
     ref_lines.append(ref_line)
 
 good_ref_lines = []
-line_colors = ['#3399ff', '#008000', '#ff6666', '#990000']
-for ii in range(4):
+line_colors = ['#3399ff', '#008000', '#ff6666', '#990000', '#20b2aa']
+for ii in range(5):
     line, ax_x, ax_y = line_axs[ii]
     good_ref_line = Lines(x=doys, y=np.ones_like(doys) * np.nan, scales = line.scales, line_style='dotted', marker='circle', marker_size=4, colors = [line_colors[ii]])
     good_ref_lines.append(good_ref_line)
@@ -147,7 +146,7 @@ figy=[]
 for i in range(3):
     figx=[]
     for j in range(2):
-        if i*2+j < 4:
+        if i*2+j < 5:
             ref_line = ref_lines[i*2+j]
             good_ref_line = good_ref_lines[i*2+j]
             line, ax_x, ax_y = line_axs[i*2+j]
@@ -177,6 +176,7 @@ fig_box = VBox(figy, align_content = 'stretch')
 
 
 cab_fig = figy[2].children[0]
+ndvi_fig = figy[2].children[0]
 lai_fig = figy[2].children[1]
 
 # field_cab_boxes = Boxplot(x=field_doys[:-1], y=field_cabs[:-1], 
@@ -204,7 +204,9 @@ field_lai_boxes.box_width=5
 
 lai_dot = Lines(x=doys[:1], y=[0,], scales=lai_fig.marks[1].scales,line_style='dotted', marker='circle', marker_size=45, colors = ['red'])
 
-lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot]
+wofost_lai = Lines(x=doys, y=np.zeros_like(doys)*np.nan, scales = lai_fig.marks[1].scales)
+
+lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
 
 
 
@@ -213,6 +215,81 @@ box_layout = Layout(display='flex',
                 align_items='center',
                 width='100%')
 
+from ipywidgets import IntSlider
+def read_wofost_data(fname):
+    f = np.load(fname, allow_pickle=True)
+    parameters = f.f.parameters
+    t_axis = f.f.t_axis
+    samples = f.f.samples
+    lais = f.f.lais
+    yields = f.f.yields
+    DVS = f.f.DVS
+    print("loading simulations")
+    doys = [int(datetime.datetime.utcfromtimestamp(i.tolist()/1e9).strftime('%j')) for i in t_axis]
+    return parameters, t_axis, samples, lais, yields, DVS, doys
+
+parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
+
+k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
+               orientation='horizontal',       # Vertical slider is what we want
+               readout=True,                # No need to show exact value
+               layout=Layout(width='80%'),
+               description='Doy of sowing: ', 
+               style={'description_width': 'initial'}) 
+
+k_slider2 = FloatSlider(min=0.05, max=0.55, value=0.35,       # Opacity is valid in [0,1] range
+               step = 0.0025,
+               orientation='horizontal',       # Vertical slider is what we want
+               readout=True,                # No need to show exact value
+               layout=Layout(width='80%'),
+               description='Early stress level: ', 
+               style={'description_width': 'initial'}) 
+
+k_slider3 = FloatSlider(min=0.05, max=0.55,  value=0.35,       # Opacity is valid in [0,1] range
+               step = 0.0025,
+               orientation='horizontal',       # Vertical slider is what we want
+               readout=True,                # No need to show exact value
+               layout=Layout(width='80%'),
+               description='Late stress level: ', 
+               style={'description_width': 'initial'}) 
+
+def on_change_k_sliders(change):
+
+    if (change['name'] == 'value') & (change['type'] == 'change'):
+        value = change["new"]
+        old = change['old']
+        
+        k1 = k_slider1.value
+        k2 = k_slider2.value
+        k3 = k_slider3.value
+        
+        
+        diff = abs(parameters - np.array([[k1, k2, k3]])).sum(axis=1)
+        ind = np.argmin(diff)
+        
+        simu_lai = lais[ind]
+        
+        
+        # var_line = line_axs[-1]
+        # var_line.scales = line_axs[5][0].scales
+        # field_lai_boxes.scales = var_line.scales
+        # lai_dot.scales = var_line.scales
+
+        wofost_lai.x = simu_doys
+        wofost_lai.y = simu_lai
+        wofost_lai.scales = lai_fig.marks[1].scales
+        wofost_lai.colors = ['red']
+        print(k1, k2, k3)
+        print(parameters[ind])
+        
+        
+        
+k_slider1.observe(on_change_k_sliders)
+k_slider2.observe(on_change_k_sliders)
+k_slider3.observe(on_change_k_sliders)
+
+panel_box = VBox([fig_box, k_slider1, k_slider2, k_slider3], layout = box_layout)
+
 k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1] range
                orientation='horizontal',       # Vertical slider is what we want
                readout=True,                # No need to show exact value
@@ -220,7 +297,7 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
                description='K: ', 
                style={'description_width': 'initial'}) 
 
-panel_box = VBox([fig_box, k_slider], layout = box_layout)
+# panel_box = VBox([fig_box, k_slider], layout = box_layout)
 
 widget_control1 = WidgetControl(widget=panel_box, position='topright')
 my_map.add_control(widget_control1)
@@ -725,10 +802,10 @@ def handle_interaction(**kwargs):
             # field_lai_boxes.box_width=5
             # lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes,]
 
-            var_line = line_axs[-2]
-            var_line.x = doys
-            var_line.y = pix_cab
-            var_line.scales = line_axs[4][0].scales
+            # var_line = line_axs[-2]
+            # var_line.x = doys
+            # var_line.y = pix_cab
+            # var_line.scales = line_axs[4][0].scales
             # field_cab_boxes.scales = var_line.scales
 
             var_line = line_axs[-1]
@@ -746,6 +823,14 @@ def handle_interaction(**kwargs):
                 ref_line.scales = line.scales
                 ref_line.x = doys[~u_mask]
                 ref_line.y = planet_sur[ii][~u_mask]
+            
+            ndvi = (planet_sur[3] - planet_sur[2]) / (planet_sur[3] + planet_sur[2])
+            
+            line, ax_x, ax_y = line_axs[4]
+            ref_line = ref_lines[4]
+            ref_line.scales = line.scales
+            ref_line.x = doys[~u_mask]
+            ref_line.y = ndvi[~u_mask]
 
             # print(planet_sur.shape, u_mask.shape)
             for ii in range(4):
@@ -754,6 +839,14 @@ def handle_interaction(**kwargs):
                 good_ref_line.scales = line.scales
                 good_ref_line.x = doys[u_mask]
                 good_ref_line.y = planet_sur[ii][u_mask]
+                
+            line, ax_x, ax_y = line_axs[4]
+            good_ref_line = good_ref_lines[4]
+            good_ref_line.scales = line.scales
+            good_ref_line.x = doys[u_mask]
+            good_ref_line.y = ndvi[u_mask]
+                
+    
 
         else:
             label.value = 'Not in field: %s'%field_id
@@ -824,7 +917,7 @@ def on_change_k_slider(change):
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = planet_sur[ii][u_mask]
 
-k_slider.observe(on_change_k_slider)
+# k_slider.observe(on_change_k_slider)
 
 my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
