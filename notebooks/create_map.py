@@ -48,7 +48,7 @@ with open('./data/Biophysical_Data_Collection_Polygons_V1.geojson', 'r') as f:
 field_ids = [feat['properties']['Field_ID'] for feat in data['features']]
 
 dropdown = Dropdown(
-    options=codes,
+    options=sorted(codes.tolist()),
     value=codes[0],
     description="Field ID:",
 )
@@ -118,7 +118,7 @@ fig_layout = Layout(width='auto', height='auto', max_height='120px', max_width='
 sels = np.zeros((6, len(doys), 10))
 
 tick_style = {'font-size': 8}
-names = ['B1', 'B2', 'B3', 'B4', 'Cab', 'Lai']
+names = ['B1', 'B2', 'B3', 'B4', 'NDVI', 'Lai']
 line_axs = []
 for ii in range(6):
     y_scale = LinearScale(min = sels[ii].T.min(), max = sels[ii].T.max())
@@ -130,15 +130,14 @@ for ii in range(6):
     line_axs.append([line, ax_x, ax_y])
 
 ref_lines = []
-
-for ii in range(4):
+for ii in range(5):
     line, ax_x, ax_y = line_axs[ii]
     ref_line = Lines(x=doys, y=np.ones_like(doys) * np.nan, scales = line.scales, line_style='dotted', marker='circle', marker_size=4, colors = ['#c0c0c0'])
     ref_lines.append(ref_line)
 
 good_ref_lines = []
-line_colors = ['#3399ff', '#008000', '#ff6666', '#990000']
-for ii in range(4):
+line_colors = ['#3399ff', '#008000', '#ff6666', '#990000', '#20b2aa']
+for ii in range(5):
     line, ax_x, ax_y = line_axs[ii]
     good_ref_line = Lines(x=doys, y=np.ones_like(doys) * np.nan, scales = line.scales, line_style='dotted', marker='circle', marker_size=4, colors = [line_colors[ii]])
     good_ref_lines.append(good_ref_line)
@@ -147,7 +146,7 @@ figy=[]
 for i in range(3):
     figx=[]
     for j in range(2):
-        if i*2+j < 4:
+        if i*2+j < 5:
             ref_line = ref_lines[i*2+j]
             good_ref_line = good_ref_lines[i*2+j]
             line, ax_x, ax_y = line_axs[i*2+j]
@@ -177,6 +176,7 @@ fig_box = VBox(figy, align_content = 'stretch')
 
 
 cab_fig = figy[2].children[0]
+ndvi_fig = figy[2].children[0]
 lai_fig = figy[2].children[1]
 
 # field_cab_boxes = Boxplot(x=field_doys[:-1], y=field_cabs[:-1], 
@@ -802,10 +802,10 @@ def handle_interaction(**kwargs):
             # field_lai_boxes.box_width=5
             # lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes,]
 
-            var_line = line_axs[-2]
-            var_line.x = doys
-            var_line.y = pix_cab
-            var_line.scales = line_axs[4][0].scales
+            # var_line = line_axs[-2]
+            # var_line.x = doys
+            # var_line.y = pix_cab
+            # var_line.scales = line_axs[4][0].scales
             # field_cab_boxes.scales = var_line.scales
 
             var_line = line_axs[-1]
@@ -823,6 +823,14 @@ def handle_interaction(**kwargs):
                 ref_line.scales = line.scales
                 ref_line.x = doys[~u_mask]
                 ref_line.y = planet_sur[ii][~u_mask]
+            
+            ndvi = (planet_sur[3] - planet_sur[2]) / (planet_sur[3] + planet_sur[2])
+            
+            line, ax_x, ax_y = line_axs[4]
+            ref_line = ref_lines[4]
+            ref_line.scales = line.scales
+            ref_line.x = doys[~u_mask]
+            ref_line.y = ndvi[~u_mask]
 
             # print(planet_sur.shape, u_mask.shape)
             for ii in range(4):
@@ -831,6 +839,14 @@ def handle_interaction(**kwargs):
                 good_ref_line.scales = line.scales
                 good_ref_line.x = doys[u_mask]
                 good_ref_line.y = planet_sur[ii][u_mask]
+                
+            line, ax_x, ax_y = line_axs[4]
+            good_ref_line = good_ref_lines[4]
+            good_ref_line.scales = line.scales
+            good_ref_line.x = doys[u_mask]
+            good_ref_line.y = ndvi[u_mask]
+                
+    
 
         else:
             label.value = 'Not in field: %s'%field_id

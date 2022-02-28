@@ -17,7 +17,39 @@ from pygeotile.tile import Tile
 from ipyleaflet import ImageOverlay, GeoJSON, WidgetControl
 from ipywidgets import Dropdown
 from shapely import geometry
+import asyncio
 
+class Timer:
+    def __init__(self, timeout, callback):
+        self._timeout = timeout
+        self._callback = callback
+
+    async def _job(self):
+        await asyncio.sleep(self._timeout)
+        self._callback()
+
+    def start(self):
+        self._task = asyncio.ensure_future(self._job())
+
+    def cancel(self):
+        self._task.cancel()
+
+def debounce(wait):
+    """ Decorator that will postpone a function's
+        execution until after `wait` seconds
+        have elapsed since the last time it was invoked. """
+    def decorator(fn):
+        timer = None
+        def debounced(*args, **kwargs):
+            nonlocal timer
+            def call_it():
+                fn(*args, **kwargs)
+            if timer is not None:
+                timer.cancel()
+            timer = Timer(wait, call_it)
+            timer.start()
+        return debounced
+    return decorator
 
 def read_wofost_data(fname):
     f = np.load(fname, allow_pickle=True)
@@ -120,7 +152,7 @@ def get_lai_color_bar():
     
     fig = plt.figure(figsize=(5, 2))
     ax = fig.add_axes([0.05, 0.8, 0.5, 0.07])
-    cmap = plt.cm.Greens
+    cmap = plt.cm.YlGn
     norm = mpl.colors.Normalize(vmin=0, vmax=2.5)
     cbar = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='horizontal')
     lai_colorbar_f = io.BytesIO()
@@ -160,8 +192,10 @@ def get_pixel(location, field_name):
     
     inds = f.f.unique_neighbour_inverse_inds[mm][0][:200]
     sels = f.f.unique_neighbour_s2_refs[:, :, inds][[0, 1, 2, 7]]
-    bios = f.f.unique_neighbour_orig_bios[:, :, inds][[1, 4]]
-    sels = np.concatenate([sels, bios])
+    bios = f.f.unique_neighbour_orig_bios[:, :, inds][[4]]
+    ndvi = (sels[3] - sels[2]) / (sels[3] + sels[2])
+    
+    sels = np.concatenate([sels, ndvi[None], bios])
     planet_sur = f.f.s2_sur_all[:, :, mm].squeeze()
              
     return doys, lai[mm].ravel(), cab[mm].ravel(), sels, lai, planet_sur
@@ -246,7 +280,7 @@ def get_lai_gif(field_name):
     print(bounds)
 
 
-    cmap = cm.Greens
+    cmap = cm.YlGn
     frames = []
     for i in range(len(doys)):
         lai_map = np.zeros(valid_mask.shape)
