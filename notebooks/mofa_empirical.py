@@ -712,3 +712,76 @@ def max_lai_per_district(years, aoi, CROPONLY=False):
     plt.legend()
 
     return district_names, max_lai
+
+
+def load_era_band(band, year, aoi, ADD_TO_MAP=False, VERBOSE=False):
+    weather_in_season = ee.ImageCollection("ECMWF/ERA5_LAND/MONTHLY") \
+        .filterBounds(aoi) \
+        .select(band) \
+        .filterDate(f'{year}-06-01', f'{year}-11-30')  # only during MAize crop season
+    size = weather_in_season.size()
+    if VERBOSE:
+        print(f'In {year}, {size.getInfo()} image(s) found.')
+
+    if ADD_TO_MAP:
+        Map.addLayer(weather_in_season, era5_visualization, "Air temperature [K] at 2m height")
+    return weather_in_season
+
+
+def era4_value_per_district(year, aoi, band='temperature_2m', \
+                            VERBOSE=False, ADD_TO_MAP=False):
+    era5_in_season = load_era_band(band, year, aoi)
+    era5_seasonal_accum = era5_in_season.sum()
+
+    accum_per_district = era5_seasonal_accum.reduceRegions(collection=aoi, \
+                                                           reducer=ee.Reducer.mean(), \
+                                                           scale=11.1 * 1000)  # ERA5 resoltuion = 0.1 deg
+
+    # print('------', accum_per_district.getInfo()) # this should be a 'FeatureCollection'
+    list_of_districts = accum_per_district.aggregate_array('ADM2_NAME').getInfo()
+    if VERBOSE:
+        print(len(list_of_districts), list_of_districts)  # this line prints all district names
+
+    list_of_means = accum_per_district.aggregate_array('mean').getInfo()
+    if VERBOSE:
+        print(len(list_of_means), list_of_means)  # this line prints all mean values
+
+    if ADD_TO_MAP:
+        Map.addLayer(accum_per_district, {'min': 0.0, 'max': 300 * 5}, f'Mean {band} {year} per district')
+
+    stats = accum_per_district.aggregate_stats('mean')
+    if VERBOSE:
+        print(year, band, stats.getInfo())
+
+    return np.asarray(list_of_districts), np.asarray(list_of_means)
+
+
+def era5_ts_per_district(years, aoi, band='temperature_2m', CROPONLY=False,
+                         PLOT=False):  # resolution so low, no need for CROPONLY
+    for year in years:
+        # reduce to per district values (district_names should be constant over years)
+        district_names, mean_era5_per_district = era4_value_per_district(year, aoi, band, ADD_TO_MAP=False)
+        # print(type(mean_era5_per_district))
+        if year == years[0]:
+            mean_era5 = mean_era5_per_district
+            # print(type(mean_ndvi), mean_ndvi.size)
+        else:
+            mean_era5 = np.vstack((mean_era5, mean_era5_per_district))
+
+    # print('No. of districts: ', len(district_names), '; No. of years: ', len(mean_era5))
+    # print(type(mean_ndvi), mean_ndvi.size, len(mean_ndvi))
+    mean_era5 = np.transpose(mean_era5)
+
+    if PLOT:
+        plt.figure(figsize=(16, 12))
+
+        for i, district in enumerate(district_names):
+            plt.plot(years, mean_era5[i], label=district)
+        if CROPONLY:
+            plt.title(f'Average {band} per district (Croplands only)')
+        else:
+            plt.title(f'Average {band} per district (all land covers)')
+        plt.legend()
+
+    return district_names, mean_era5
+
