@@ -8,13 +8,15 @@ import pandas as pd
 from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot
-from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play
+from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
 
 
 sys.path.insert(0, './python/')
 from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
+from map_utils import debounce
+from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_gee
 
 from ipywidgets import Image as ImageWidget
 
@@ -210,85 +212,328 @@ lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
 
 
 
-box_layout = Layout(display='flex',
-                flex_flow='column',
-                align_items='center',
-                width='100%')
+# box_layout = Layout(display='flex',
+#                 flex_flow='column',
+#                 align_items='center',
+#                 width='100%')
 
-from ipywidgets import IntSlider
-def read_wofost_data(fname):
-    f = np.load(fname, allow_pickle=True)
-    parameters = f.f.parameters
-    t_axis = f.f.t_axis
-    samples = f.f.samples
-    lais = f.f.lais
-    yields = f.f.yields
-    DVS = f.f.DVS
-    print("loading simulations")
-    doys = [int(datetime.datetime.utcfromtimestamp(i.tolist()/1e9).strftime('%j')) for i in t_axis]
-    return parameters, t_axis, samples, lais, yields, DVS, doys
+# from ipywidgets import IntSlider
 
-parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
+# def read_wofost_data(fname):
+#     f = np.load(fname, allow_pickle=True)
+#     parameters = f.f.parameters
+#     t_axis = f.f.t_axis
+#     samples = f.f.samples
+#     lais = f.f.lais
+#     yields = f.f.yields
+#     DVS = f.f.DVS
+#     print("loading simulations")
+#     doys = [int(datetime.datetime.utcfromtimestamp(i.tolist()/1e9).strftime('%j')) for i in t_axis]
+#     return parameters, t_axis, samples, lais, yields, DVS, doys
 
-k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
-               orientation='horizontal',       # Vertical slider is what we want
-               readout=True,                # No need to show exact value
-               layout=Layout(width='80%'),
-               description='Doy of sowing: ', 
-               style={'description_width': 'initial'}) 
+# parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
 
-k_slider2 = FloatSlider(min=0.05, max=0.55, value=0.35,       # Opacity is valid in [0,1] range
-               step = 0.0025,
-               orientation='horizontal',       # Vertical slider is what we want
-               readout=True,                # No need to show exact value
-               layout=Layout(width='80%'),
-               description='Early stress level: ', 
-               style={'description_width': 'initial'}) 
+# k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
+#                orientation='horizontal',       # Vertical slider is what we want
+#                readout=True,                # No need to show exact value
+#                layout=Layout(width='80%'),
+#                description='Doy of sowing: ', 
+#                style={'description_width': 'initial'}) 
 
-k_slider3 = FloatSlider(min=0.05, max=0.55,  value=0.35,       # Opacity is valid in [0,1] range
-               step = 0.0025,
-               orientation='horizontal',       # Vertical slider is what we want
-               readout=True,                # No need to show exact value
-               layout=Layout(width='80%'),
-               description='Late stress level: ', 
-               style={'description_width': 'initial'}) 
+# k_slider2 = FloatSlider(min=0.05, max=0.55, value=0.35,       # Opacity is valid in [0,1] range
+#                step = 0.0025,
+#                orientation='horizontal',       # Vertical slider is what we want
+#                readout=True,                # No need to show exact value
+#                layout=Layout(width='80%'),
+#                description='Early stress level: ', 
+#                style={'description_width': 'initial'}) 
 
-def on_change_k_sliders(change):
+# k_slider3 = FloatSlider(min=0.05, max=0.55,  value=0.35,       # Opacity is valid in [0,1] range
+#                step = 0.0025,
+#                orientation='horizontal',       # Vertical slider is what we want
+#                readout=True,                # No need to show exact value
+#                layout=Layout(width='80%'),
+#                description='Late stress level: ', 
+#                style={'description_width': 'initial'}) 
 
-    if (change['name'] == 'value') & (change['type'] == 'change'):
-        value = change["new"]
-        old = change['old']
+# def on_change_k_sliders(change):
+
+#     if (change['name'] == 'value') & (change['type'] == 'change'):
+#         value = change["new"]
+#         old = change['old']
         
-        k1 = k_slider1.value
-        k2 = k_slider2.value
-        k3 = k_slider3.value
-        
-        
-        diff = abs(parameters - np.array([[k1, k2, k3]])).sum(axis=1)
-        ind = np.argmin(diff)
-        
-        simu_lai = lais[ind]
+#         k1 = k_slider1.value
+#         k2 = k_slider2.value
+#         k3 = k_slider3.value
         
         
-        # var_line = line_axs[-1]
-        # var_line.scales = line_axs[5][0].scales
-        # field_lai_boxes.scales = var_line.scales
-        # lai_dot.scales = var_line.scales
+#         diff = abs(parameters - np.array([[k1, k2, k3]])).sum(axis=1)
+#         ind = np.argmin(diff)
+        
+#         simu_lai = lais[ind]
+        
+        
+#         # var_line = line_axs[-1]
+#         # var_line.scales = line_axs[5][0].scales
+#         # field_lai_boxes.scales = var_line.scales
+#         # lai_dot.scales = var_line.scales
 
-        wofost_lai.x = simu_doys
-        wofost_lai.y = simu_lai
-        wofost_lai.scales = lai_fig.marks[1].scales
-        wofost_lai.colors = ['red']
-        print(k1, k2, k3)
-        print(parameters[ind])
+#         wofost_lai.x = simu_doys
+#         wofost_lai.y = simu_lai
+#         wofost_lai.scales = lai_fig.marks[1].scales
+#         wofost_lai.colors = ['red']
+#         print(k1, k2, k3)
+#         print(parameters[ind])
         
         
-        
-k_slider1.observe(on_change_k_sliders)
-k_slider2.observe(on_change_k_sliders)
-k_slider3.observe(on_change_k_sliders)
 
-panel_box = VBox([fig_box, k_slider1, k_slider2, k_slider3], layout = box_layout)
+# k_slider1.observe(on_change_k_sliders)
+# k_slider2.observe(on_change_k_sliders)
+# k_slider3.observe(on_change_k_sliders)
+
+
+
+# paras = ['TDWI', 'TSUM1', 'TSUM2', 'RGRLAI', 'SDOY', 'SPAN', 'AMAXTB_150']
+
+# paras, para_mins, para_maxs = np.array(df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
+# wofost_sliders = []
+
+# for i in range(round(len(paras) / 2)):
+#     horizon_sliders = []
+#     for j in range(2):
+#         if i*2 + j <  len(paras):
+#             para_name = paras[i*2+j]
+#             para_min = para_mins[i*2+j]
+#             para_max = para_maxs[i*2+j]
+#             step = (para_max - para_min) / 10
+#             initial = (para_min + para_max) / 2
+#             wofost_slider = FloatSlider(min=para_min, max=para_max, value=initial,       # Opacity is valid in [0,1] range
+#                            step = step,
+#                            orientation='horizontal',       # Vertical slider is what we want
+#                            readout=True,                # No need to show exact value
+#                            layout=Layout(width='80%'),
+#                            description='%s: '%para_name, 
+#                            style={'description_width': 'initial'}) 
+#             horizon_sliders.append(wofost_slider)
+#     wofost_sliders.append(HBox(horizon_sliders))
+
+# wofost_sliders.append(lai_fig)
+    
+# wofost_box = VBox(wofost_sliders, layout = box_layout)
+
+lon = -2.7
+lat = 8.20
+year = 2021
+
+@debounce(0.2)
+def on_change_wofost_slider(change):
+    
+    global wofost_out_dict
+    if (change['type'] == 'change'):
+        print(year, lat, lon)
+        meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
+        ens_parameters = {}
+        paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]
+        for para in paras_to_overwrite:    
+            ens_parameters[para] = wofost_sliders_dict[para].value
+        ens_parameters['AMAXTB'] = [0, 55.0, 1.5, wofost_sliders_dict['AMAXTB_150'].value]
+        df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
+        dates = df.index
+        doys = [int(i.strftime('%j')) for i in dates]
+        
+        # wofost_lai_fig.x = doys
+        # wofost_lai_fig.y = np.array(df.LAI)
+        wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
+        for wofost_out_para in wofost_out_paras:
+            wofost_out_dict[wofost_out_para].marks[0].x = doys
+            wofost_out_dict[wofost_out_para].marks[0].y = np.array(df.loc[:, wofost_out_para])
+        
+        wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
+        wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
+
+        # wofost_out_dict['TWSO'].marks[0].x = doys
+        # wofost_out_dict['TWSO'].marks[0].y = np.array(df.TWSO)
+        
+        # lai_fig.marks[1].scales = {'x': LinearScale(max=365.0, min=180.0), 'y': LinearScale(max=3.0, min=0.0)} 
+        # lai_fig.axes[1].scale = LinearScale(max=3.0, min=0.0)
+        # lai_fig.axes[0].scale = LinearScale(max=365.0, min=180.0)
+
+prior_df = pd.read_csv('data/par_prior_maize_tropical-C.csv')
+paras = ['TDWI', 'TSUM1', 'RGRLAI', 'SDOY', 'SPAN', 'AMAXTB_150']
+all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
+para_inds = [all_paras.tolist().index(i) for i in paras]
+wofost_sliders = []
+
+for i in range(len(paras)):
+    para_ind = para_inds[i]
+    para_name = all_paras[para_ind]
+    para_min = para_mins[para_ind]
+    para_max = para_maxs[para_ind]
+    step = (para_max - para_min) / 50
+    initial = (para_min + para_max) / 2
+    wofost_slider = FloatSlider(min=para_min, max=para_max, value=initial,       # Opacity is valid in [0,1] range
+                   step = step,
+                   orientation='horizontal',       # Vertical slider is what we want
+                   readout=True,                # No need to show exact value
+                   layout=Layout(width='80%'),
+                   description='%s: '%para_name, 
+                   style={'description_width': 'initial'}) 
+    wofost_slider.observe(on_change_wofost_slider)
+    wofost_sliders.append(wofost_slider)
+
+wofost_sliders_dict = dict(zip(paras, wofost_sliders))
+
+
+
+def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
+    x = np.array(x)
+    y = np.array(y)
+    
+    para_min_maxs = {'DVS': [0, 2],
+                     'LAI': [0, 3],
+                     'TAGP': [0, 15000],
+                     'TWSO': [0, 4000],
+                     'TWLV': [0, 2000],
+                     'TWST': [0, 10000],
+                     'TWRT': [0, 2000],
+                     'TRA':  [0, 0.5],
+                     'RD':   [0, 100],
+                     'SM':   [0, 0.8],
+                     'WWLOW': [0, 100]
+                    }
+
+    ymin, ymax = para_min_maxs[para_name]
+    
+    mm = (x >= xmin) & (x <= xmax)
+    x_scale = LinearScale(min = xmin, max = xmax)
+    # ymin = np.maximum(np.nanpercentile(y[mm], 2.5) * 0.9, 0)
+    # ymax = np.nanpercentile(y[mm], 97.5) * 1.1
+    y_scale = LinearScale(min = ymin  , max = ymax)
+    
+    line = Lines(x=x, y=y, scales={"x": x_scale, "y": y_scale})
+    tick_style = {'font-size': 8}
+    tick_values = np.linspace(ymin, ymax, 4)
+    tick_values
+    
+    ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
+    ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
+
+    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line], 
+                       title=para_name, 
+                       animation_duration=500, 
+                       title_style = {'font-size': '8'},
+                       fig_margin = dict(top=16, bottom=16, left=26, right=16))
+
+    return para_fig
+
+
+def update_wofost_fig_val(wofost_out_para, x, y, xmin = 180, xmax = 330):
+    x = np.array(x)
+    y = np.array(y)
+    mm = (x >= xmin) & (x <= xmax)
+    y = y[mm]
+    x = x[mm]
+    wofost_out_dict[wofost_out_para].marks[0].x = x
+    wofost_out_dict[wofost_out_para].marks[0].y = y
+    
+wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
+para_figs = []
+
+x = np.arange(180, 330)
+y = np.zeros_like(x)
+for wofost_out_para in wofost_out_paras:
+    para_fig = get_para_plot(wofost_out_para, x, y)
+    para_figs.append(para_fig)
+wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
+
+obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
+wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line]
+
+
+wofost_output_dropdown1 = Dropdown(
+    options=wofost_out_paras,
+    value=wofost_out_paras[1],
+    layout={'width': 'max-content'}
+    
+    # description="Field ID:",
+)
+wofost_output_dropdown2 = Dropdown(
+    options=wofost_out_paras,
+    value=wofost_out_paras[3],
+    layout={'width': 'max-content'}
+    # description="Field ID:",
+)
+
+
+
+wofost_output_dropdowns = HBox([wofost_output_dropdown1, wofost_output_dropdown2], layout = Layout(display='flex',
+                                  flex_flow='horizontal',
+                                  align_items='flex-start',
+                                  width='100%'))
+
+
+left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='50%'))
+
+right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_dropdown2.value]], layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='50%'))
+
+
+
+def on_change_dropdown1(change):
+    global wofost_widgets
+    left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='50%'))
+    right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_dropdown2.value]], layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='50%'))
+    
+    wofost_widgets[-1] = HBox([left_output, right_output])
+    wofost_box = VBox(wofost_widgets, 
+                  layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='flex-start',
+                                  width='400px'))
+    tab.children = [panel_box, wofost_box]
+
+def on_change_dropdown2(change):
+    global wofost_widgets
+    left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='50%'))
+    right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_dropdown2.value]], layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='50%'))
+    wofost_widgets[-1] = HBox([left_output, right_output])
+
+    wofost_box = VBox(wofost_widgets, 
+                  layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='flex-start',
+                                  width='400px'))
+    tab.children = [panel_box, wofost_box]
+
+wofost_out_panel = HBox([left_output, right_output])
+wofost_widgets = wofost_sliders + [wofost_out_panel]
+wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
+wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
+
+
+wofost_box = VBox(wofost_widgets, 
+                  layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='flex-start',
+                                  width='400px'))
+
 
 k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1] range
                orientation='horizontal',       # Vertical slider is what we want
@@ -297,9 +542,15 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
                description='K: ', 
                style={'description_width': 'initial'}) 
 
-# panel_box = VBox([fig_box, k_slider], layout = box_layout)
+panel_box = VBox([fig_box, k_slider])
 
-widget_control1 = WidgetControl(widget=panel_box, position='topright')
+names = ['Reflectance fitting', 'Wofost DA']
+tab = Tab()
+tab.children = [panel_box, wofost_box]
+[tab.set_title(i, title) for i, title in enumerate(names)]
+
+
+widget_control1 = WidgetControl(widget=tab, position='topright')
 my_map.add_control(widget_control1)
 
 
@@ -713,14 +964,18 @@ display(label)
 maize_marker = None
 pix_lai = None
 maize_icon = None
+marker_lon = None
+marker_lat = None
 
 def handle_interaction(**kwargs):
+    
     # if kwargs.get('type') == 'mousemove':
     #     label.value = str(kwargs.get('coordinates'))
     if kwargs.get('type') == 'click':
 
         location=kwargs.get('coordinates')
         # print(location)
+        
         point = geometry.Point(location[1], location[0])
 
         ind = field_ids.index(field_id)
@@ -735,7 +990,9 @@ def handle_interaction(**kwargs):
             # marker = Marker(location=location)
 
             global sels, planet_sur, doys
-            global maize_icon, pix_lai, field_max, field_min, maize_marker, field_lai_boxes, lai_dot, maize_markers
+            global maize_icon, pix_lai, field_max, field_min, maize_marker, field_lai_boxes, lai_dot, maize_markers, marker_lon, marker_lat
+            marker_lon, marker_lat = location
+            
             doys, pix_lai, pix_cab, sels, lais, planet_sur = get_pixel(location, field_id)
 
             mean_ref, mean_bios, std_ref, std_bios, sel_inds, u_mask = da_pix(sels, planet_sur, u_thresh = k_slider.value)
@@ -877,10 +1134,10 @@ def on_change_k_slider(change):
 
         pix_cab, pix_lai = mean_bios
 
-        var_line = line_axs[-2]
-        var_line.x = doys
-        var_line.y = pix_cab
-        var_line.scales = line_axs[4][0].scales
+        # var_line = line_axs[-2]
+        # var_line.x = doys
+        # var_line.y = pix_cab
+        # var_line.scales = line_axs[4][0].scales
 
 
         var_line = line_axs[-1]
@@ -888,10 +1145,10 @@ def on_change_k_slider(change):
         var_line.y = pix_lai
         var_line.scales = line_axs[5][0].scales
 
-        var_line = line_axs[-2]
-        var_line.x = doys
-        var_line.y = pix_cab
-        var_line.scales = line_axs[4][0].scales
+        # var_line = line_axs[-2]
+        # var_line.x = doys
+        # var_line.y = pix_cab
+        # var_line.scales = line_axs[4][0].scales
         # field_cab_boxes.scales = var_line.scales
 
         var_line = line_axs[-1]
@@ -908,6 +1165,14 @@ def on_change_k_slider(change):
             ref_line.scales = line.scales
             ref_line.x = doys[~u_mask]
             ref_line.y = planet_sur[ii][~u_mask]
+            
+        ndvi = (planet_sur[3] - planet_sur[2]) / (planet_sur[3] + planet_sur[2])
+
+        line, ax_x, ax_y = line_axs[4]
+        ref_line = ref_lines[4]
+        ref_line.scales = line.scales
+        ref_line.x = doys[~u_mask]
+        ref_line.y = ndvi[~u_mask]
 
         # print(planet_sur.shape, u_mask.shape)
         for ii in range(4):
@@ -916,9 +1181,14 @@ def on_change_k_slider(change):
             good_ref_line.scales = line.scales
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = planet_sur[ii][u_mask]
+        line, ax_x, ax_y = line_axs[4]
+        good_ref_line = good_ref_lines[4]
+        good_ref_line.scales = line.scales
+        good_ref_line.x = doys[u_mask]
+        good_ref_line.y = ndvi[u_mask]
 
-# k_slider.observe(on_change_k_slider)
 
+k_slider.observe(on_change_k_slider)
 my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
 my_map.add_layer(points)
