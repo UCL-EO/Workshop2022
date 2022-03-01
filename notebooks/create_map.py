@@ -8,7 +8,7 @@ import pandas as pd
 from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot
-from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play
+from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
 
@@ -283,12 +283,70 @@ def on_change_k_sliders(change):
         print(parameters[ind])
         
         
-        
+
 k_slider1.observe(on_change_k_sliders)
 k_slider2.observe(on_change_k_sliders)
 k_slider3.observe(on_change_k_sliders)
 
-panel_box = VBox([fig_box, k_slider1, k_slider2, k_slider3], layout = box_layout)
+
+
+# paras = ['TDWI', 'TSUM1', 'TSUM2', 'RGRLAI', 'SDOY', 'SPAN', 'AMAXTB_150']
+
+# paras, para_mins, para_maxs = np.array(df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
+# wofost_sliders = []
+
+# for i in range(round(len(paras) / 2)):
+#     horizon_sliders = []
+#     for j in range(2):
+#         if i*2 + j <  len(paras):
+#             para_name = paras[i*2+j]
+#             para_min = para_mins[i*2+j]
+#             para_max = para_maxs[i*2+j]
+#             step = (para_max - para_min) / 10
+#             initial = (para_min + para_max) / 2
+#             wofost_slider = FloatSlider(min=para_min, max=para_max, value=initial,       # Opacity is valid in [0,1] range
+#                            step = step,
+#                            orientation='horizontal',       # Vertical slider is what we want
+#                            readout=True,                # No need to show exact value
+#                            layout=Layout(width='80%'),
+#                            description='%s: '%para_name, 
+#                            style={'description_width': 'initial'}) 
+#             horizon_sliders.append(wofost_slider)
+#     wofost_sliders.append(HBox(horizon_sliders))
+
+# wofost_sliders.append(lai_fig)
+    
+# wofost_box = VBox(wofost_sliders, layout = box_layout)
+
+prior_df = pd.read_csv('data/par_prior_maize_tropical-C.csv')
+paras = ['TDWI', 'TSUM1', 'RGRLAI', 'SDOY', 'SPAN', 'AMAXTB_150']
+all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
+para_inds = [all_paras.tolist().index(i) for i in paras]
+wofost_sliders = []
+
+for i in range(len(paras)):
+    para_ind = para_inds[i]
+    para_name = all_paras[para_ind]
+    para_min = para_mins[para_ind]
+    para_max = para_maxs[para_ind]
+    step = (para_max - para_min) / 50
+    initial = (para_min + para_max) / 2
+    wofost_slider = FloatSlider(min=para_min, max=para_max, value=initial,       # Opacity is valid in [0,1] range
+                   step = step,
+                   orientation='horizontal',       # Vertical slider is what we want
+                   readout=True,                # No need to show exact value
+                   layout=Layout(width='80%'),
+                   description='%s: '%para_name, 
+                   style={'description_width': 'initial'}) 
+    
+    wofost_sliders.append(wofost_slider)
+wofost_sliders.append(lai_fig)
+wofost_box = VBox(wofost_sliders, 
+                  layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='flex-start',
+                                  width='400px'))
+
 
 k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1] range
                orientation='horizontal',       # Vertical slider is what we want
@@ -297,9 +355,15 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
                description='K: ', 
                style={'description_width': 'initial'}) 
 
-# panel_box = VBox([fig_box, k_slider], layout = box_layout)
+panel_box = VBox([fig_box, k_slider])
 
-widget_control1 = WidgetControl(widget=panel_box, position='topright')
+names = ['Reflectance fitting', 'Wofost DA']
+tab = Tab()
+tab.children = [panel_box, wofost_box]
+[tab.set_title(i, title) for i, title in enumerate(names)]
+
+
+widget_control1 = WidgetControl(widget=tab, position='topright')
 my_map.add_control(widget_control1)
 
 
@@ -877,10 +941,10 @@ def on_change_k_slider(change):
 
         pix_cab, pix_lai = mean_bios
 
-        var_line = line_axs[-2]
-        var_line.x = doys
-        var_line.y = pix_cab
-        var_line.scales = line_axs[4][0].scales
+        # var_line = line_axs[-2]
+        # var_line.x = doys
+        # var_line.y = pix_cab
+        # var_line.scales = line_axs[4][0].scales
 
 
         var_line = line_axs[-1]
@@ -888,10 +952,10 @@ def on_change_k_slider(change):
         var_line.y = pix_lai
         var_line.scales = line_axs[5][0].scales
 
-        var_line = line_axs[-2]
-        var_line.x = doys
-        var_line.y = pix_cab
-        var_line.scales = line_axs[4][0].scales
+        # var_line = line_axs[-2]
+        # var_line.x = doys
+        # var_line.y = pix_cab
+        # var_line.scales = line_axs[4][0].scales
         # field_cab_boxes.scales = var_line.scales
 
         var_line = line_axs[-1]
@@ -908,6 +972,14 @@ def on_change_k_slider(change):
             ref_line.scales = line.scales
             ref_line.x = doys[~u_mask]
             ref_line.y = planet_sur[ii][~u_mask]
+            
+        ndvi = (planet_sur[3] - planet_sur[2]) / (planet_sur[3] + planet_sur[2])
+
+        line, ax_x, ax_y = line_axs[4]
+        ref_line = ref_lines[4]
+        ref_line.scales = line.scales
+        ref_line.x = doys[~u_mask]
+        ref_line.y = ndvi[~u_mask]
 
         # print(planet_sur.shape, u_mask.shape)
         for ii in range(4):
@@ -916,9 +988,14 @@ def on_change_k_slider(change):
             good_ref_line.scales = line.scales
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = planet_sur[ii][u_mask]
+        line, ax_x, ax_y = line_axs[4]
+        good_ref_line = good_ref_lines[4]
+        good_ref_line.scales = line.scales
+        good_ref_line.x = doys[u_mask]
+        good_ref_line.y = ndvi[u_mask]
 
-# k_slider.observe(on_change_k_slider)
 
+k_slider.observe(on_change_k_slider)
 my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
 my_map.add_layer(points)

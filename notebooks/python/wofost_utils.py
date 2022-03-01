@@ -28,7 +28,21 @@ from tqdm.contrib.concurrent import process_map
 
 import ee
 import requests
-from retry import retry
+import pip
+import shutil
+
+try:
+    from retry import retry
+except ImportError:
+    pip.main(['install', package]) 
+    from retry import retry
+
+try:
+    ee.Initialize(opt_url="https://earthengine-highvolume.googleapis.com")
+except:
+    ee.Authenticate()
+    ee.Initialize(opt_url="https://earthengine-highvolume.googleapis.com")
+
 
 agromanagement_contents = """
 Version: 1.0
@@ -81,33 +95,48 @@ def get_ensemble_jasmin(
     year,
     lat,
     lon,
+    en_size = 20000,
     base_url="https://gws-access.jasmin.ac.uk/"
     + "public/odanceo/ghana_ensembles/",
+    cache_folder = 'data/'
 ):
     """This function will search on JASMIN for any pre-computed ensembles"""
 
-    html = requests.get(base_url).content
-    soup = BeautifulSoup(html, "html.parser")
+#     html = requests.get(base_url).content
+#     soup = BeautifulSoup(html, "html.parser")
 
-    # Find all <a> in your HTML that have a not null 'href'. Keep only 'href'.
-    links = [
-        a["href"]
-        for a in soup.find_all("a", href=True)
-        if a["href"].endswith(".npz")
-    ]
+#     # Find all <a> in your HTML that have a not null 'href'. Keep only 'href'.
+#     links = [
+#         a["href"]
+#         for a in soup.find_all("a", href=True)
+#         if a["href"].endswith(".npz")
+#     ]
 
-    link_url = None
-    for link in links:
-        _, fyear, flon, flat, size = link.split("_")
-        if year == int(fyear) and lat == float(flat) and lon == float(flon):
-            link_url = link
-            break
-    if link_url is None:
+#     link_url = None
+#     for link in links:
+#         _, fyear, flon, flat, size = link.split("_")
+#         if year == int(fyear) and lat == float(flat) and lon == float(flon):
+#             link_url = link
+#             break
+#     if link_url is None:
+#         return None
+    
+    ensemble_fname = (
+        "ensMaizeWLLlowest_"
+        + f"{year:4d}_{lon:.2f}_{lat:.2f}"
+        + f"_size{en_size:d}.npz"
+    )
+    
+    r = requests.get(f"{base_url}/{ensemble_fname}", stream=True)
+    if r.ok:
+        print(f"Getting remote version of ensemble!")
+        with open(cache_folder + '/' + ensemble_fname, 'wb') as f:
+            # shutil.copyfileobj(r.raw, f)
+            f.write(r.content)
+        data = np.load(cache_folder + '/' + ensemble_fname, allow_pickle=True)
+        return data
+    else:
         return None
-    print(f"Getting remote version of ensemble!")
-    r = requests.get(f"{base_url}/{link_url}", stream=True)
-    data = np.load(BytesIO(r.raw.read()), allow_pickle=True)
-    return data
 
 
 def write_pcse_csv(
@@ -362,6 +391,7 @@ def wofost_parameter_sweep_func(
     parameters = ParameterProvider(
         cropdata=cropdata, soildata=soildata, sitedata=sitedata
     )
+
     sowing_doy = int(np.round(ens_parameters.pop("SDOY")))
     for k, v in ens_parameters.items():
         parameters.set_override(k, v, check=True)
@@ -394,17 +424,18 @@ def create_ensemble(
     lat,
     lon,
     year,
-    en_size=10,
+    en_size=20000,
     param_file="data/par_prior_maize_tropical-C.csv",
     cropfile="data/MAIZGA-C.CAB",
     soil="data/ec4.new",
     co2=400,
     rdmsol=100.0,
     potential=False,
+    cache_folder = 'data/'
 ):
 
     ensemble_fname = (
-        "ensMaizeWLLlowest_"
+        cache_folder + "/ensMaizeWLLlowest_"
         + f"{year:4d}_{lon:.2f}_{lat:.2f}"
         + f"_size{en_size:d}.npz"
     )
@@ -413,12 +444,12 @@ def create_ensemble(
         return np.load(ensemble_fname, allow_pickle=True)
     else:
         # Check whether it's been pregenerated online
-        retval = get_ensemble_jasmin(year, lat, lon)
+        retval = get_ensemble_jasmin(year, lat, lon, cache_folder=cache_folder, en_size=en_size)
         if retval is not None:
             return retval
 
     print("Getting meteo data from EarthEngine")
-    meteo_file = get_era5_gee(year, lat, lon, dest_folder="./")
+    meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
     (
         prior_dist,
         param_list,
@@ -444,14 +475,15 @@ def create_ensemble(
         amaxtb = [
             0,
             z_start[param_list.index("AMAXTB_000"), i],
-            1.25,
-            z_start[param_list.index("AMAXTB_000"), i],
+            # 1.25,
+            # z_start[param_list.index("AMAXTB_000"), i],
             1.5,
             z_start[param_list.index("AMAXTB_150"), i],
         ]
         dd["AMAXTB"] = amaxtb
         ensemble_parameters.append(dd)
-
+    print(ensemble_parameters)
+    
     results = []
     wrapper = partial(
         wofost_parameter_sweep_func,
