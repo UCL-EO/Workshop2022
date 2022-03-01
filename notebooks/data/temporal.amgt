@@ -1,0 +1,14 @@
+
+Version: 1.0
+AgroManagement:
+- 2020-01-01:
+    CropCalendar:
+        crop_name: 'maize'
+        variety_name: 'Ghana'
+        crop_start_date: 2020-06-23
+        crop_start_type: sowing
+        crop_end_date: 2020-11-30
+        crop_end_type: harvest
+        max_duration: 150
+    TimedEvents: null
+    StateEvents: null

@@ -34,7 +34,7 @@ import shutil
 try:
     from retry import retry
 except ImportError:
-    pip.main(['install', package]) 
+    pip.main(['install', 'retry']) 
     from retry import retry
 
 try:
