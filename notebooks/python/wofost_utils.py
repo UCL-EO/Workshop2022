@@ -514,24 +514,87 @@ def create_ensemble(
     return results
 
 
-if __name__ == "__main__":
-    lon = -2.7
-    lat = 8.20
-    year = 2020
-    retval = create_ensemble(
-        lat, lon, year, en_size=5, param_file="data/par_prior_maize_tropical-C.csv"
-    )
+def ensemble_assimilation(
+    parameters,
+    sim_times,
+    sim_lai,
+    sim_yields,
+    obs_lai,
+    obs_lai_time,
+    sigma_lai=None,
+    obs_yield = None,
+    sigma_yield=1.,
+    sel_n_best=50,
+    cost_prior = 0.
+):
+    """A function that performs ensemble assimilation. Requires:
+    * parameters (n_params, n_ens) set of model parameters
+    * sim_times (n_times): time axis of the simulations
+    * sim_lai (n_ens, n_times): time series of modelled LAI. Same
+    temporal axis for all ensemble members.
+    * sim_yields (n_ens): simulated yields.
+    * obs_lai (n_obs_times): time series of observed LAI
+    * sigma_lai (scalar or n_obs_times): standard deviation of LAI.
+    Can be `None` to just use inverse squared distance
+    * obs_yield (scalar) Observed yield if used.
+    * sigma_yield (scalar) Yield uncertainty
+    * sel_n_best (int) Select the best N simulations.
+    * cost_prior (n_ens) You can also add a prior cost to each
+    ensemble member.
+    """
+    n_par, n_ens = parameters.shape
+    cost_lai = np.zeros(n_ens)
+    if obs_yield is not None:
+        cost_yield = np.zeros_like(cost_lai)
 
-    lon = -0.7
-    lat = 9.5
-    year = 2021
-    retval = create_ensemble(
-        lat,
-        lon,
-        year,
-        en_size=500,
-        param_file="data/par_prior_maize_tropical-C.csv",
-    )
+    #####obs_dates = obs_lai_time
+    #####for iens in range(n_ens):
+        #####sim_timex = pd.date_range(sim_times[iens][0],
+                                  #####sim_times[iens][1]
+                                  #####)
+        #####passer = obs_lai_time <= sim_timex.max()
+        #####obs_dates = obs_lai_time[passer]
+        #####obs_lai_sub = obs_lai[passer]
+        #####doys = (obs_dates -
+                #####sim_timex.to_pydatetime()[0].date())
+
+        #####time_index = [x.days for x in doys]
+        #####work_sim_times = sim_timex[time_index]
+        #####diffs = np.array(sim_lai[iens])[time_index] - obs_lai_sub.squeeze()
+        #####cost_lai[iens] = np.nansum(diffs*diffs)
+    # Get observations that match the simulation period
+    passer = obs_lai_time<= sim_times.max()
+    obs_dates = obs_lai_time[passer]
+    obs_lai = obs_lai[passer]
+    # We need a pointer that matches times in the
+    # dense simulations array to the observations
+    doys = obs_dates - sim_times[0]
+    time_index = [x.days for x in doys]
+
+    diffs = sim_lai[:, time_index] - obs_lai.squeeze()
+    if sigma_lai is None:
+        cost_lai = np.nansum(diffs*diffs, axis=1)
+    else:
+        cost_lai = np.nansum(-0.5*diffs**2/(sigma_lai*sigma_lai),
+                             axis=1)
+
+    posterior = cost_prior + cost_lai
+    if obs_yield is not None:
+        cost_yield= 0.5 * ((sim_yields - obs_yield) ** 2 / (sigma_yield ** 2))
+        posterior += cost_yield
+
+    ilocs = posterior.argsort()[:sel_n_best] # best 20?
+
+    sim_yields = np.array(sim_yields)
+    parameters=np.array(parameters)
+    est_yield = np.nanmean(sim_yields[ilocs])
+    est_yield_sd = np.nanstd(sim_yields[ilocs])
+    parameters = np.nanmean(parameters[:, ilocs],
+                            axis=1)
+
+    return est_yield, est_yield_sd, parameters
+
+
 ########def wofost_parameter_sweep():
 ########widgets.interact_manual(wofost_parameter_sweep_func,
 ########field_code=widgets.Dropdown(options=all_fields),
