@@ -619,8 +619,23 @@ def on_change_zoom(change):
 # my_map.observe(on_change_zoom)
 
 
+def create_field_image_tab(urls):
+    field_image_widgets = []
+    for url in urls:
+        r = requests.get(url)
+        if r.ok:
+            field_image = widgetIMG(
+              value=r.content,
+              format='png',
+            )
+            field_image_widgets.append(field_image)
+    tab = Tab(field_image_widgets)
+    [tab.set_title(i, '%02d'%(i+1)) for i in range(len(field_image_widgets))]
+    return tab
 
-
+with open('./data/Ghana_field_photos.json', 'r') as f:
+    Ghana_field_photo_dict = json.load(f)
+    
 field_movie = None
 yield_img = None
 yield_control = None
@@ -674,6 +689,13 @@ def on_click(change):
 
     image = yield_colorbar_f.getvalue()
     output = widgetIMG(value=image, format='png',)
+    field_pics_base_url = 'https://github.com/UCL-EO/Ghana_field_images/raw/main/'
+    if field_id in Ghana_field_photo_dict.keys():
+        urls = [field_pics_base_url + '/%s/%s'%(field_id, i) for i in Ghana_field_photo_dict[field_id]]
+    else:
+        urls = []
+    field_image_tab = create_field_image_tab(urls)
+    
 #     yield_colorbar = WidgetControl(widget=output, position='bottomleft', transparent_bg=True)
 #     yield_colorbar.widget = output
 #     my_map.add_control(yield_colorbar)
@@ -725,7 +747,12 @@ def on_click(change):
     yield_label2 = Label('$$Yield [kg/ha]$$')
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
     yield_box = VBox([yield_label, yield_label2, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    yield_control = WidgetControl(widget=yield_box, position='bottomleft')
+    
+    yield_field_photo_tab = Tab([yield_box, field_image_tab])
+    yield_field_photo_tab.set_title(0, 'Field Yield')
+    yield_field_photo_tab.set_title(1, 'Field Photos')
+     
+    yield_control = WidgetControl(widget=yield_field_photo_tab, position='bottomleft')
 
     my_map.add_control(yield_control)
 
