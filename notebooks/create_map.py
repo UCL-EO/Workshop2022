@@ -330,8 +330,12 @@ def on_change_wofost_slider(change):
     
     global wofost_out_dict
     if (change['type'] == 'change'):
-        print(year, lat, lon)
+        
+        lat, lon = my_map.center
+        lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+        print(lat, lon, year)
         meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
+        
         ens_parameters = {}
         paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]
         for para in paras_to_overwrite:    
@@ -345,9 +349,12 @@ def on_change_wofost_slider(change):
         # wofost_lai_fig.y = np.array(df.LAI)
         wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
         for wofost_out_para in wofost_out_paras:
-            wofost_out_dict[wofost_out_para].marks[0].x = doys
-            wofost_out_dict[wofost_out_para].marks[0].y = np.array(df.loc[:, wofost_out_para])
-        
+            if wofost_out_para != 'TWSO':
+                wofost_out_dict[wofost_out_para].marks[0].x = doys
+                wofost_out_dict[wofost_out_para].marks[0].y = np.array(df.loc[:, wofost_out_para])
+            else:
+                wofost_out_dict[wofost_out_para].marks[1].x = doys
+                wofost_out_dict[wofost_out_para].marks[1].y = np.array(df.loc[:, wofost_out_para])
         wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
         wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
 
@@ -375,7 +382,7 @@ for i in range(len(paras)):
                    step = step,
                    orientation='horizontal',       # Vertical slider is what we want
                    readout=True,                # No need to show exact value
-                   layout=Layout(width='80%'),
+                   layout=Layout(width='100%'),
                    description='%s: '%para_name, 
                    style={'description_width': 'initial'}) 
     wofost_slider.observe(on_change_wofost_slider)
@@ -392,7 +399,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     para_min_maxs = {'DVS': [0, 2],
                      'LAI': [0, 3],
                      'TAGP': [0, 15000],
-                     'TWSO': [0, 4000],
+                     'TWSO': [0, 5500],
                      'TWLV': [0, 2000],
                      'TWST': [0, 10000],
                      'TWRT': [0, 2000],
@@ -417,7 +424,9 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     
     ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
     ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
-
+    
+    fig_layout = Layout(width='auto', height='auto', max_height='160px', max_width='200px')
+    
     para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line], 
                        title=para_name, 
                        animation_duration=500, 
@@ -448,6 +457,13 @@ wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
 obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
 wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line]
+
+twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='dashed', colors=['gray'], fill='between')
+twso_hline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#ffa500'], fill='between')
+twso_shade = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1])
+
+wofost_out_dict['TWSO'].marks = [twso_shade, wofost_out_dict['TWSO'].marks[0],  twso_hline]
+
 
 
 wofost_output_dropdown1 = Dropdown(
@@ -544,7 +560,7 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
 
 panel_box = VBox([fig_box, k_slider])
 
-names = ['Reflectance fitting', 'Wofost DA']
+names = ['Reflectance fitting', 'Wofost simulation']
 tab = Tab()
 tab.children = [panel_box, wofost_box]
 [tab.set_title(i, title) for i, title in enumerate(names)]
@@ -615,6 +631,7 @@ def on_click(change):
     global field_bounds
     global doys
     global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img, maize_markers
+    global wofost_out_dict
     field_id = change["new"]
 
     ind = field_ids.index(field_id)
@@ -662,7 +679,43 @@ def on_click(change):
 #     my_map.add_control(yield_colorbar)
 
     ylds = np.array(field_yields[field_id])
+    
+    yld_mean, yld_std = ylds.mean(), ylds.std()
+    twso_vline.x = [365, 365]
+    twso_vline.y = [0, yld_mean]
 
+    twso_hline.x = [0, 365]
+    twso_hline.y = [yld_mean, yld_mean]
+
+    twso_shade.x = [0, 365]
+    twso_shade.y = [[yld_mean - yld_std, yld_mean - yld_std], [yld_mean + yld_std, yld_mean + yld_std]]
+
+    xmax = wofost_out_dict['LAI'].marks[0].x.max()
+
+    twso_vline.x = [xmax, xmax]
+    twso_vline.y = [0, yld_mean]
+
+    twso_hline.x = [0, xmax]
+    twso_hline.y = [yld_mean, yld_mean]
+
+    twso_shade.x = [0, xmax]
+    twso_shade.y = [[yld_mean - yld_std, yld_mean - yld_std], [yld_mean + yld_std, yld_mean + yld_std]]
+    
+    ymax = (yld_mean + 3 * yld_std)
+    scales = twso_vline.scales
+    scales['y'] = LinearScale(max=ymax, min=0)
+    
+    twso_vline.scales = scales
+    twso_hline.scales = scales
+    twso_shade.scales = scales
+    
+    # twso_vline.scales['y'] = LinearScale(max=yld_mean*1.5, min=0)
+    wofost_out_dict['TWSO'].axes[1].scale  = LinearScale(max=ymax, min=0)
+    wofost_out_dict['TWSO'].axes[1].tick_values = np.linspace(0, ymax, 5)
+    wofost_out_dict['TWSO'].marks[1].scales = scales
+    
+    
+    
     import scipy.stats as st
 
     cl = st.t.interval(0.95, len(ylds)-1, loc=np.mean(ylds), scale=st.sem(ylds))
@@ -1102,7 +1155,10 @@ def handle_interaction(**kwargs):
             good_ref_line.scales = line.scales
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = ndvi[u_mask]
-                
+            
+            wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
+            wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
+
     
 
         else:
