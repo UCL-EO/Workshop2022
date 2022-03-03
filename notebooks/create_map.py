@@ -8,7 +8,7 @@ import pandas as pd
 from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot
-from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab
+from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
 
@@ -627,11 +627,21 @@ def create_field_image_tab(urls):
             field_image = widgetIMG(
               value=r.content,
               format='png',
+              
             )
+            field_image.layout.object_fit = 'cover'
             field_image_widgets.append(field_image)
-    tab = Tab(field_image_widgets)
-    [tab.set_title(i, '%02d'%(i+1)) for i in range(len(field_image_widgets))]
-    return tab
+
+    box_layout = Layout(overflow='scroll hidden',
+                        border='0px solid black',
+                        width='400px',
+                        height='300px',
+                        flex_flow='row',
+                        display='flex')
+    carousel = Box(children=field_image_widgets, layout=box_layout)
+    # tab = Tab(field_image_widgets)
+    # [tab.set_title(i, '%02d'%(i+1)) for i in range(len(field_image_widgets))]
+    return carousel
 
 with open('./data/Ghana_field_photos.json', 'r') as f:
     Ghana_field_photo_dict = json.load(f)
@@ -689,7 +699,7 @@ def on_click(change):
 
     image = yield_colorbar_f.getvalue()
     output = widgetIMG(value=image, format='png',)
-    field_pics_base_url = 'https://github.com/UCL-EO/Ghana_field_images/raw/main/'
+    field_pics_base_url = 'https://github.com/UCL-EO/Ghana_field_images/raw/main/fields/'
     if field_id in Ghana_field_photo_dict.keys():
         urls = [field_pics_base_url + '/%s/%s'%(field_id, i) for i in Ghana_field_photo_dict[field_id]]
     else:
