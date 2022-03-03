@@ -424,7 +424,7 @@ def create_ensemble(
     lat,
     lon,
     year,
-    en_size=20000,
+    en_size=50,
     param_file="data/par_prior_maize_tropical-C.csv",
     cropfile="data/MAIZGA-C.CAB",
     soil="data/ec4.new",
@@ -603,4 +603,5 @@ def ensemble_assimilation(
     parameters = parameters[:, ilocs]#np.nanmean(parameters[:, ilocs],
                             #axis=1)
     fit_lai = sim_lai[:, time_index].astype(float)[ilocs, :]
-    return est_yield, est_yield_sd, parameters, obs_dates, obs_lai_sub, work_sim_times, fit_lai
+    return (est_yield, est_yield_sd, parameters, 
+            obs_dates, obs_lai_sub, work_sim_times, fit_lai)
