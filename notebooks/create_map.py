@@ -5,10 +5,11 @@ import requests
 import json
 import datetime
 import pandas as pd
+from pathlib import Path
 from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot
-from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box
+from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
 
@@ -17,6 +18,7 @@ sys.path.insert(0, './python/')
 from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
 from map_utils import debounce
 from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_gee
+from wofost_utils import ensemble_assimilation
 
 from ipywidgets import Image as ImageWidget
 
@@ -219,19 +221,7 @@ lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
 
 # from ipywidgets import IntSlider
 
-# def read_wofost_data(fname):
-#     f = np.load(fname, allow_pickle=True)
-#     parameters = f.f.parameters
-#     t_axis = f.f.t_axis
-#     samples = f.f.samples
-#     lais = f.f.lais
-#     yields = f.f.yields
-#     DVS = f.f.DVS
-#     print("loading simulations")
-#     doys = [int(datetime.datetime.utcfromtimestamp(i.tolist()/1e9).strftime('%j')) for i in t_axis]
-#     return parameters, t_axis, samples, lais, yields, DVS, doys
 
-# parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
 
 # k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
 #                orientation='horizontal',       # Vertical slider is what we want
@@ -325,6 +315,9 @@ lon = -2.7
 lat = 8.20
 year = 2021
 
+# Read ensemble
+param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data()
+
 @debounce(0.2)
 def on_change_wofost_slider(change):
     
@@ -340,14 +333,22 @@ def on_change_wofost_slider(change):
         paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]
         for para in paras_to_overwrite:    
             ens_parameters[para] = wofost_sliders_dict[para].value
-        ens_parameters['AMAXTB'] = [0, 55.0, 1.5, wofost_sliders_dict['AMAXTB_150'].value]
-        df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
+        ens_parameters['AMAXTB'] = [0, wofost_sliders_dict['AMAXTB_000'].value,
+                                   1.25, wofost_sliders_dict['AMAXTB_125'].value,
+                                   1.50, wofost_sliders_dict['AMAXTB_150'].value,
+                                   2.0, wofost_sliders_dict['AMAXTB_200'].value
+                                   ]
+        print(ens_parameters)
+        df = wofost_parameter_sweep_func(year, 
+                                         ens_parameters = ens_parameters.copy(), 
+                                         meteo=meteo_file)
         dates = df.index
         doys = [int(i.strftime('%j')) for i in dates]
         
         # wofost_lai_fig.x = doys
         # wofost_lai_fig.y = np.array(df.LAI)
-        wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
+        wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST',
+                            'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
         for wofost_out_para in wofost_out_paras:
             if wofost_out_para != 'TWSO':
                 wofost_out_dict[wofost_out_para].marks[0].x = doys
@@ -366,10 +367,72 @@ def on_change_wofost_slider(change):
         # lai_fig.axes[0].scale = LinearScale(max=365.0, min=180.0)
 
 prior_df = pd.read_csv('data/par_prior_maize_tropical-C.csv')
-paras = ['TDWI', 'TSUM1', 'RGRLAI', 'SDOY', 'SPAN', 'AMAXTB_150']
+paras = prior_df["#PARAM_CODE"].str.strip().tolist()
 all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
 para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
+
+
+def read_wofost_data():
+    """Reads ensemble from JASMIN"""
+    lat, lon = my_map.center
+    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+    print(lat, lon, year)
+    f = create_ensemble(lat, lon, year)
+    max_lai = np.nanmax(f.f.LAI, axis=1)
+    y = f.f.Yields.astype(float)
+    lai = f.f.LAI.astype(float)
+    param_names = paras
+
+    param_array = np.array([f[i]
+                            for i in param_names]).astype(float)
+
+    pred_yield = max_lai * 1500 - 700
+    passer = np.abs(pred_yield - y) < 100.
+    sim_yields = y[passer]
+    sim_lai = lai[passer, :]
+    param_array = param_array[:, passer]
+    sim_times = f.f.sim_times
+
+    doys = [int(x.strftime("%j")) for x in sim_times]
+    return param_array, sim_times, sim_lai, sim_yields, doys
+
+
+
+
+# Button needs to be centered
+assimilate_me_button = Button(
+    description='Assimilate Me!',
+    disabled=False,
+    button_style='danger', 
+    tooltip='Click me',
+    icon='check',
+    layout = Layout(display='flex',
+                    flex_flow='horizontal',
+                    align_items='center',
+                    justify_content="center",
+                    width='30%'))
+
+def assimilate_me(b):
+    # Needs obs LAI & obs LAI times
+    global pix_lai, doys
+    print(pix_lai)
+    t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
+              for x in doys])
+    est_yield, est_yield_sd, parameters, _, _ , _, lai_fitted_ensembles = ensemble_assimilation(
+        param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
+    # est_yield: mean estimated yield for this LAI set of observations
+    # est_yield_sd: standard deviation for the yield estimate
+    # parameters: list with parameters of selected ensemble members
+    # lai_fitted_ensembles: list with selected LAI simulations
+    # TOOD:
+    # 1. Update sliders with ?mean/median parameters?
+    # 2. Probably run wofost with solution parameters (or just plot ensemble?)
+    # 3. Update plots of LAI and TWSO
+    
+# Link assimilate button to function
+assimilate_me_button.on_click(assimilate_me)    
+
 
 for i in range(len(paras)):
     para_ind = para_inds[i]
@@ -480,11 +543,9 @@ wofost_output_dropdown2 = Dropdown(
     # description="Field ID:",
 )
 
-
-
 wofost_output_dropdowns = HBox([wofost_output_dropdown1, wofost_output_dropdown2], layout = Layout(display='flex',
                                   flex_flow='horizontal',
-                                  align_items='flex-start',
+                                  align_items='center',
                                   width='100%'))
 
 
@@ -538,8 +599,10 @@ def on_change_dropdown2(change):
                                   width='400px'))
     tab.children = [panel_box, wofost_box]
 
+
+    
 wofost_out_panel = HBox([left_output, right_output])
-wofost_widgets = wofost_sliders + [wofost_out_panel]
+wofost_widgets = wofost_sliders + [assimilate_me_button, wofost_out_panel]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
@@ -1093,7 +1156,6 @@ def handle_interaction(**kwargs):
             pix_cab, pix_lai = mean_bios
 
             max_ind = np.argmax(pix_lai)
-
             field_max = lais[:, max_ind].max()
             field_min = lais[:, max_ind].min() 
 
@@ -1101,8 +1163,14 @@ def handle_interaction(**kwargs):
             lai_ratio = (pix_lai.max() - 0) / (field_max - 0)
             # print(field_max, field_min)
             # print(lai_ratio)
+            
 
-            icon = Icon(icon_url='https://leafletjs.com/examples/custom-icons/leaf-green.png', icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
+            try:
+                icon = Icon(icon_url='data/leaf-green.png',
+                            icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
+            except ValueError:
+                icon = Icon(icon_url='https://leafletjs.com/SlavaUkraini/examples//custom-icons/leaf-green.png',
+                            icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
             maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Ghana_workshop2022/imgs/maize.png', 
                         icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
                         icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
