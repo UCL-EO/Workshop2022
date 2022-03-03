@@ -26,8 +26,8 @@ IDSL     =   0      ! indicates whether pre-anthesis development depends
                     ! on temp. (=0), daylength (=1) , or both (=2)
 DLO      =   1.00   ! optimum daylength for development [hr]
 DLC      =   0.00   ! critical daylength (lower threshold) [hr]
-TSUM1    = 1825.     ! temperature sum from emergence to anthesis [cel d]
-TSUM2    = 1210.     ! temperature sum from anthesis to maturity [cel d]
+TSUM1    = 1060.     ! temperature sum from emergence to anthesis [cel d]
+TSUM2    = 990.     ! temperature sum from anthesis to maturity [cel d]
 DTSMTB   =   0.00,    0.00,     ! daily increase in temp. sum 
              8.00,    0.00,     ! as function of av. temp. [cel; cel d]
             30.00,   22.00,
@@ -39,7 +39,7 @@ DVSEND   =   2.00   ! development stage at harvest (= 2.0 at maturity [-])
 TDWI     =  3.00    ! initial total crop dry weight [kg ha-1]
 ** ! Not used as imput by WOF6_0 model
 LAIEM    =   0.02604 ! leaf area index at emergence [ha ha-1]
-RGRLAI   =   0.0055  ! maximum relative increase in LAI [ha ha-1 d-1]
+RGRLAI   =   0.06  ! maximum relative increase in LAI [ha ha-1 d-1]
 
 ** green area
 SLATB    =   0.00,    0.0035,   ! specific leaf area  
