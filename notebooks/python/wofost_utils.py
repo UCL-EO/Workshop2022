@@ -521,11 +521,11 @@ def ensemble_assimilation(
     sim_yields,
     obs_lai,
     obs_lai_time,
-    sigma_lai=None,
+    sigma_lai=0.05,
     obs_yield = None,
     sigma_yield=1.,
-    sel_n_best=50,
-    cost_prior = 0.
+    sel_n_best=20,
+    fit_tail_end=False
 ):
     """A function that performs ensemble assimilation. Requires:
     * parameters (n_params, n_ens) set of model parameters
@@ -541,80 +541,66 @@ def ensemble_assimilation(
     * sel_n_best (int) Select the best N simulations.
     * cost_prior (n_ens) You can also add a prior cost to each
     ensemble member.
+
+    Returns
+    -------
+    est_yield: estimated yield
+    est_yield_sd: estiamted yield std dev
+    parameters: list of parameters for selectede ensemble members
+    obs_dates: dates of the observations
+    obs_lai_sub: lai measurements
+    work_sim_times: simulation times that match observations
+    fit_lai: Simulated LAI predictions to match observations.
     """
     n_par, n_ens = parameters.shape
     cost_lai = np.zeros(n_ens)
+    sim_lai = sim_lai.astype(float)
+    sim_lai[np.isnan(sim_lai)] = 0.
     if obs_yield is not None:
         cost_yield = np.zeros_like(cost_lai)
 
-    #####obs_dates = obs_lai_time
-    #####for iens in range(n_ens):
-        #####sim_timex = pd.date_range(sim_times[iens][0],
-                                  #####sim_times[iens][1]
-                                  #####)
-        #####passer = obs_lai_time <= sim_timex.max()
-        #####obs_dates = obs_lai_time[passer]
-        #####obs_lai_sub = obs_lai[passer]
-        #####doys = (obs_dates -
-                #####sim_timex.to_pydatetime()[0].date())
-
-        #####time_index = [x.days for x in doys]
-        #####work_sim_times = sim_timex[time_index]
-        #####diffs = np.array(sim_lai[iens])[time_index] - obs_lai_sub.squeeze()
-        #####cost_lai[iens] = np.nansum(diffs*diffs)
     # Get observations that match the simulation period
     passer = obs_lai_time<= sim_times.max()
     obs_dates = obs_lai_time[passer]
     obs_lai = obs_lai[passer]
+    if fit_tail_end:
+        iloc = np.argmax(obs_lai)-5
+        jloc = np.argmax(obs_lai)+5
+
+
+        obs_dates = obs_dates[iloc:jloc]
+        obs_lai_sub = obs_lai[iloc:jloc]
+    else:
+        obs_lai_sub = obs_lai
     # We need a pointer that matches times in the
     # dense simulations array to the observations
     doys = obs_dates - sim_times[0]
     time_index = [x.days for x in doys]
 
-    diffs = sim_lai[:, time_index] - obs_lai.squeeze()
-    if sigma_lai is None:
-        cost_lai = np.nansum(diffs*diffs, axis=1)
-    else:
-        cost_lai = np.nansum(-0.5*diffs**2/(sigma_lai*sigma_lai),
-                             axis=1)
+    work_sim_times = sim_times[time_index]
 
-    posterior = cost_prior + cost_lai
+    # work sims has the simulations on the same time axis
+    # as the observations now.
+
+    diffs = sim_lai[:, time_index] - obs_lai_sub.squeeze()
+
+    cost_lai = np.nansum(diffs*diffs, axis=1)
+
+    posterior = cost_lai
     if obs_yield is not None:
         cost_yield= 0.5 * ((sim_yields - obs_yield) ** 2 / (sigma_yield ** 2))
         posterior += cost_yield
 
     ilocs = posterior.argsort()[:sel_n_best] # best 20?
 
+
+    eposterior = np.exp(-posterior.astype(float))
     sim_yields = np.array(sim_yields)
-    parameters=np.array(parameters)
+    parameters = np.array(parameters)
     est_yield = np.nanmean(sim_yields[ilocs])
+    #est_yield = np.average(sim_yields, weights=eposterior)
     est_yield_sd = np.nanstd(sim_yields[ilocs])
-    parameters = np.nanmean(parameters[:, ilocs],
-                            axis=1)
-
-    return est_yield, est_yield_sd, parameters
-
-
-########def wofost_parameter_sweep():
-########widgets.interact_manual(wofost_parameter_sweep_func,
-########field_code=widgets.Dropdown(options=all_fields),
-########crop_start_date=widgets.fixed(dt.date(2021, 7, 25)),
-########crop_end_date=widgets.fixed(dt.date(2021, 12, 1)),
-########span=widgets.FloatSlider(value=35.0, min=10, max=50),
-########cvo = widgets.FloatSlider(value=0.54, min=0.1, max=0.9, step=0.02),
-########cvl = widgets.FloatSlider(value=0.68, min=0.1, max=0.9, step=0.02),
-########tdwi=widgets.FloatSlider(value=2.0,min=0.5, max=20),
-########amaxtb_000=widgets.FloatSlider(value=55.0,min=0, max=90),
-########amaxtb_150=widgets.FloatSlider(value=55.0,min=0, max=90),
-########tsum1=widgets.FloatSlider(value=850.0,min=100, max=1800),
-########tsum2=widgets.FloatSlider(value=850.0,min=100, max=1800),
-########tsumem=widgets.FloatSlider(value=56,min=10, max=100),
-########rgrlai=widgets.FloatSlider(value=0.005, min=0.001, max=0.3, step=0.001,
-########readout_format='.3f',),
-########meteo=widgets.fixed("AgERA5_Togo_Tamale_2021_2022.csv"),
-########soil=widgets.fixed("ec4.new"),
-########wav=widgets.FloatSlider(value=5, min=0, max=100),
-########co2=widgets.fixed(400),
-########rdmsol=widgets.fixed(100.),
-########potential=widgets.Checkbox(value=True, description='Potential mode',
-########icon='check'))
+    parameters = parameters[:, ilocs]#np.nanmean(parameters[:, ilocs],
+                            #axis=1)
+    fit_lai = sim_lai[:, time_index].astype(float)[ilocs, :]
+    return est_yield, est_yield_sd, parameters, obs_dates, obs_lai_sub, work_sim_times, fit_lai
