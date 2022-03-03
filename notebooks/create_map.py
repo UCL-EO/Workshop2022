@@ -7,8 +7,8 @@ import datetime
 import pandas as pd
 from pygeotile.tile import Tile
 from shapely import geometry
-from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot
-from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab
+from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot, Scatter
+from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
 
@@ -17,6 +17,7 @@ sys.path.insert(0, './python/')
 from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
 from map_utils import debounce
 from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_gee
+from wofost_utils import ensemble_assimilation
 
 from ipywidgets import Image as ImageWidget
 
@@ -233,6 +234,104 @@ lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
 
 # parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
 
+def read_wofost_data(lat, lon, year):
+    """Reads ensemble from JASMIN"""
+    # lat, lon = my_map.center
+    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+    print(lat, lon, year)
+    f = create_ensemble(lat, lon, year)
+    max_lai = np.nanmax(f.f.LAI, axis=1)
+    y = f.f.Yields.astype(float)
+    lai = f.f.LAI.astype(float)
+    param_names = paras
+
+    param_array = np.array([f[i]
+                            for i in param_names]).astype(float)
+
+    pred_yield = max_lai * 1500 - 700
+    passer = np.abs(pred_yield - y) < 100.
+    sim_yields = y[passer]
+    sim_lai = lai[passer, :]
+    param_array = param_array[:, passer]
+    sim_times = f.f.sim_times
+
+    doys = [int(x.strftime("%j")) for x in sim_times]
+    return param_array, sim_times, sim_lai, sim_yields, doys
+
+
+
+
+# Button needs to be centered
+assimilate_me_button = Button(
+    description='Assimilate Me!',
+    disabled=False,
+    button_style='danger', 
+    tooltip='Click me',
+    icon='check',
+    layout = Layout(display='flex',
+                    flex_flow='horizontal',
+                    align_items='center',
+                    justify_content="center",
+                    width='30%'))
+
+def assimilate_me(b):
+    # Needs obs LAI & obs LAI times
+    # global pix_lai, doys
+    doys = line_axs[-1].x
+    pix_lai = line_axs[-1].y
+    
+#     step = 5
+#     bin_doys = np.arange(doys.min(), doys.max(), step)
+#     pix_lai = np.interp(bin_doys, doys, pix_lai)
+#     doys = bin_doys
+    
+    bin_lais = []
+    bin_doys = []
+    step = 10
+    for i in np.arange(doys.min(), doys.max()-step, step):
+        mm = (doys >= i) * (doys <=i+step)
+        bin_lai = np.nanmean(pix_lai[mm])
+        if not np.isnan(bin_lai):
+            bin_lais.append(bin_lai)
+            bin_doys.append(int(i + step / 2))
+    pix_lai = np.array(bin_lais)
+    doys = np.array(bin_doys)
+    print(pix_lai)
+    lat, lon = my_map.center
+    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+    year = 2021
+    # Read ensemble
+    param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data(lat, lon, year)
+
+
+    t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
+              for x in doys])
+    est_yield, est_yield_sd, parameters, _, _ , ensemble_lai_time, lai_fitted_ensembles = ensemble_assimilation(
+        param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
+    
+    for i, para in enumerate(paras):
+        wofost_sliders_dict[para].value = np.mean(parameters[i])
+    
+    ensemble_lai_time = [int(i.strftime('%j')) for i in ensemble_lai_time]
+    
+    wofost_out_dict['LAI'].marks[2].x = ensemble_lai_time
+    wofost_out_dict['LAI'].marks[2].y = lai_fitted_ensembles
+
+    print(est_yield)
+    # est_yield: mean estimated yield for this LAI set of observations
+    # est_yield_sd: standard deviation for the yield estimate
+    # parameters: list with parameters of selected ensemble members
+    # lai_fitted_ensembles: list with selected LAI simulations
+    # TOOD:
+    # 1. Update sliders with ?mean/median parameters?
+    # 2. Probably run wofost with solution parameters (or just plot ensemble?)
+    # 3. Update plots of LAI and TWSO
+    
+# Link assimilate button to function
+assimilate_me_button.on_click(assimilate_me)    
+
+
+
 # k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
 #                orientation='horizontal',       # Vertical slider is what we want
 #                readout=True,                # No need to show exact value
@@ -330,13 +429,24 @@ def on_change_wofost_slider(change):
     
     global wofost_out_dict
     if (change['type'] == 'change'):
-        print(year, lat, lon)
+        
+        lat, lon = my_map.center
+        lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+        print(lat, lon, year)
         meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
+        
         ens_parameters = {}
         paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]
         for para in paras_to_overwrite:    
             ens_parameters[para] = wofost_sliders_dict[para].value
-        ens_parameters['AMAXTB'] = [0, 55.0, 1.5, wofost_sliders_dict['AMAXTB_150'].value]
+        # ens_parameters['AMAXTB'] = [0, 55.0, 1.5, wofost_sliders_dict['AMAXTB_150'].value]
+        
+        ens_parameters['AMAXTB'] = [0, wofost_sliders_dict['AMAXTB_000'].value,
+                                   1.25, wofost_sliders_dict['AMAXTB_125'].value,
+                                   1.50, wofost_sliders_dict['AMAXTB_150'].value,
+                                   2.0, 2
+                                   ]
+        
         df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
         dates = df.index
         doys = [int(i.strftime('%j')) for i in dates]
@@ -345,9 +455,12 @@ def on_change_wofost_slider(change):
         # wofost_lai_fig.y = np.array(df.LAI)
         wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
         for wofost_out_para in wofost_out_paras:
-            wofost_out_dict[wofost_out_para].marks[0].x = doys
-            wofost_out_dict[wofost_out_para].marks[0].y = np.array(df.loc[:, wofost_out_para])
-        
+            if wofost_out_para != 'TWSO':
+                wofost_out_dict[wofost_out_para].marks[0].x = doys
+                wofost_out_dict[wofost_out_para].marks[0].y = np.array(df.loc[:, wofost_out_para])
+            else:
+                wofost_out_dict[wofost_out_para].marks[1].x = doys
+                wofost_out_dict[wofost_out_para].marks[1].y = np.array(df.loc[:, wofost_out_para])
         wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
         wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
 
@@ -359,7 +472,7 @@ def on_change_wofost_slider(change):
         # lai_fig.axes[0].scale = LinearScale(max=365.0, min=180.0)
 
 prior_df = pd.read_csv('data/par_prior_maize_tropical-C.csv')
-paras = ['TDWI', 'TSUM1', 'RGRLAI', 'SDOY', 'SPAN', 'AMAXTB_150']
+paras = ['TDWI', 'SDOY', 'SPAN', 'CVO', 'AMAXTB_000', 'AMAXTB_125', 'AMAXTB_150']
 all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
 para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
@@ -375,7 +488,7 @@ for i in range(len(paras)):
                    step = step,
                    orientation='horizontal',       # Vertical slider is what we want
                    readout=True,                # No need to show exact value
-                   layout=Layout(width='80%'),
+                   layout=Layout(width='100%'),
                    description='%s: '%para_name, 
                    style={'description_width': 'initial'}) 
     wofost_slider.observe(on_change_wofost_slider)
@@ -392,7 +505,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     para_min_maxs = {'DVS': [0, 2],
                      'LAI': [0, 3],
                      'TAGP': [0, 15000],
-                     'TWSO': [0, 4000],
+                     'TWSO': [0, 5500],
                      'TWLV': [0, 2000],
                      'TWST': [0, 10000],
                      'TWRT': [0, 2000],
@@ -417,7 +530,9 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     
     ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
     ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
-
+    
+    fig_layout = Layout(width='auto', height='auto', max_height='160px', max_width='200px')
+    
     para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line], 
                        title=para_name, 
                        animation_duration=500, 
@@ -446,8 +561,17 @@ for wofost_out_para in wofost_out_paras:
     para_figs.append(para_fig)
 wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
-obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
-wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line]
+# obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
+obs_lai_line  = Scatter(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, default_size=4, colors = ['green'])    
+ens_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['#cccccc'])
+wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line, ens_lai_line]
+
+twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='dashed', colors=['gray'], fill='between')
+twso_hline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#ffa500'], fill='between')
+twso_shade = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1])
+
+wofost_out_dict['TWSO'].marks = [twso_shade, wofost_out_dict['TWSO'].marks[0],  twso_hline]
+
 
 
 wofost_output_dropdown1 = Dropdown(
@@ -523,7 +647,7 @@ def on_change_dropdown2(change):
     tab.children = [panel_box, wofost_box]
 
 wofost_out_panel = HBox([left_output, right_output])
-wofost_widgets = wofost_sliders + [wofost_out_panel]
+wofost_widgets = wofost_sliders + [assimilate_me_button, wofost_out_panel]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
@@ -531,7 +655,7 @@ wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
-                                  align_items='flex-start',
+                                  align_items='center',
                                   width='400px'))
 
 
@@ -544,7 +668,7 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
 
 panel_box = VBox([fig_box, k_slider])
 
-names = ['Reflectance fitting', 'Wofost DA']
+names = ['Reflectance fitting', 'Wofost simulation']
 tab = Tab()
 tab.children = [panel_box, wofost_box]
 [tab.set_title(i, title) for i, title in enumerate(names)]
@@ -603,18 +727,53 @@ def on_change_zoom(change):
 # my_map.observe(on_change_zoom)
 
 
+def create_field_image_tab(urls):
+    field_image_widgets = []
+    for url in urls:
+        r = requests.get(url)
+        if r.ok:
+            field_image = widgetIMG(
+              value=r.content,
+              format='png',
+              
+            )
+            field_image.layout.object_fit = 'cover'
+            field_image_widgets.append(field_image)
 
+    box_layout = Layout(overflow='scroll hidden',
+                        border='0px solid black',
+                        width='400px',
+                        height='300px',
+                        flex_flow='row',
+                        display='flex')
+    carousel = Box(children=field_image_widgets, layout=box_layout)
+    # tab = Tab(field_image_widgets)
+    # [tab.set_title(i, '%02d'%(i+1)) for i in range(len(field_image_widgets))]
+    return carousel
 
+with open('./data/Ghana_field_photos.json', 'r') as f:
+    Ghana_field_photo_dict = json.load(f)
+    
 field_movie = None
 yield_img = None
 yield_control = None
 daily_img = None
 maize_markers = []
+
+
+lai_colorbar_f = get_lai_color_bar()
+image = lai_colorbar_f.getvalue()
+lai_colorbar_output = widgetIMG(value=image, format='png',)
+# lai_colorbar_output.layout.object_fit = 'contain'
+lai_colorbar_label = Label('$$LAI [m^2/m^2]$$')
+# lai_box = VBox([lai_label, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
+
 def on_click(change):
     global field_id
     global field_bounds
     global doys
     global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img, maize_markers
+    global wofost_out_dict
     field_id = change["new"]
 
     ind = field_ids.index(field_id)
@@ -627,7 +786,6 @@ def on_click(change):
     my_map.zoom = zoom
     tile = Tile.for_latitude_longitude(*my_map.center, zoom)
     x, y = tile.tms
-
 
 
     for i in range(x- 3, x + 4):
@@ -657,12 +815,55 @@ def on_click(change):
 
     image = yield_colorbar_f.getvalue()
     output = widgetIMG(value=image, format='png',)
+    field_pics_base_url = 'https://github.com/UCL-EO/Ghana_field_images/raw/main/fields/'
+    if field_id in Ghana_field_photo_dict.keys():
+        urls = [field_pics_base_url + '/%s/%s'%(field_id, i) for i in Ghana_field_photo_dict[field_id]]
+    else:
+        urls = []
+    field_image_tab = create_field_image_tab(urls)
+    
 #     yield_colorbar = WidgetControl(widget=output, position='bottomleft', transparent_bg=True)
 #     yield_colorbar.widget = output
 #     my_map.add_control(yield_colorbar)
 
     ylds = np.array(field_yields[field_id])
+    
+    yld_mean, yld_std = ylds.mean(), ylds.std()
+    twso_vline.x = [365, 365]
+    twso_vline.y = [0, yld_mean]
 
+    twso_hline.x = [0, 365]
+    twso_hline.y = [yld_mean, yld_mean]
+
+    twso_shade.x = [0, 365]
+    twso_shade.y = [[yld_mean - yld_std, yld_mean - yld_std], [yld_mean + yld_std, yld_mean + yld_std]]
+
+    xmax = wofost_out_dict['LAI'].marks[0].x.max()
+
+    twso_vline.x = [xmax, xmax]
+    twso_vline.y = [0, yld_mean]
+
+    twso_hline.x = [0, xmax]
+    twso_hline.y = [yld_mean, yld_mean]
+
+    twso_shade.x = [0, xmax]
+    twso_shade.y = [[yld_mean - yld_std, yld_mean - yld_std], [yld_mean + yld_std, yld_mean + yld_std]]
+    
+    ymax = (yld_mean + 3 * yld_std)
+    scales = twso_vline.scales
+    scales['y'] = LinearScale(max=ymax, min=0)
+    
+    twso_vline.scales = scales
+    twso_hline.scales = scales
+    twso_shade.scales = scales
+    
+    # twso_vline.scales['y'] = LinearScale(max=yld_mean*1.5, min=0)
+    wofost_out_dict['TWSO'].axes[1].scale  = LinearScale(max=ymax, min=0)
+    wofost_out_dict['TWSO'].axes[1].tick_values = np.linspace(0, ymax, 5)
+    wofost_out_dict['TWSO'].marks[1].scales = scales
+    
+    
+    
     import scipy.stats as st
 
     cl = st.t.interval(0.95, len(ylds)-1, loc=np.mean(ylds), scale=st.sem(ylds))
@@ -671,8 +872,13 @@ def on_click(change):
     yield_label = Label('%s Field yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
     yield_label2 = Label('$$Yield [kg/ha]$$')
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    yield_box = VBox([yield_label, yield_label2, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    yield_control = WidgetControl(widget=yield_box, position='bottomleft')
+    yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
+    # yield_lai_box = VBox([yield_box, lai_box])
+    yield_field_photo_tab = Tab([yield_box, field_image_tab])
+    yield_field_photo_tab.set_title(0, 'Field Yield')
+    yield_field_photo_tab.set_title(1, 'Field Photos')
+     
+    yield_control = WidgetControl(widget=yield_field_photo_tab, position='bottomleft')
 
     my_map.add_control(yield_control)
 
@@ -904,12 +1110,7 @@ slider2.observe(on_change_slider2)
 jslink((play, 'value'), (slider2, 'index'))
 # label = 
 # display(label)
-lai_colorbar_f = get_lai_color_bar()
-image = lai_colorbar_f.getvalue()
-output = widgetIMG(value=image, format='png',)
-output.layout.object_fit = 'contain'
-lai_label = Label('$$LAI [m^2/m^2]$$')
-lai_box = VBox([lai_label, output])
+
 
 
 play_label = Label('Click to play LAI movie over field: %s'%field_id)
@@ -920,8 +1121,8 @@ play_box = VBox([play_label, play_box])
 
 widget_control2 = WidgetControl(widget=play_box, position="bottomright")
 my_map.add_control(widget_control2)
-lai_control = WidgetControl(widget=lai_box, position="bottomright")
-my_map.add_control(lai_control)
+# lai_control = WidgetControl(widget=lai_box, position="bottomright")
+# my_map.add_control(lai_control)
 
 def random_color(feature):
     return {
@@ -1012,7 +1213,7 @@ def handle_interaction(**kwargs):
             # print(field_max, field_min)
             # print(lai_ratio)
 
-            icon = Icon(icon_url='https://leafletjs.com/examples/custom-icons/leaf-green.png', icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
+#             icon = Icon(icon_url='https://leafletjs.com/examples/custom-icons/leaf-green.png', icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
             maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Ghana_workshop2022/imgs/maize.png', 
                         icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
                         icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
@@ -1102,7 +1303,10 @@ def handle_interaction(**kwargs):
             good_ref_line.scales = line.scales
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = ndvi[u_mask]
-                
+            
+            wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
+            wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
+
     
 
         else:
