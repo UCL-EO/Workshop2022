@@ -315,8 +315,6 @@ lon = -2.7
 lat = 8.20
 year = 2021
 
-# Read ensemble
-param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data()
 
 @debounce(0.2)
 def on_change_wofost_slider(change):
@@ -397,6 +395,8 @@ def read_wofost_data():
     doys = [int(x.strftime("%j")) for x in sim_times]
     return param_array, sim_times, sim_lai, sim_yields, doys
 
+# Read ensemble
+param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data()
 
 
 
