@@ -5,10 +5,9 @@ import requests
 import json
 import datetime
 import pandas as pd
-from pathlib import Path
 from pygeotile.tile import Tile
 from shapely import geometry
-from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot
+from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot, Scatter
 from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
@@ -221,6 +220,116 @@ lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
 
 # from ipywidgets import IntSlider
 
+# def read_wofost_data(fname):
+#     f = np.load(fname, allow_pickle=True)
+#     parameters = f.f.parameters
+#     t_axis = f.f.t_axis
+#     samples = f.f.samples
+#     lais = f.f.lais
+#     yields = f.f.yields
+#     DVS = f.f.DVS
+#     print("loading simulations")
+#     doys = [int(datetime.datetime.utcfromtimestamp(i.tolist()/1e9).strftime('%j')) for i in t_axis]
+#     return parameters, t_axis, samples, lais, yields, DVS, doys
+
+# parameters, t_axis, samples, lais, yields, DVS, simu_doys = read_wofost_data('data/wofost_sims_dvs150.npz')
+
+def read_wofost_data(lat, lon, year):
+    """Reads ensemble from JASMIN"""
+    # lat, lon = my_map.center
+    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+    print(lat, lon, year)
+    f = create_ensemble(lat, lon, year)
+    max_lai = np.nanmax(f.f.LAI, axis=1)
+    y = f.f.Yields.astype(float)
+    lai = f.f.LAI.astype(float)
+    param_names = paras
+
+    param_array = np.array([f[i]
+                            for i in param_names]).astype(float)
+
+    pred_yield = max_lai * 1500 - 700
+    passer = np.abs(pred_yield - y) < 100.
+    sim_yields = y[passer]
+    sim_lai = lai[passer, :]
+    param_array = param_array[:, passer]
+    sim_times = f.f.sim_times
+
+    doys = [int(x.strftime("%j")) for x in sim_times]
+    return param_array, sim_times, sim_lai, sim_yields, doys
+
+
+
+
+# Button needs to be centered
+assimilate_me_button = Button(
+    description='Assimilate Me!',
+    disabled=False,
+    button_style='danger', 
+    tooltip='Click me',
+    icon='check',
+    layout = Layout(display='flex',
+                    flex_flow='horizontal',
+                    align_items='center',
+                    justify_content="center",
+                    width='30%'))
+
+def assimilate_me(b):
+    # Needs obs LAI & obs LAI times
+    # global pix_lai, doys
+    doys = line_axs[-1].x
+    pix_lai = line_axs[-1].y
+    
+#     step = 5
+#     bin_doys = np.arange(doys.min(), doys.max(), step)
+#     pix_lai = np.interp(bin_doys, doys, pix_lai)
+#     doys = bin_doys
+    
+    bin_lais = []
+    bin_doys = []
+    step = 10
+    for i in np.arange(doys.min(), doys.max()-step, step):
+        mm = (doys >= i) * (doys <=i+step)
+        bin_lai = np.nanmean(pix_lai[mm])
+        if not np.isnan(bin_lai):
+            bin_lais.append(bin_lai)
+            bin_doys.append(int(i + step / 2))
+    pix_lai = np.array(bin_lais)
+    doys = np.array(bin_doys)
+    print(pix_lai)
+    lat, lon = my_map.center
+    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+    year = 2021
+    # Read ensemble
+    param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data(lat, lon, year)
+
+
+    t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
+              for x in doys])
+    est_yield, est_yield_sd, parameters, _, _ , ensemble_lai_time, lai_fitted_ensembles = ensemble_assimilation(
+        param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
+    
+    for i, para in enumerate(paras):
+        wofost_sliders_dict[para].value = np.mean(parameters[i])
+    
+    ensemble_lai_time = [int(i.strftime('%j')) for i in ensemble_lai_time]
+    
+    wofost_out_dict['LAI'].marks[2].x = ensemble_lai_time
+    wofost_out_dict['LAI'].marks[2].y = lai_fitted_ensembles
+
+    print(est_yield)
+    # est_yield: mean estimated yield for this LAI set of observations
+    # est_yield_sd: standard deviation for the yield estimate
+    # parameters: list with parameters of selected ensemble members
+    # lai_fitted_ensembles: list with selected LAI simulations
+    # TOOD:
+    # 1. Update sliders with ?mean/median parameters?
+    # 2. Probably run wofost with solution parameters (or just plot ensemble?)
+    # 3. Update plots of LAI and TWSO
+    
+# Link assimilate button to function
+assimilate_me_button.on_click(assimilate_me)    
+
 
 
 # k_slider1 = IntSlider(min=181, max=224, value=200,        # Opacity is valid in [0,1] range
@@ -315,7 +424,6 @@ lon = -2.7
 lat = 8.20
 year = 2021
 
-
 @debounce(0.2)
 def on_change_wofost_slider(change):
     
@@ -331,22 +439,21 @@ def on_change_wofost_slider(change):
         paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]
         for para in paras_to_overwrite:    
             ens_parameters[para] = wofost_sliders_dict[para].value
+        # ens_parameters['AMAXTB'] = [0, 55.0, 1.5, wofost_sliders_dict['AMAXTB_150'].value]
+        
         ens_parameters['AMAXTB'] = [0, wofost_sliders_dict['AMAXTB_000'].value,
                                    1.25, wofost_sliders_dict['AMAXTB_125'].value,
                                    1.50, wofost_sliders_dict['AMAXTB_150'].value,
-                                   2.0, wofost_sliders_dict['AMAXTB_200'].value
+                                   2.0, 2
                                    ]
-        print(ens_parameters)
-        df = wofost_parameter_sweep_func(year, 
-                                         ens_parameters = ens_parameters.copy(), 
-                                         meteo=meteo_file)
+        
+        df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
         dates = df.index
         doys = [int(i.strftime('%j')) for i in dates]
         
         # wofost_lai_fig.x = doys
         # wofost_lai_fig.y = np.array(df.LAI)
-        wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST',
-                            'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
+        wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
         for wofost_out_para in wofost_out_paras:
             if wofost_out_para != 'TWSO':
                 wofost_out_dict[wofost_out_para].marks[0].x = doys
@@ -365,74 +472,10 @@ def on_change_wofost_slider(change):
         # lai_fig.axes[0].scale = LinearScale(max=365.0, min=180.0)
 
 prior_df = pd.read_csv('data/par_prior_maize_tropical-C.csv')
-paras = prior_df["#PARAM_CODE"].str.strip().tolist()
+paras = ['TDWI', 'SDOY', 'SPAN', 'CVO', 'AMAXTB_000', 'AMAXTB_125', 'AMAXTB_150']
 all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
 para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
-
-
-def read_wofost_data():
-    """Reads ensemble from JASMIN"""
-    lat, lon = my_map.center
-    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
-    print(lat, lon, year)
-    f = create_ensemble(lat, lon, year)
-    max_lai = np.nanmax(f.f.LAI, axis=1)
-    y = f.f.Yields.astype(float)
-    lai = f.f.LAI.astype(float)
-    param_names = paras
-
-    param_array = np.array([f[i]
-                            for i in param_names]).astype(float)
-
-    pred_yield = max_lai * 1500 - 700
-    passer = np.abs(pred_yield - y) < 100.
-    sim_yields = y[passer]
-    sim_lai = lai[passer, :]
-    param_array = param_array[:, passer]
-    sim_times = f.f.sim_times
-
-    doys = [int(x.strftime("%j")) for x in sim_times]
-    return param_array, sim_times, sim_lai, sim_yields, doys
-
-# Read ensemble
-param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data()
-
-
-
-# Button needs to be centered
-assimilate_me_button = Button(
-    description='Assimilate Me!',
-    disabled=False,
-    button_style='danger', 
-    tooltip='Click me',
-    icon='check',
-    layout = Layout(display='flex',
-                    flex_flow='horizontal',
-                    align_items='center',
-                    justify_content="center",
-                    width='30%'))
-
-def assimilate_me(b):
-    # Needs obs LAI & obs LAI times
-    global pix_lai, doys
-    print(pix_lai)
-    t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
-              for x in doys])
-    est_yield, est_yield_sd, parameters, _, _ , _, lai_fitted_ensembles = ensemble_assimilation(
-        param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
-    # est_yield: mean estimated yield for this LAI set of observations
-    # est_yield_sd: standard deviation for the yield estimate
-    # parameters: list with parameters of selected ensemble members
-    # lai_fitted_ensembles: list with selected LAI simulations
-    # TOOD:
-    # 1. Update sliders with ?mean/median parameters?
-    # 2. Probably run wofost with solution parameters (or just plot ensemble?)
-    # 3. Update plots of LAI and TWSO
-    
-# Link assimilate button to function
-assimilate_me_button.on_click(assimilate_me)    
-
 
 for i in range(len(paras)):
     para_ind = para_inds[i]
@@ -518,8 +561,10 @@ for wofost_out_para in wofost_out_paras:
     para_figs.append(para_fig)
 wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
-obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
-wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line]
+# obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
+obs_lai_line  = Scatter(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, default_size=4, colors = ['green'])    
+ens_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['#cccccc'])
+wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line, ens_lai_line]
 
 twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='dashed', colors=['gray'], fill='between')
 twso_hline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#ffa500'], fill='between')
@@ -543,9 +588,11 @@ wofost_output_dropdown2 = Dropdown(
     # description="Field ID:",
 )
 
+
+
 wofost_output_dropdowns = HBox([wofost_output_dropdown1, wofost_output_dropdown2], layout = Layout(display='flex',
                                   flex_flow='horizontal',
-                                  align_items='center',
+                                  align_items='flex-start',
                                   width='100%'))
 
 
@@ -599,8 +646,6 @@ def on_change_dropdown2(change):
                                   width='400px'))
     tab.children = [panel_box, wofost_box]
 
-
-    
 wofost_out_panel = HBox([left_output, right_output])
 wofost_widgets = wofost_sliders + [assimilate_me_button, wofost_out_panel]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
@@ -610,7 +655,7 @@ wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
-                                  align_items='flex-start',
+                                  align_items='center',
                                   width='400px'))
 
 
@@ -714,6 +759,15 @@ yield_img = None
 yield_control = None
 daily_img = None
 maize_markers = []
+
+
+lai_colorbar_f = get_lai_color_bar()
+image = lai_colorbar_f.getvalue()
+lai_colorbar_output = widgetIMG(value=image, format='png',)
+# lai_colorbar_output.layout.object_fit = 'contain'
+lai_colorbar_label = Label('$$LAI [m^2/m^2]$$')
+# lai_box = VBox([lai_label, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
+
 def on_click(change):
     global field_id
     global field_bounds
@@ -732,7 +786,6 @@ def on_click(change):
     my_map.zoom = zoom
     tile = Tile.for_latitude_longitude(*my_map.center, zoom)
     x, y = tile.tms
-
 
 
     for i in range(x- 3, x + 4):
@@ -819,8 +872,8 @@ def on_click(change):
     yield_label = Label('%s Field yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
     yield_label2 = Label('$$Yield [kg/ha]$$')
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    yield_box = VBox([yield_label, yield_label2, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    
+    yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
+    # yield_lai_box = VBox([yield_box, lai_box])
     yield_field_photo_tab = Tab([yield_box, field_image_tab])
     yield_field_photo_tab.set_title(0, 'Field Yield')
     yield_field_photo_tab.set_title(1, 'Field Photos')
@@ -1057,12 +1110,7 @@ slider2.observe(on_change_slider2)
 jslink((play, 'value'), (slider2, 'index'))
 # label = 
 # display(label)
-lai_colorbar_f = get_lai_color_bar()
-image = lai_colorbar_f.getvalue()
-output = widgetIMG(value=image, format='png',)
-output.layout.object_fit = 'contain'
-lai_label = Label('$$LAI [m^2/m^2]$$')
-lai_box = VBox([lai_label, output])
+
 
 
 play_label = Label('Click to play LAI movie over field: %s'%field_id)
@@ -1073,8 +1121,8 @@ play_box = VBox([play_label, play_box])
 
 widget_control2 = WidgetControl(widget=play_box, position="bottomright")
 my_map.add_control(widget_control2)
-lai_control = WidgetControl(widget=lai_box, position="bottomright")
-my_map.add_control(lai_control)
+# lai_control = WidgetControl(widget=lai_box, position="bottomright")
+# my_map.add_control(lai_control)
 
 def random_color(feature):
     return {
@@ -1156,6 +1204,7 @@ def handle_interaction(**kwargs):
             pix_cab, pix_lai = mean_bios
 
             max_ind = np.argmax(pix_lai)
+
             field_max = lais[:, max_ind].max()
             field_min = lais[:, max_ind].min() 
 
@@ -1163,14 +1212,8 @@ def handle_interaction(**kwargs):
             lai_ratio = (pix_lai.max() - 0) / (field_max - 0)
             # print(field_max, field_min)
             # print(lai_ratio)
-            
 
-            try:
-                icon = Icon(icon_url='data/leaf-green.png',
-                            icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
-            except ValueError:
-                icon = Icon(icon_url='https://leafletjs.com/SlavaUkraini/examples//custom-icons/leaf-green.png',
-                            icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
+#             icon = Icon(icon_url='https://leafletjs.com/examples/custom-icons/leaf-green.png', icon_size=[(38*lai_ratio), int(95*lai_ratio)], icon_anchor=[22,94])
             maize_icon = Icon(icon_url='https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Ghana_workshop2022/imgs/maize.png', 
                         icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
                         icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])

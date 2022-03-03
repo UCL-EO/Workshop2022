@@ -391,7 +391,13 @@ def wofost_parameter_sweep_func(
     parameters = ParameterProvider(
         cropdata=cropdata, soildata=soildata, sitedata=sitedata
     )
+    
+    parameters["SMW"] = 0.095
+    parameters["SMFCF"] =  0.31
+    parameters["SM0"] = 0.475 
+    parameters["CRAIRC"] = 0.075
 
+    
     sowing_doy = int(np.round(ens_parameters.pop("SDOY")))
     for k, v in ens_parameters.items():
         parameters.set_override(k, v, check=True)
@@ -525,7 +531,7 @@ def ensemble_assimilation(
     sigma_lai=0.05,
     obs_yield = None,
     sigma_yield=1.,
-    sel_n_best=20,
+    sel_n_best=5,
     fit_tail_end=False
 ):
     """A function that performs ensemble assimilation. Requires:
@@ -562,7 +568,9 @@ def ensemble_assimilation(
 
     # Get observations that match the simulation period
     passer = obs_lai_time<= sim_times.max()
+    passer = (obs_lai>0.5) & (obs_lai_time<= sim_times.max())
     obs_dates = obs_lai_time[passer]
+    
     obs_lai = obs_lai[passer]
     if fit_tail_end:
         iloc = np.argmax(obs_lai)-5

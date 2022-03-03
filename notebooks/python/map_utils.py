@@ -150,7 +150,7 @@ def get_field_yield():
 
 def get_lai_color_bar():
     
-    fig = plt.figure(figsize=(5, 2))
+    fig = plt.figure(figsize=(8, 3))
     ax = fig.add_axes([0.05, 0.8, 0.5, 0.07])
     cmap = plt.cm.YlGn
     norm = mpl.colors.Normalize(vmin=0, vmax=2.5)
