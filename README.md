@@ -30,7 +30,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * Perspectives and needs: MOFA yield estimation director [20 mins]
 * Overview and achioevements: Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
-* Climate and yield: Dilys MacArthy [20 mins]
+* Climate and yield: Dilys MacCarthy [20 mins]
 * Weather and yield in-season forecast: Nicola Pounder, Assimila [20 mins]
 * Discussion and future priorities [GSSTI to chair] [15 mins]
 
@@ -41,6 +41,8 @@ Practical Session [11:20:12:40] [1:40-2:00]
 Groups of 5, run each session x 4 
 
 [Practicals](https://mybinder.org/v2/gh/jgomezdans/binder-sandbox/master?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCL-EO%252FWorkshop2022%26urlpath%3Dlab%252Ftree%252FWorkshop2022%252Fnotebooks%26branch%3Dmain):
+
+• You may want to [register for a GEE account](https://earthengine.google.com/signup/) before starting the practicals.
 
 -   [DEA showcase]: DEA Edward Boamah
 -   [Biophysical binder (Feng)](https://github.com/UCL-EO/Workshop2022/issues/13#issue-1150356786): EO & field data explorer

@@ -76,6 +76,12 @@ igbpLandCoverVis3 = {
     '78d203', '05450a', '54a708', 'f9ffa4', 'a5a5a5']
 }
 
+defaultVisualizationVis = {
+    'min': 0.0,
+    'max': 100.0,
+    'palette': ['e1e4b4', '999d60', '2ec409', '0a4b06'],
+}
+
 colorized_vis = {
                  'Lai': lai_colorized_vis,\
                  'NDVI': ndvi_colorized_vis,\
@@ -83,7 +89,8 @@ colorized_vis = {
                  'EVI': ndvi_colorized_vis,\
                  'LC_Type1': igbpLandCoverVis,\
                  'LC_Type2': igbpLandCoverVis,
-                 'LC_Type3': igbpLandCoverVis3
+                 'LC_Type3': igbpLandCoverVis3,\
+                 'FparLai_QC': defaultVisualizationVis
 }
 
 
@@ -197,10 +204,25 @@ def load_landsat_collection(year, aoi, cloud_tolerance=3.0,
         return all_sr_image, mean_image, median_image, ndvi_image
 
 
+def bitwiseExtract(qa_value, fromBit, toBit=-1):
+    if toBit == -1:
+        toBit = fromBit
+    maskSize = ee.Number(1).add(toBit).subtract(fromBit)
+    mask = ee.Number(1).leftShift(maskSize).subtract(1)
+    return qa_value.rightShift(fromBit).bitwiseAnd(mask)
+
+
+def filterqa(image):
+    qa = image.select('FparLai_QC')
+    good = bitwiseExtract(qa, 0) # returns 0 for good quality
+    return image.updateMask(not(good))
+
+
 def load_modis_collection(year, aoi,
                           collection='MOD13Q1',
                           band='NDVI', scale=0.0001,
-                          TIME_REDUCER='None', DISPLAY_REDUCED_ON_MAP=False):
+                          TIME_REDUCER='None', DISPLAY_REDUCED_ON_MAP=False,
+                          onlyGoodQA=False):
     '''This function allows GEE to display a MODIS data collection
     from any year
     that fall within the AOI and cloud tolerance, e.g. 3.0%.
@@ -211,7 +233,7 @@ def load_modis_collection(year, aoi,
     assert year >= 2000
     # print('TIME_REDUCER=',TIME_REDUCER, 'DISPLAY_REDUCED_ON_MAP=', DISPLAY_REDUCED_ON_MAP)
 
-    # if not LC, filter maize planitng season only, or whole year f'{year}-01-01', f'{year}-12-31
+    # if not LC, filter maize planting season only, or whole year f'{year}-01-01', f'{year}-12-31
     if collection == 'MCD12Q1':
         start_date = f'{year}-01-01'
         end_date = f'{year}-12-31'
@@ -222,8 +244,13 @@ def load_modis_collection(year, aoi,
     all_image = ee.ImageCollection(f"MODIS/006/{collection}") \
         .filterBounds(aoi) \
         .filterDate(start_date, end_date) \
-        .sort('system:time_start') \
-        .select(band)
+        .sort('system:time_start')
+
+    if onlyGoodQA:
+        all_image = all_image.map(filterqa).select(band)
+        print('QA Filter applied.')
+    else:
+        all_image = all_image.select(band)
     # .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 10)
 
     # print('-------all_image----------',all_image.getInfo())
@@ -259,14 +286,16 @@ def load_modis_collection(year, aoi,
         return all_image, None
 
 
-def load_modis_band(band, year, aoi, TIME_REDUCER):
+def load_modis_band(band, year, aoi, TIME_REDUCER, applyQA=False):
     ''' Define VIs or LandCover bands and their associated MODIS collections
     and Reduce to per_district (spatial) mean/median LAI '''
     layers = {'NDVI': 'MOD13Q1', 'EVI': 'MOD13Q1', \
               'Lai': 'MCD15A3H', \
+              'FparLai_QC': 'MCD15A3H', \
               'LC_Type1': 'MCD12Q1', 'LC_Type2': 'MCD12Q1', 'LC_Type3': 'MCD12Q1'}
     scales = {'NDVI': 0.0001, 'EVI': 0.0001, \
               'Lai': 0.1, \
+              'FparLai_QC': 1, \
               'LC_Type1': 1, 'LC_Type2': 1, 'LC_Type3': 1}
 
     # find modis collection:
@@ -276,15 +305,16 @@ def load_modis_band(band, year, aoi, TIME_REDUCER):
     collection_all, annual_mean = load_modis_collection(year, aoi, \
                                                         collection=collection, band=band, scale=scale, \
                                                         TIME_REDUCER=TIME_REDUCER,
-                                                        DISPLAY_REDUCED_ON_MAP=(TIME_REDUCER != 'None'))
+                                                        DISPLAY_REDUCED_ON_MAP=(TIME_REDUCER != 'None'),
+                                                        onlyGoodQA=applyQA)
     # print(collection_all.getInfo(), '--'*20)
     # print(annual_mean.getInfo(), '=='*20)
 
     return collection_all, annual_mean
 
 
-def load_modis_lc(band, year, aoi, cropclasses=[10]):
-    collection_all, annual_mean_lc = load_modis_band(band, year, aoi, 'mean')
+def load_modis_lc(band, year, aoi, cropclasses=[10], applyQA=False):
+    collection_all, annual_mean_lc = load_modis_band(band, year, aoi, 'mean', applyQA=applyQA)
     # print(annual_mean_lc.getInfo())
 
     '''Reclassify Yearly Land Cover into a Grassland only image 'cropland'.
