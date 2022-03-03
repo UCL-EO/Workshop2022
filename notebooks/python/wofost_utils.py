@@ -424,7 +424,7 @@ def create_ensemble(
     lat,
     lon,
     year,
-    en_size=50,
+    en_size=20_000,
     param_file="data/par_prior_maize_tropical-C.csv",
     cropfile="data/MAIZGA-C.CAB",
     soil="data/ec4.new",
@@ -449,6 +449,7 @@ def create_ensemble(
             return retval
 
     print("Getting meteo data from EarthEngine")
+    en_size = 50 # Reduce number of simulations
     meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
     (
         prior_dist,
