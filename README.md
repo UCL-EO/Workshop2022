@@ -17,7 +17,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * Cropping issues in North of Ghana: ADRA Kankam Boadu [20 mins]
 * Overview and achievements: Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
-* Weather and yield in-season forecast: Nicola Pounder, Assimila [20 mins]
+* [Weather and yield in-season forecast](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/Assimila%20status%20and%20ouputs.pptx): Nicola Pounder, Assimila [20 mins]
 * Discussion and future priorities [GSSTI to chair] [15 mins]
 
 
@@ -31,7 +31,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * Overview and achioevements: Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
 * Climate and yield: Dilys MacCarthy [20 mins]
-* Weather and yield in-season forecast: Nicola Pounder, Assimila [20 mins]
+* [Weather and yield in-season forecast](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/Assimila%20status%20and%20ouputs.pptx): Nicola Pounder, Assimila [20 mins]
 * Discussion and future priorities [GSSTI to chair] [15 mins]
 
 
@@ -47,7 +47,7 @@ Groups of 5, run each session x 4
 -   [DEA showcase]: DEA Edward Boamah
 -   [Biophysical binder (Feng)](https://github.com/UCL-EO/Workshop2022/issues/13#issue-1150356786): EO & field data explorer
 -   [Weather data and within-season demonstrator??] (Nicola)
--   [Model data assimilation] (Jose/Hongyuan): Crop model sliders, DA-Me, yield context plot
+-   [Model data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan): Crop model sliders, DA-Me, yield context plot
 -   [Maize mapper](notebooks/CAU_Interface_Ghana_V1.ipynb)  **** CAU classification,  MOFA yield (GEE) Qingling
 -   [Field measurements demo] Kenneth
 -   [LAI anywhere + DA-Me] Kofi
@@ -62,9 +62,9 @@ Workshop technical presentations 2:30-4:00
 
 -  Classification (cau)
 -  DEA classification in Ghana 
--  Crop modelling & ensembles: (Hongyuan)
--  EO interpretation (talk on issues and methods) (feng)
--  Introduction to data assimilation (Jose/Hongyuan/CAU)
+-  [Crop modelling & ensembles](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/WOFOST%20Crop%20Model%20and%20Ensemble%20Generation-Hongyuan.pptx): (Hongyuan)
+-  [EO interpretation](https://liveuclac-my.sharepoint.com/:p:/g/personal/ucfafyi_ucl_ac_uk/EVlH9lVhJnlKi4oHdItIhLkBoSCtOasAouhNuseoSlaVeg?e=7egrDY) (talk on issues and methods) (feng)
+-  [Introduction to data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan/CAU)
 -  Discussion and Reflections: GSSTI (Kofi to lead)
 
 ## Layout
