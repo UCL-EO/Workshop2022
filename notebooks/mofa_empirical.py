@@ -76,6 +76,26 @@ igbpLandCoverVis3 = {
     '78d203', '05450a', '54a708', 'f9ffa4', 'a5a5a5']
 }
 
+
+era5TemperatureVis = {
+  'min': 250.0,
+  'max': 320.0,
+  'palette': [
+    "#000080","#0000D9","#4000FF","#8000FF","#0080FF","#00FFFF",
+    "#00FF80","#80FF00","#DAFF00","#FFFF00","#FFF500","#FFDA00",
+    "#FFB000","#FFA400","#FF4F00","#FF2500","#FF0A00","#FF00FF"]
+}
+
+
+era5PrecipitationVis = {
+  'min': 0.0,
+  'max': 0.04,
+  'palette': [
+    "#000080","#0000D9","#4000FF","#8000FF","#0080FF","#00FFFF",
+    "#00FF80","#80FF00","#DAFF00","#FFFF00","#FFF500","#FFDA00",
+    "#FFB000","#FFA400","#FF4F00","#FF2500","#FF0A00","#FF00FF"]
+}
+
 defaultVisualizationVis = {
     'min': 0.0,
     'max': 100.0,
@@ -90,7 +110,9 @@ colorized_vis = {
                  'LC_Type1': igbpLandCoverVis,\
                  'LC_Type2': igbpLandCoverVis,
                  'LC_Type3': igbpLandCoverVis3,\
-                 'FparLai_QC': defaultVisualizationVis
+                 'FparLai_QC': defaultVisualizationVis,\
+                 'Prec': era5PrecipitationVis,\
+                 'Temp': era5TemperatureVis
 }
 
 
@@ -274,7 +296,7 @@ def load_modis_collection(year, aoi,
         if DISPLAY_REDUCED_ON_MAP == True:
             Map.addLayer(reduced_image, colorized_vis[band], f"{TIME_REDUCER} {band} {year}", opacity=0.7)
 
-        print(f'MODIS {band} and mean both SUCCESS for {year}')
+        #print(f'MODIS {band} and mean both SUCCESS for {year}')
         return all_image, reduced_image
     else:
         print(f'Returning MODIS {band} time series (no time-reducer)')
