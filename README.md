@@ -63,7 +63,7 @@ Workshop technical presentations 2:30-4:00
 -  Classification (cau)
 -  DEA classification in Ghana 
 -  Crop modelling & ensembles: (Hongyuan)
--  EO interpretation (talk on issues and methods) (feng)
+-  [EO interpretation](https://liveuclac-my.sharepoint.com/:p:/g/personal/ucfafyi_ucl_ac_uk/EVlH9lVhJnlKi4oHdItIhLkBoSCtOasAouhNuseoSlaVeg?e=7egrDY) (talk on issues and methods) (feng)
 -  Introduction to data assimilation (Jose/Hongyuan/CAU)
 -  Discussion and Reflections: GSSTI (Kofi to lead)
 
