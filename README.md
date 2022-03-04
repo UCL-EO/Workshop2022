@@ -47,7 +47,7 @@ Groups of 5, run each session x 4
 -   [DEA showcase]: DEA Edward Boamah
 -   [Biophysical binder (Feng)](https://github.com/UCL-EO/Workshop2022/issues/13#issue-1150356786): EO & field data explorer
 -   [Weather data and within-season demonstrator??] (Nicola)
--   [Model data assimilation] (Jose/Hongyuan): Crop model sliders, DA-Me, yield context plot
+-   [Model data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan): Crop model sliders, DA-Me, yield context plot
 -   [Maize mapper](notebooks/CAU_Interface_Ghana_V1.ipynb)  **** CAU classification,  MOFA yield (GEE) Qingling
 -   [Field measurements demo] Kenneth
 -   [LAI anywhere + DA-Me] Kofi
@@ -64,7 +64,7 @@ Workshop technical presentations 2:30-4:00
 -  DEA classification in Ghana 
 -  Crop modelling & ensembles: (Hongyuan)
 -  [EO interpretation](https://liveuclac-my.sharepoint.com/:p:/g/personal/ucfafyi_ucl_ac_uk/EVlH9lVhJnlKi4oHdItIhLkBoSCtOasAouhNuseoSlaVeg?e=7egrDY) (talk on issues and methods) (feng)
--  Introduction to data assimilation (Jose/Hongyuan/CAU)
+-  [Introduction to data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan/CAU)
 -  Discussion and Reflections: GSSTI (Kofi to lead)
 
 ## Layout
