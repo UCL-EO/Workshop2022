@@ -623,7 +623,7 @@ def on_change_dropdown1(change):
     wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
-                                  align_items='flex-start',
+                                  align_items='center',
                                   width='400px'))
     tab.children = [panel_box, wofost_box]
 
@@ -642,7 +642,7 @@ def on_change_dropdown2(change):
     wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
-                                  align_items='flex-start',
+                                  align_items='center',
                                   width='400px'))
     tab.children = [panel_box, wofost_box]
 

@@ -568,7 +568,7 @@ def ensemble_assimilation(
 
     # Get observations that match the simulation period
     passer = obs_lai_time<= sim_times.max()
-    passer = (obs_lai>0.5) & (obs_lai_time<= sim_times.max())
+    passer = (obs_lai>0.25) & (obs_lai_time<= sim_times.max())
     obs_dates = obs_lai_time[passer]
     
     obs_lai = obs_lai[passer]
