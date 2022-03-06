@@ -263,7 +263,7 @@ def read_wofost_data(lat, lon, year):
 
 # Button needs to be centered
 assimilate_me_button = Button(
-    description='Assimilate Me!',
+    description='Fit LAI!',
     disabled=False,
     button_style='danger', 
     tooltip='Click me',
@@ -316,7 +316,7 @@ def assimilate_me(b):
     
     wofost_out_dict['LAI'].marks[2].x = ensemble_lai_time
     wofost_out_dict['LAI'].marks[2].y = lai_fitted_ensembles
-
+    wofost_out_dict['LAI'].marks[2].display_legend = False
     print(est_yield)
     # est_yield: mean estimated yield for this LAI set of observations
     # est_yield_sd: standard deviation for the yield estimate
@@ -477,6 +477,16 @@ all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min'
 para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
 
+para_meaning = {'TDWI': 'Initial total crop dry weight [kg ha-1]',
+                'SDOY': 'Sowing day of year',
+                'SPAN': 'Life span of leaves growing at 35 Celsius [d]',
+                'CVO' : 'Efficiency of conversion into storage org. [kg kg-1]',
+                'AMAXTB_000': 'Max. leaf CO2 assim. rate at development stage of 0',
+                'AMAXTB_125': 'Max. leaf CO2 assim. rate at development stage of 1.25',
+                'AMAXTB_150': 'Max. leaf CO2 assim. rate at development stage of 1.5',
+               }
+
+
 for i in range(len(paras)):
     para_ind = para_inds[i]
     para_name = all_paras[para_ind]
@@ -490,6 +500,7 @@ for i in range(len(paras)):
                    readout=True,                # No need to show exact value
                    layout=Layout(width='100%'),
                    description='%s: '%para_name, 
+                   description_tooltip= para_meaning[para_name],
                    style={'description_width': 'initial'}) 
     wofost_slider.observe(on_change_wofost_slider)
     wofost_sliders.append(wofost_slider)
@@ -523,7 +534,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     # ymax = np.nanpercentile(y[mm], 97.5) * 1.1
     y_scale = LinearScale(min = ymin  , max = ymax)
     
-    line = Lines(x=x, y=y, scales={"x": x_scale, "y": y_scale})
+    line = Lines(x=x, y=y, scales={"x": x_scale, "y": y_scale}, labels = 'Simu. %s'%para_name, display_legend=True)
     tick_style = {'font-size': 8}
     tick_values = np.linspace(ymin, ymax, 4)
     tick_values
@@ -537,6 +548,9 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
                        title=para_name, 
                        animation_duration=500, 
                        title_style = {'font-size': '8'},
+                       legend_text={'font-size': 7},
+                       legend_location = 'top-left',
+                       legend_style={'width': '40%', 'height': '30%', 'stroke-width':0},
                        fig_margin = dict(top=16, bottom=16, left=26, right=16))
 
     return para_fig
@@ -562,17 +576,35 @@ for wofost_out_para in wofost_out_paras:
 wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
 # obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
-obs_lai_line  = Scatter(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, default_size=4, colors = ['green'])    
-ens_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['#cccccc'])
-wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line, ens_lai_line]
+obs_lai_line  = Scatter(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
+                        default_size=4, colors = ['green'], display_legend=True, labels=['Planet LAI'])    
+ens_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
+                     colors = ['#cccccc'], display_legend=False, labels=['Ensemble LAI'])
 
-twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='dashed', colors=['gray'], fill='between')
-twso_hline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#ffa500'], fill='between')
-twso_shade = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1])
-
-wofost_out_dict['TWSO'].marks = [twso_shade, wofost_out_dict['TWSO'].marks[0],  twso_hline]
+ens_lai_line_temp = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
+                     colors = ['#cccccc'], display_legend=True, labels=['Ensemble LAI'])
 
 
+wofost_out_dict['LAI'].marks[0].display_legend=True
+
+wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line, ens_lai_line, ens_lai_line_temp]
+
+twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
+                   line_style='dashed', colors=['gray'], fill='between')
+
+twso_hline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
+                   line_style='solid', colors=['#ffa500'], fill='between', display_legend=True, labels = ['Avg. Field Yield'])
+
+twso_shade = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
+                   line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1], display_legend=False, labels = ['1σ'])
+
+twso_shade_temp = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
+                   line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1], display_legend=True, labels = ['1σ'])
+
+
+wofost_out_dict['TWSO'].marks = [twso_shade, wofost_out_dict['TWSO'].marks[0],  twso_hline, twso_shade_temp]
+wofost_out_dict['TWSO'].legend_location = 'bottom-left'
+wofost_out_dict['TWSO'].marks[1].display_legend=True
 
 wofost_output_dropdown1 = Dropdown(
     options=wofost_out_paras,
