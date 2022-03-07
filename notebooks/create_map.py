@@ -799,6 +799,9 @@ lai_colorbar_output = widgetIMG(value=image, format='png',)
 # lai_colorbar_output.layout.object_fit = 'contain'
 lai_colorbar_label = Label('$$LAI [m^2/m^2]$$')
 # lai_box = VBox([lai_label, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
+loading_bar_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/loading.gif'
+loading_bar = requests.get(loading_bar_url)
+
 
 def on_click(change):
     global field_id
@@ -839,6 +842,17 @@ def on_click(change):
     if yield_control is not None:
         
         my_map.remove_control(yield_control)
+        
+    loading_bar_img = widgetIMG(value=loading_bar.content,
+      format='gif', 
+      width=30,
+      height=40,
+    )
+    loading_label = Label('Loading data over field %s'%field_id)
+    loading_info = HBox([loading_bar_img, loading_label])
+    yield_control = WidgetControl(widget=loading_info, position='bottomleft')
+
+    my_map.add_control(yield_control)
         
     url, bounds, doys, yield_colorbar_f = get_lai_gif(field_id)
 
@@ -912,7 +926,10 @@ def on_click(change):
     yield_field_photo_tab = Tab([yield_box, field_image_tab])
     yield_field_photo_tab.set_title(0, 'Field Yield')
     yield_field_photo_tab.set_title(1, 'Field Photos')
-     
+    
+    if yield_control is not None:        
+        my_map.remove_control(yield_control)
+        
     yield_control = WidgetControl(widget=yield_field_photo_tab, position='bottomleft')
 
     my_map.add_control(yield_control)
