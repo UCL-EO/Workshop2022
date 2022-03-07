@@ -712,10 +712,10 @@ my_map.add_control(widget_control1)
 
 
 slider = FloatSlider(min=0, max=1, value=1,        # Opacity is valid in [0,1] range
-               orientation='vertical',       # Vertical slider is what we want
+               orientation='horizontal',       # Vertical slider is what we want
                readout=False,                # No need to show exact value
-               layout=Layout(width='2em')) # Fine tune display layout: make it thinner
-my_map.add_control(WidgetControl(widget=slider))
+               layout=Layout(height='2em', width='200px')) # Fine tune display layout: make it thinner
+
 
 tile = Tile.for_latitude_longitude(*my_map.center, zoom)
 x, y = tile.tms
@@ -1174,6 +1174,12 @@ play_box = VBox([play_label, play_box])
 
 widget_control2 = WidgetControl(widget=play_box, position="bottomright")
 my_map.add_control(widget_control2)
+
+
+transparency_label = Label('Transparency:')
+transparency_box = HBox([transparency_label, slider])
+my_map.add_control(WidgetControl(widget=transparency_box, position="bottomright"))
+
 # lai_control = WidgetControl(widget=lai_box, position="bottomright")
 # my_map.add_control(lai_control)
 
@@ -1456,8 +1462,22 @@ k_slider.observe(on_change_k_slider)
 my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
 my_map.add_layer(points)
+
+info_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/info.png'
+info = requests.get(info_url)
+
+info_img = widgetIMG(value=info.content,
+  format='png', 
+  width=30,
+  align="center")
+info_imgs = HBox([info_img])
+info_control = WidgetControl(widget=info_imgs, position='topleft')
+# info_control.transparent_bg=True
+my_map.add_control(info_control)
+
 layer_control = LayersControl(position='topleft')
 my_map.add_control(layer_control)
 
 
 # my_map
+
