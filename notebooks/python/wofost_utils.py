@@ -30,12 +30,7 @@ import ee
 import requests
 import pip
 import shutil
-
-try:
-    from retry import retry
-except ImportError:
-    pip.main(['install', 'retry']) 
-    from retry import retry
+from retry import retry
 
 try:
     ee.Initialize(opt_url="https://earthengine-highvolume.googleapis.com")

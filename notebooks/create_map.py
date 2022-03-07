@@ -41,7 +41,7 @@ field_yields = dict(zip(codes, yields.tolist()))
 zoom = 17
 
 
-defaultLayout=Layout(width='100%', height='640px')
+defaultLayout=Layout(width='100%', height='760px')
 my_map = Map(center=(9.3771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zoom = 19, layout=defaultLayout)
 
 
@@ -263,11 +263,11 @@ def read_wofost_data(lat, lon, year):
 
 # Button needs to be centered
 assimilate_me_button = Button(
-    description='Fit LAI!',
+    description='Auto Fit',
     disabled=False,
     button_style='danger', 
     tooltip='Click me',
-    icon='check',
+    icon='',
     layout = Layout(display='flex',
                     flex_flow='horizontal',
                     align_items='center',
@@ -728,7 +728,7 @@ for i in range(x-3, x + 4):
         image = ImageOverlay(
             url=url,
             bounds = tile.bounds,
-            name = 'bing_basemap_%d'%zoom
+            name = '' #'bing_basemap_%d'%zoom
         )
         my_map.add_layer(image)  
 
@@ -748,7 +748,7 @@ def on_change_zoom(change):
                 image = ImageOverlay(
                     url=url,
                     bounds = tile.bounds,
-                    name = 'bing_basemap_%d'%zoom
+                    #name = 'bing_basemap_%d'%zoom
                 )
                 my_map.add_layer(image)   
 
@@ -827,7 +827,7 @@ def on_click(change):
             image = ImageOverlay(
                 url=url,
                 bounds = tile.bounds,
-                name = 'bing_basemap_%d'%zoom
+                #name = 'bing_basemap_%d'%zoom
             )
             my_map.add_layer(image)   
     print(field_id)
@@ -836,14 +836,17 @@ def on_click(change):
     cwd = '/files/' + '/'.join(home.split('/')[3:])
     base_url = my_map.window_url.split('/lab/')[0] + cwd + '/'
 
+    if yield_control is not None:
+        
+        my_map.remove_control(yield_control)
+        
     url, bounds, doys, yield_colorbar_f = get_lai_gif(field_id)
 
     # daily_img = None
 #     if daily_img in my_map.layers:
 #         my_map.remove_control(daily_img)
 
-    if yield_control is not None:
-        my_map.remove_control(yield_control)
+
 
     image = yield_colorbar_f.getvalue()
     output = widgetIMG(value=image, format='png',)
@@ -950,7 +953,7 @@ def on_click(change):
         yield_img = ImageOverlay(
         url=url,
         bounds = field_bounds,
-        name = 'S2_%s_yield_png'%(field_id)
+        name = 'Yield map'#%(field_id)
         )
         my_map.add_layer(yield_img)
         yield_img.url = url
@@ -960,14 +963,14 @@ def on_click(change):
         yield_img = ImageOverlay(
             url=url,
             bounds = field_bounds,
-            name = 'S2_%s_yield_png'%(field_id)
+            name = 'Yield map'#%(field_id)
         )
         my_map.add_layer(yield_img)
         # daily_img.url = url
         # daily_img.bounds = field_bounds
 
     jslink((slider, 'value'), (yield_img, 'opacity') )
-
+    
     try:
         my_map.remove_layer(daily_img)
     except:
@@ -1114,7 +1117,7 @@ def on_change_slider2(change):
             daily_img = ImageOverlay(
             url=url,
             bounds = field_bounds,
-            name = 'S2_%s_lai_png'%(field_id)
+            name = 'LAI map'#%(field_id)
             )
             my_map.add_layer(daily_img)
             daily_img.url = url
@@ -1122,8 +1125,9 @@ def on_change_slider2(change):
         else:
             daily_img.url = url
             daily_img.bounds = field_bounds
-            daily_img.name = 'S2_%s_lai_png'%(field_id)
+            daily_img.name = 'LAI map'#%(field_id)
         # print(url)
+        jslink((slider, 'value'), (daily_img, 'opacity') )
 
 play = Play(
     value=0,
@@ -1170,6 +1174,7 @@ fields = GeoJSON(
     hover_style={
         'color': 'white', 'dashArray': '0', 'fillOpacity': 0
     },
+    name = 'Field boundaries',
     style_callback=random_color
 )
 
@@ -1186,6 +1191,7 @@ points = GeoJSON(
     hover_style={
         'color': 'white', 'dashArray': '0', 'fillOpacity': 1
     },
+    name = 'Field measurement points',
     # style_callback=random_color
 )
 
@@ -1216,14 +1222,19 @@ def handle_interaction(**kwargs):
         poly = geometry.Polygon(feature['geometry']['coordinates'][0])
 
         if poly.contains(point):    
+            global sels, planet_sur, doys
+            global maize_icon, pix_lai, field_max, field_min, field_lai_boxes, lai_dot, maize_markers, marker_lon, marker_lat, maize_marker
+            
             label.value = 'Maize planted in field: %s'%field_id
-            # global marker
-            # if marker is not None:
-            #     my_map.remove_layer(marker)
+            # global 
+            # if maize_marker is not None:
+            try:
+                my_map.remove_layer(maize_marker)
+                maize_markers = []
+            except:
+                pass
             # marker = Marker(location=location)
 
-            global sels, planet_sur, doys
-            global maize_icon, pix_lai, field_max, field_min, maize_marker, field_lai_boxes, lai_dot, maize_markers, marker_lon, marker_lat
             marker_lon, marker_lat = location
             
             doys, pix_lai, pix_cab, sels, lais, planet_sur = get_pixel(location, field_id)
@@ -1250,7 +1261,7 @@ def handle_interaction(**kwargs):
                         icon_size=[36.5*lai_ratio, 98.5*lai_ratio], 
                         icon_anchor=[36.5/2*lai_ratio, 98.5*lai_ratio])
 
-            maize_marker = Marker(location=location, icon=maize_icon, rotation_angle=0, rotation_origin='22px 94px', draggable=False)
+            maize_marker = Marker(location=location, icon=maize_icon, rotation_angle=0, rotation_origin='22px 94px', draggable=False, name='Maize marker')
             maize_markers.append([maize_marker, lai_ratio])
             
             my_map.add_layer(maize_marker)                        
@@ -1428,8 +1439,8 @@ k_slider.observe(on_change_k_slider)
 my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
 my_map.add_layer(points)
-control = LayersControl(position='topleft')
-my_map.add_control(control)
+layer_control = LayersControl(position='topleft')
+my_map.add_control(layer_control)
 
 
 # my_map
