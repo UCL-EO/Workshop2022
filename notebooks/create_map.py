@@ -433,7 +433,7 @@ def on_change_wofost_slider(change):
         lat, lon = my_map.center
         lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
         print(lat, lon, year)
-        meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
+        meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/ERA5_weather/")
         
         ens_parameters = {}
         paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]

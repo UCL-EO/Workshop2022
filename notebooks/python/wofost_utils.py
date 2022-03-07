@@ -456,7 +456,7 @@ def create_ensemble(
 
     print("Getting meteo data from EarthEngine")
     en_size = 50 # Reduce number of simulations
-    meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/")
+    meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/ERA5_weather/")
     (
         prior_dist,
         param_list,
