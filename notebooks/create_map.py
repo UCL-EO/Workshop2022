@@ -534,7 +534,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     # ymax = np.nanpercentile(y[mm], 97.5) * 1.1
     y_scale = LinearScale(min = ymin  , max = ymax)
     
-    line = Lines(x=x, y=y, scales={"x": x_scale, "y": y_scale}, labels = 'Simu. %s'%para_name, display_legend=True)
+    line = Lines(x=x, y=y, scales={"x": x_scale, "y": y_scale}, labels = 'Wofost %s'%para_name, display_legend=True)
     tick_style = {'font-size': 8}
     tick_values = np.linspace(ymin, ymax, 4)
     tick_values
