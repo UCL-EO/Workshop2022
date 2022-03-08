@@ -8,9 +8,10 @@ import pandas as pd
 from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot, Scatter
-from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button
+from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button, HTML
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
+from ipyevents import Event
 
 
 sys.path.insert(0, './python/')
@@ -642,6 +643,7 @@ right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_drop
 
 def on_change_dropdown1(change):
     global wofost_widgets
+    
     left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
@@ -661,6 +663,7 @@ def on_change_dropdown1(change):
 
 def on_change_dropdown2(change):
     global wofost_widgets
+    
     left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
@@ -940,7 +943,7 @@ def on_click(change):
     slider2.options = dates
     field_bounds = bounds
     url = base_url + url
-
+    print(url)
     field_mask = df.CODE == field_id
 
     field_doys = [int(datetime.datetime(2021, int(i.split('/')[1]), int(i.split('/')[0])).strftime('%j')) for i in df[field_mask].DATE]
@@ -1463,21 +1466,46 @@ my_map.on_interaction(handle_interaction)
 my_map.add_layer(fields)
 my_map.add_layer(points)
 
+
+
 info_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/info.png'
 info = requests.get(info_url)
+
+usage_text_box = VBox([HTML(value = f"<b><font color='red' font weight='bold'>Usage</b>"),
+                       Label('1. Choose a field ID from the dropdown list to load data'),
+                       Label('2. Scroll left to see the field photos in the Field Photos tab'),
+                       Label('3. Using the Date slider to load the LAI over the field or click to play LAI movie'),
+                       Label('4. Click the map within the field to check the pixel values'),
+                       Label('5. Using sliders in the WOFOST simulation tab to fit the field LAI'),
+                       Label('6. Auto fit can automatically fit the Planet LAI'),
+                       ])
 
 info_img = widgetIMG(value=info.content,
   format='png', 
   width=30,
   align="center")
-info_imgs = HBox([info_img])
-info_control = WidgetControl(widget=info_imgs, position='topleft')
-# info_control.transparent_bg=True
-my_map.add_control(info_control)
+info_box = VBox([info_img, usage_text_box])
+info_control = WidgetControl(widget=info_box, position='topleft')
+
+info_image_event = Event(source=info_img, watched_events=['mouseenter', 'mouseleave'])
+def info_image_event_handler(event):
+    if event['event'] == 'mouseenter':
+        info_box.children = [info_img, usage_text_box]
+    if event['event'] == 'mouseleave':
+        info_box.children = [info_img]
+info_image_event.on_dom_event(info_image_event_handler)
+
+
+usage_text_box_event = Event(source=usage_text_box, watched_events=['mouseleave'])
+def usage_text_box_event_handler(event):
+    if event['event'] == 'mouseleave':
+        info_box.children = [info_img]
+usage_text_box_event.on_dom_event(usage_text_box_event_handler)
+
 
 layer_control = LayersControl(position='topleft')
 my_map.add_control(layer_control)
 
-
+my_map.add_control(info_control)
 # my_map
 
