@@ -12,7 +12,7 @@ from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink,
 from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
 from ipywidgets import Image as widgetIMG
 from ipyevents import Event
-
+from bqplot import ColorScale, FlexLine, ColorAxis
 
 sys.path.insert(0, './python/')
 from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
@@ -168,7 +168,10 @@ for i in range(3):
                                title=field_id, 
                                animation_duration=500, 
                                title_style = {'font-size': '8'},
-                               fig_margin = dict(top=16, bottom=16, left=16, right=16))
+                               legend_text={'font-size': 7},
+                               legend_location = 'top-left',
+                               legend_style={'width': '40%', 'height': '30%', 'stroke-width':0},
+                               fig_margin = dict(top=16, bottom=16, left=26, right=16))
 
         fig.title = names[i*2+j]
         figx.append(fig)
@@ -210,7 +213,16 @@ lai_dot = Lines(x=doys[:1], y=[0,], scales=lai_fig.marks[1].scales,line_style='d
 
 wofost_lai = Lines(x=doys, y=np.zeros_like(doys)*np.nan, scales = lai_fig.marks[1].scales)
 
-lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai]
+field_med_lai_line = Lines(x=doys, y=np.zeros_like(doys)*np.nan, 
+                           scales = lai_fig.marks[1].scales,  
+                           colors = ['#20b2aa'], display_legend=True, labels = ['Field LAI median'])
+
+lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai, field_med_lai_line]
+var_line = line_axs[-1]
+
+var_line.labels = ['Pixel LAI']
+var_line.display_legend = True
+
 
 
 
@@ -302,11 +314,14 @@ def assimilate_me(b):
     lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
     year = 2021
     # Read ensemble
+    wofost_status_info.description = 'Getting Wofost ensembles...'
     param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data(lat, lon, year)
-
+    
 
     t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
               for x in doys])
+    
+    wofost_status_info.description = 'Fitting to Planet LAI'
     est_yield, est_yield_sd, parameters, _, _ , ensemble_lai_time, lai_fitted_ensembles = ensemble_assimilation(
         param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
     
@@ -434,6 +449,7 @@ def on_change_wofost_slider(change):
         lat, lon = my_map.center
         lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
         print(lat, lon, year)
+        wofost_status_info.description = 'Reading ERA5 weather data from local or GEE'
         meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/ERA5_weather/")
         
         ens_parameters = {}
@@ -447,8 +463,9 @@ def on_change_wofost_slider(change):
                                    1.50, wofost_sliders_dict['AMAXTB_150'].value,
                                    2.0, 2
                                    ]
-        
+        wofost_status_info.description = 'Running model...'
         df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
+        
         dates = df.index
         doys = [int(i.strftime('%j')) for i in dates]
         
@@ -464,7 +481,10 @@ def on_change_wofost_slider(change):
                 wofost_out_dict[wofost_out_para].marks[1].y = np.array(df.loc[:, wofost_out_para])
         wofost_out_dict['LAI'].marks[2].x = line_axs[-1].x
         wofost_out_dict['LAI'].marks[2].y = line_axs[-1].y
-
+        colored_dvs_line.x = doys
+        colored_dvs_line.y = wofost_out_dict['DVS'].marks[0].y
+        colored_dvs_line.color = wofost_out_dict['DVS'].marks[0].y
+        wofost_status_info.description = 'Done'
         # wofost_out_dict['TWSO'].marks[0].x = doys
         # wofost_out_dict['TWSO'].marks[0].y = np.array(df.TWSO)
         
@@ -557,7 +577,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
                        legend_text={'font-size': 7},
                        legend_location = 'top-left',
                        legend_style={'width': '40%', 'height': '30%', 'stroke-width':0},
-                       fig_margin = dict(top=16, bottom=16, left=26, right=16))
+                       fig_margin = dict(top=16, bottom=16, left=26, right=26))
 
     return para_fig
 
@@ -604,7 +624,6 @@ lai_dot_wofost = Lines(x=[180,], y=[0,], scales=wofost_out_dict['LAI'].marks[0].
 lai_vline = Lines(x=[180, 180], y=[0, 3], scales=wofost_out_dict['LAI'].marks[0].scales, 
                    line_style='solid', colors=['gray'], stroke_width=1)
 
-wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:2] + [obs_lai_line, ens_lai_line, lai_dot_wofost, ens_lai_line_temp]
 
 twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
                    line_style='dashed', colors=['gray'], fill='between')
@@ -618,11 +637,43 @@ twso_shade = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scale
 twso_shade_temp = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
                    line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1], display_legend=True, labels = ['1σ'])
 
+dvs_line = wofost_out_dict['DVS'].marks[0]
 
-wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:2] + [twso_hline, twso_shade_temp]
+colors = ['#e5f5e0', '#a1d99b', '#31a354', '#31a354', '#31a354','#a1d99b', '#ffeda0', '#feb24c']
+col_line = ColorScale(colors=colors)
+
+scales = dvs_line.scales
+scales['color'] = col_line
+
+dvs_yticks = wofost_out_dict['DVS'].axes[1].tick_values
+dvs_yax = Axis(
+    label="DVS",
+    scale=scales['y'],
+    orientation="vertical",
+    side="right",
+    tick_format="0.1f",
+    grid_lines = 'none',
+    tick_values = dvs_yticks,
+    tick_style = {'font-size': 8}
+)
+
+colored_dvs_line = FlexLine(x=dvs_line.x, y=dvs_line.y, color=dvs_line.y,
+                             scales=scales, labels = ['Wofost DVS'], display_legend=False,)
+
+wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:2] + [twso_hline, colored_dvs_line,twso_shade_temp]
 wofost_out_dict['TWSO'].legend_location = 'bottom-left'
 wofost_out_dict['TWSO'].marks[1].display_legend=True
 
+for wofost_out_para in wofost_out_paras:
+    wofost_out_dict[wofost_out_para].axes = wofost_out_dict[wofost_out_para].axes + [dvs_yax,]
+
+for wofost_out_para in ['TAGP', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']:
+    wofost_out_dict[wofost_out_para].marks = wofost_out_dict[wofost_out_para].marks + [colored_dvs_line,]
+
+    
+wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:2] + [obs_lai_line, ens_lai_line, lai_dot_wofost, colored_dvs_line, ens_lai_line_temp]
+    
+    
 wofost_output_dropdown1 = Dropdown(
     options=wofost_out_paras,
     value=wofost_out_paras[1],
@@ -697,8 +748,10 @@ def on_change_dropdown2(change):
                                   width='400px'))
     tab.children = [panel_box, wofost_box]
 
+wofost_status_info = Button(description = '', button_style='info', layout=Layout(width='100%'), disabled=True)
+wofost_status_info.style.button_color = '#999999'
 wofost_out_panel = HBox([left_output, right_output])
-wofost_widgets = wofost_sliders + [assimilate_me_button, wofost_out_panel]
+wofost_widgets = [wofost_status_info, ] + wofost_sliders + [assimilate_me_button, wofost_out_panel]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
@@ -778,29 +831,43 @@ def on_change_zoom(change):
 # my_map.observe(on_change_zoom)
 
 
-def create_field_image_tab(urls):
+def create_field_image_tab(urls, dates):
     field_image_widgets = []
-    for url in urls:
+    for i, url in enumerate(urls):
         r = requests.get(url)
         if r.ok:
             field_image = widgetIMG(
               value=r.content,
               format='png',
-              
+
+              # width = 450,
             )
             field_image.layout.object_fit = 'cover'
-            field_image_widgets.append(field_image)
+            field_image.layout.height = '310px'
+
+            date_str = dates[i]
+            date = datetime.datetime.strptime(date_str, '%Y:%m:%d %H:%M:%S')
+            date_str = date.strftime('%Y-%m-%dT%H:%M:%S  (DOY: %j)')
+
+            date = Label(date_str)
+
+            field_box_layout = Layout(min_width = '250px', overflow='hidden', align_items='center', border='1px solid white',)
+            field_box = VBox([date, field_image], layout = field_box_layout)
+            field_image_widgets.append(field_box)
 
     box_layout = Layout(overflow='scroll hidden',
                         border='0px solid black',
                         width='400px',
-                        height='300px',
+                        height='350px',
+                        # align_items='flex-end',
                         flex_flow='row',
                         display='flex')
     carousel = Box(children=field_image_widgets, layout=box_layout)
     # tab = Tab(field_image_widgets)
     # [tab.set_title(i, '%02d'%(i+1)) for i in range(len(field_image_widgets))]
     return carousel
+
+
 
 with open('./data/Ghana_field_photos.json', 'r') as f:
     Ghana_field_photo_dict = json.load(f)
@@ -873,7 +940,9 @@ def on_click(change):
 
     my_map.add_control(yield_control)
         
-    url, bounds, doys, yield_colorbar_f = get_lai_gif(field_id)
+    url, bounds, doys, yield_colorbar_f, med_lai = get_lai_gif(field_id)
+    field_med_lai_line.x = doys
+    field_med_lai_line.y = med_lai
 
     # daily_img = None
 #     if daily_img in my_map.layers:
@@ -885,10 +954,12 @@ def on_click(change):
     output = widgetIMG(value=image, format='png',)
     field_pics_base_url = 'https://github.com/UCL-EO/Ghana_field_images/raw/main/fields/'
     if field_id in Ghana_field_photo_dict.keys():
-        urls = [field_pics_base_url + '/%s/%s'%(field_id, i) for i in Ghana_field_photo_dict[field_id]]
+        urls = [field_pics_base_url + '/%s/%s'%(field_id, i) for i in Ghana_field_photo_dict[field_id]['files']]
+        dates = Ghana_field_photo_dict[field_id]['dates']
     else:
         urls = []
-    field_image_tab = create_field_image_tab(urls)
+        dates = []
+    field_image_tab = create_field_image_tab(urls, dates)
     
 #     yield_colorbar = WidgetControl(widget=output, position='bottomleft', transparent_bg=True)
 #     yield_colorbar.widget = output
@@ -1370,7 +1441,8 @@ def handle_interaction(**kwargs):
             field_lai_boxes.x = field_doys
             field_lai_boxes.y = field_lais
             lai_dot.scales = var_line.scales
-
+            field_med_lai_line.scales = var_line.scales
+                
             for ii in range(4):
                 line, ax_x, ax_y = line_axs[ii]
                 ref_line = ref_lines[ii]
