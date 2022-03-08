@@ -315,9 +315,9 @@ def assimilate_me(b):
     
     ensemble_lai_time = [int(i.strftime('%j')) for i in ensemble_lai_time]
     
-    wofost_out_dict['LAI'].marks[2].x = ensemble_lai_time
-    wofost_out_dict['LAI'].marks[2].y = lai_fitted_ensembles
-    wofost_out_dict['LAI'].marks[2].display_legend = False
+    wofost_out_dict['LAI'].marks[3].x = ensemble_lai_time
+    wofost_out_dict['LAI'].marks[3].y = lai_fitted_ensembles
+    wofost_out_dict['LAI'].marks[3].display_legend = False
     print(est_yield)
     # est_yield: mean estimated yield for this LAI set of observations
     # est_yield_sd: standard deviation for the yield estimate
@@ -462,8 +462,8 @@ def on_change_wofost_slider(change):
             else:
                 wofost_out_dict[wofost_out_para].marks[1].x = doys
                 wofost_out_dict[wofost_out_para].marks[1].y = np.array(df.loc[:, wofost_out_para])
-        wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
-        wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
+        wofost_out_dict['LAI'].marks[2].x = line_axs[-1].x
+        wofost_out_dict['LAI'].marks[2].y = line_axs[-1].y
 
         # wofost_out_dict['TWSO'].marks[0].x = doys
         # wofost_out_dict['TWSO'].marks[0].y = np.array(df.TWSO)
@@ -509,8 +509,9 @@ for i in range(len(paras)):
 wofost_sliders_dict = dict(zip(paras, wofost_sliders))
 
 
-
+wofost_fig_vlines = {}
 def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
+    global wofost_fig_vlines
     x = np.array(x)
     y = np.array(y)
     
@@ -540,12 +541,16 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     tick_values = np.linspace(ymin, ymax, 4)
     tick_values
     
+    vline = Lines(x=[xmin, xmin], y=[0, ymax], scales={"x": x_scale, "y": y_scale},
+                       line_style='solid', colors=['gray'], stroke_width=1)
+    wofost_fig_vlines[wofost_out_para] = vline
+    
     ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
     ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
     
     fig_layout = Layout(width='auto', height='auto', max_height='160px', max_width='200px')
     
-    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line], 
+    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, vline], 
                        title=para_name, 
                        animation_duration=500, 
                        title_style = {'font-size': '8'},
@@ -576,19 +581,30 @@ for wofost_out_para in wofost_out_paras:
     para_figs.append(para_fig)
 wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
+
+# wofost_fig_vlines = {}
+# for wofost_out_para in wofost_out_paras:
+#     vline = Lines(x=[180, 180], y=[0, wofost_out_dict[wofost_out_para].marks[0].scales['x'].max], scales=wofost_out_dict[wofost_out_para].marks[0], 
+#                        line_style='solid', colors=['gray'], stroke_width=1)
+#     wofost_fig_vlines[wofost_out_para] = vline
+    
 # obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
 obs_lai_line  = Scatter(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
                         default_size=4, colors = ['green'], display_legend=True, labels=['Planet LAI'])    
 ens_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
                      colors = ['#cccccc'], display_legend=False, labels=['Ensemble LAI'])
 
-ens_lai_line_temp = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
+ens_lai_line_temp = Lines(x=line_axs[-1].x, y=line_axs[-1].y*np.nan, scales=wofost_out_dict['LAI'].marks[0].scales, 
                      colors = ['#cccccc'], display_legend=True, labels=['Ensemble LAI'])
 
 
 wofost_out_dict['LAI'].marks[0].display_legend=True
 
-wofost_out_dict['LAI'].marks = [wofost_out_dict['LAI'].marks[0], obs_lai_line, ens_lai_line, ens_lai_line_temp]
+lai_dot_wofost = Lines(x=[180,], y=[0,], scales=wofost_out_dict['LAI'].marks[0].scales,line_style='dotted', marker='circle', marker_size=45, colors = ['red'])
+lai_vline = Lines(x=[180, 180], y=[0, 3], scales=wofost_out_dict['LAI'].marks[0].scales, 
+                   line_style='solid', colors=['gray'], stroke_width=1)
+
+wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:2] + [obs_lai_line, ens_lai_line, lai_dot_wofost, ens_lai_line_temp]
 
 twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
                    line_style='dashed', colors=['gray'], fill='between')
@@ -603,7 +619,7 @@ twso_shade_temp = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].
                    line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1], display_legend=True, labels = ['1σ'])
 
 
-wofost_out_dict['TWSO'].marks = [twso_shade, wofost_out_dict['TWSO'].marks[0],  twso_hline, twso_shade_temp]
+wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:2] + [twso_hline, twso_shade_temp]
 wofost_out_dict['TWSO'].legend_location = 'bottom-left'
 wofost_out_dict['TWSO'].marks[1].display_legend=True
 
@@ -915,7 +931,9 @@ def on_click(change):
     wofost_out_dict['TWSO'].marks[1].scales = scales
     
     
-    
+    for wofost_out_para in wofost_out_paras:
+        wofost_fig_vlines[wofost_out_para].x = [scales['x'].min, scales['x'].min]
+
     import scipy.stats as st
 
     cl = st.t.interval(0.95, len(ylds)-1, loc=np.mean(ylds), scale=st.sem(ylds))
@@ -1126,7 +1144,16 @@ def on_change_slider2(change):
                 
             lai_dot.x = doys[[ind]]
             lai_dot.y = pix_lai[[ind]]
-
+            lai_dot_wofost.x = doys[[ind]]
+            lai_dot_wofost.y = pix_lai[[ind]]
+#             lai_vline.x = doys[[ind]]
+#             lai_vline.y = [3,]
+            
+            for wofost_out_para in wofost_out_paras:
+                wofost_fig_vlines[wofost_out_para].x = [doys[ind], doys[ind]]
+            # lai_vline.x = 
+            # lai_vline.y = [0, 3]
+    
         # maize_marker.icon.icon_size=[38*lai_ratio, 95*lai_ratio] 
         # maize_marker.icon.icon_anchor=[22*lai_ratio,94*lai_ratio]
         # my_map.add_layer(maize_marker) 
@@ -1373,8 +1400,8 @@ def handle_interaction(**kwargs):
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = ndvi[u_mask]
             
-            wofost_out_dict['LAI'].marks[1].x = line_axs[-1].x
-            wofost_out_dict['LAI'].marks[1].y = line_axs[-1].y
+            wofost_out_dict['LAI'].marks[2].x = line_axs[-1].x
+            wofost_out_dict['LAI'].marks[2].y = line_axs[-1].y
 
     
 
