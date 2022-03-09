@@ -3,6 +3,8 @@
 import datetime as dt
 from io import BytesIO
 from pathlib import Path
+import os
+import tempfile
 
 import ipywidgets.widgets as widgets
 import numpy as np
@@ -400,7 +402,10 @@ def wofost_parameter_sweep_func(
         f"{year}/{sowing_doy}", "%Y/%j"
     ).date()
     crop_end_date = dt.date(year, 11, 30)
-    with open("data/temporal.amgt", "w") as fp:
+    filename = tempfile.NamedTemporaryFile(dir="data/",
+                                           mode='w',
+                                           delete=False)
+    with open(filename.name, 'w', encoding='utf8', newline='') as fp:
         fp.write(
             agromanagement_contents.format(
                 year=crop_start_date.year,
@@ -410,8 +415,15 @@ def wofost_parameter_sweep_func(
                 crop_end_date=crop_end_date,
             )
         )
-    agromanagement = YAMLAgroManagementReader("data/temporal.amgt")
 
+    agromanagement = YAMLAgroManagementReader(filename.name)
+    os.remove(filename.name)
+    agromanagement[0][dt.date(year, 1, 1)
+                      ]["CropCalendar"]["crop_start_date"] = \
+                          crop_start_date
+    agromanagement[0][dt.date(year, 1, 1)
+                      ]["CropCalendar"]["crop_end_date"] = \
+                          crop_end_date
     wdp = CSVWeatherDataProvider(meteo, dateformat="%Y-%m-%d", delimiter=",")
 
     df_results, simulator = run_wofost(
@@ -449,9 +461,11 @@ def create_ensemble(
         if retval is not None:
             return retval
 
-    print("Getting meteo data from EarthEngine")
+
     en_size = 50 # Reduce number of simulations
+
     meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/ERA5_weather/")
+    print(meteo_file)
     (
         prior_dist,
         param_list,
@@ -461,6 +475,7 @@ def create_ensemble(
         param_scale,
     ) = define_prior_distribution(fname=param_file)
     z_start = np.empty((len(param_list), en_size))
+    print(z_start.shape)
     for i, param in enumerate(param_list):
         if prior_dist[param] == 0:
             z_start[i, :] = (
@@ -474,17 +489,17 @@ def create_ensemble(
         for j, parameter_name in enumerate(param_list):
             if param_type[parameter_name] == "S":
                 dd[parameter_name] = z_start[j, i]
-        amaxtb = [
-            0,
-            z_start[param_list.index("AMAXTB_000"), i],
-            # 1.25,
-            # z_start[param_list.index("AMAXTB_000"), i],
-            1.5,
-            z_start[param_list.index("AMAXTB_150"), i],
-        ]
-        dd["AMAXTB"] = amaxtb
+            elif param_type[parameter_name] == "X":
+                scalar = z_start[j, i]
+                amaxtb = [0.0, 70.0*scalar,
+                    1.25, 70.0*scalar,
+                    1.50, 63.0*scalar,
+                    1.75, 49.0*scalar,
+                    2.0, 0.0,
+                    ]
+                dd["AMAXTB"] = amaxtb
+
         ensemble_parameters.append(dd)
-    print(ensemble_parameters)
     
     results = []
     wrapper = partial(
@@ -516,6 +531,30 @@ def create_ensemble(
     return results
 
 
+def subsample_lai_observations(obs_dates, obs_lai, step=10):
+    bin_lais = []
+    bin_doys = []
+    doys = [int(x.strftime("%j")) for x in obs_dates]
+    year = obs_dates[0].year
+
+    for i in np.arange(np.min(doys), np.max(doys)-step,
+                       step):
+        mm = (doys >= i) * (doys <=i+step)
+        bin_lai = np.nanmean(obs_lai[mm])
+        if not np.isnan(bin_lai):
+            bin_lais.append(bin_lai)
+            bin_doys.append(int(i + step / 2))
+    subsampled_lai = np.array(bin_lais)
+    subsampled_dates = np.array([dt.datetime.strptime(
+                                f"{year}/{x}", "%Y/%j").date()
+                                for x in bin_doys])
+    return subsampled_dates, subsampled_lai,
+
+
+
+
+
+
 def ensemble_assimilation(
     parameters,
     sim_times,
@@ -527,7 +566,9 @@ def ensemble_assimilation(
     obs_yield = None,
     sigma_yield=1.,
     sel_n_best=5,
-    fit_tail_end=False
+    fit_tail_end=False,
+    subsample_lai=True,
+    cost_prior=None
 ):
     """A function that performs ensemble assimilation. Requires:
     * parameters (n_params, n_ens) set of model parameters
@@ -554,12 +595,18 @@ def ensemble_assimilation(
     work_sim_times: simulation times that match observations
     fit_lai: Simulated LAI predictions to match observations.
     """
+    if subsample_lai:
+        obs_lai_time, obs_lai  = subsample_lai_observations(
+                        obs_lai_time, obs_lai)
+
     n_par, n_ens = parameters.shape
     cost_lai = np.zeros(n_ens)
     sim_lai = sim_lai.astype(float)
     sim_lai[np.isnan(sim_lai)] = 0.
     if obs_yield is not None:
         cost_yield = np.zeros_like(cost_lai)
+    if cost_prior is not None:
+        assert len(cost_prior) == n_ens
 
     # Get observations that match the simulation period
     passer = obs_lai_time<= sim_times.max()
@@ -594,6 +641,8 @@ def ensemble_assimilation(
     if obs_yield is not None:
         cost_yield= 0.5 * ((sim_yields - obs_yield) ** 2 / (sigma_yield ** 2))
         posterior += cost_yield
+    if cost_prior is not None:
+        posterior += cost_prior
 
     ilocs = posterior.argsort()[:sel_n_best] # best 20?
 
