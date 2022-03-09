@@ -72,7 +72,7 @@ TMNFTB   =   5.00,    0.00,     ! red. factor of gross assim. rate
 
 ** conversion of assimilates into biomass
 CVL      =   0.680  ! efficiency of conversion into leaves [kg kg-1]
-CVO      =   0.540  ! efficiency of conversion into storage org. [kg kg-1]
+CVO      =   0.420  ! efficiency of conversion into storage org. [kg kg-1]
 CVR      =   0.690  ! efficiency of conversion into roots [kg kg-1]
 CVS      =   0.658  ! efficiency of conversion into stems [kg kg-1]
 

@@ -451,20 +451,29 @@ def on_change_wofost_slider(change):
         print(lat, lon, year)
         wofost_status_info.description = 'Reading ERA5 weather data from local or GEE'
         meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/ERA5_weather/")
+        print(meteo_file)
         
         ens_parameters = {}
-        paras_to_overwrite = [i for i in paras if 'AMAXTB_' not in i]
+        paras_to_overwrite = [i for i in paras if 'AMAX_' not in i]
         for para in paras_to_overwrite:    
             ens_parameters[para] = wofost_sliders_dict[para].value
         # ens_parameters['AMAXTB'] = [0, 55.0, 1.5, wofost_sliders_dict['AMAXTB_150'].value]
+        scalar =  wofost_sliders_dict["AMAX_SCALAR"].value
+        ens_parameters["AMAXTB"]  = [0.0, 70.0*scalar,
+                                    1.25, 70.0*scalar,
+                                    1.50, 0.7*63.0*scalar,
+                                    1.75, 0.7*49.0*scalar,
+                                    2.0, 0.0,
+                                    ]
         
-        ens_parameters['AMAXTB'] = [0, wofost_sliders_dict['AMAXTB_000'].value,
-                                   1.25, wofost_sliders_dict['AMAXTB_125'].value,
-                                   1.50, wofost_sliders_dict['AMAXTB_150'].value,
-                                   2.0, 2
-                                   ]
+        #ens_parameters['AMAXTB'] = [0, wofost_sliders_dict['AMAXTB_000'].value,
+        #                           1.25, wofost_sliders_dict['AMAXTB_125'].value,
+        #                           1.50, wofost_sliders_dict['AMAXTB_150'].value,
+        #                           2.0, 2
+        #                           ]
         wofost_status_info.description = 'Running model...'
         df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
+        print(df)
         
         dates = df.index
         doys = [int(i.strftime('%j')) for i in dates]
@@ -493,7 +502,8 @@ def on_change_wofost_slider(change):
         # lai_fig.axes[0].scale = LinearScale(max=365.0, min=180.0)
 
 prior_df = pd.read_csv('data/par_prior_maize_tropical-C.csv')
-paras = ['TDWI', 'SDOY', 'SPAN', 'CVO', 'AMAXTB_000', 'AMAXTB_125', 'AMAXTB_150']
+#paras = ['TDWI', 'SDOY', 'SPAN', 'CVO', 'AMAXTB_000', 'AMAXTB_125', 'AMAXTB_150']
+paras = ['TDWI', 'SDOY', 'SPAN',  'AMAX_SCALAR']
 all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min', 'Max']]).T
 para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
@@ -501,10 +511,11 @@ wofost_sliders = []
 para_meaning = {'TDWI': 'Initial total crop dry weight [kg ha-1]',
                 'SDOY': 'Sowing day of year',
                 'SPAN': 'Life span of leaves growing at 35 Celsius [d]',
-                'CVO' : 'Efficiency of conversion into storage org. [kg kg-1]',
-                'AMAXTB_000': 'Max. leaf CO2 assim. rate at development stage of 0',
-                'AMAXTB_125': 'Max. leaf CO2 assim. rate at development stage of 1.25',
-                'AMAXTB_150': 'Max. leaf CO2 assim. rate at development stage of 1.5',
+                #'CVO' : 'Efficiency of conversion into storage org. [kg kg-1]',
+                #'AMAXTB_000': 'Max. leaf CO2 assim. rate at development stage of 0',
+                #'AMAXTB_125': 'Max. leaf CO2 assim. rate at development stage of 1.25',
+                #'AMAXTB_150': 'Max. leaf CO2 assim. rate at development stage of 1.5',
+                "AMAX_SCALAR": "Scalar on Max. lead CO2 assim. rate"
                }
 
 
@@ -1023,7 +1034,7 @@ def on_click(change):
     yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
     # yield_lai_box = VBox([yield_box, lai_box])
     
-    field_df = df[df.CODE==field_id].dropna(subset='COMMENTS')
+    field_df = df[df.CODE==field_id].dropna(subset=['COMMENTS'])
 
     comment_labels = []
     for i in range(len(field_df)):
@@ -1046,7 +1057,7 @@ def on_click(change):
         comment_labels.append(comment_label)
     field_comments_tab = VBox(comment_labels)
 
-    field_df = df[df.CODE==field_id].dropna(subset='Phynology Data')
+    field_df = df[df.CODE==field_id].dropna(subset=['Phynology Data'])
 
     pheo_labels = []
     for i in range(len(field_df)):
