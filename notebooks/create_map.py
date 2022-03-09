@@ -486,8 +486,12 @@ def on_change_wofost_slider(change):
                 wofost_out_dict[wofost_out_para].marks[0].x = doys
                 wofost_out_dict[wofost_out_para].marks[0].y = np.array(df.loc[:, wofost_out_para])
             else:
+                twso = np.array(df.loc[:, wofost_out_para])
+                real_twso = 1.4553 * np.nanmax(twso) - 1341.81
+                real_twso = np.max([0, real_twso])
+                twso = real_twso / np.nanmax(twso) * twso
                 wofost_out_dict[wofost_out_para].marks[1].x = doys
-                wofost_out_dict[wofost_out_para].marks[1].y = np.array(df.loc[:, wofost_out_para])
+                wofost_out_dict[wofost_out_para].marks[1].y = np.array(twso)
         wofost_out_dict['LAI'].marks[2].x = line_axs[-1].x
         wofost_out_dict['LAI'].marks[2].y = line_axs[-1].y
         colored_dvs_line.x = doys
@@ -579,7 +583,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
     ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
     
-    fig_layout = Layout(width='auto', height='auto', max_height='160px', max_width='200px')
+    fig_layout = Layout(width='400px', height='160px', max_height='160px', max_width='400px')
     
     para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, vline], 
                        title=para_name, 
@@ -588,7 +592,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
                        legend_text={'font-size': 7},
                        legend_location = 'top-left',
                        legend_style={'width': '40%', 'height': '30%', 'stroke-width':0},
-                       fig_margin = dict(top=16, bottom=16, left=26, right=26))
+                       fig_margin = dict(top=16, bottom=16, left=46, right=46))
 
     return para_fig
 
@@ -710,12 +714,12 @@ wofost_output_dropdowns = HBox([wofost_output_dropdown1, wofost_output_dropdown2
 left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
-                                  width='50%'))
+                                  width='100%'))
 
 right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_dropdown2.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
-                                  width='50%'))
+                                  width='100%'))
 
 
 
@@ -725,13 +729,13 @@ def on_change_dropdown1(change):
     left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
-                                  width='50%'))
+                                  width='100%'))
     right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_dropdown2.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
-                                  width='50%'))
+                                  width='100%'))
     
-    wofost_widgets[-1] = HBox([left_output, right_output])
+    wofost_widgets[-1] = VBox([left_output, right_output])
     wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
@@ -745,12 +749,12 @@ def on_change_dropdown2(change):
     left_output = VBox([wofost_output_dropdown1, wofost_out_dict[wofost_output_dropdown1.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
-                                  width='50%'))
+                                  width='100%'))
     right_output = VBox([wofost_output_dropdown2, wofost_out_dict[wofost_output_dropdown2.value]], layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
-                                  width='50%'))
-    wofost_widgets[-1] = HBox([left_output, right_output])
+                                  width='100%'))
+    wofost_widgets[-1] = VBox([left_output, right_output])
 
     wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
@@ -761,7 +765,7 @@ def on_change_dropdown2(change):
 
 wofost_status_info = Button(description = '', button_style='info', layout=Layout(width='100%'), disabled=True)
 wofost_status_info.style.button_color = '#999999'
-wofost_out_panel = HBox([left_output, right_output])
+wofost_out_panel = VBox([left_output, right_output])
 wofost_widgets = [wofost_status_info, ] + wofost_sliders + [assimilate_me_button, wofost_out_panel]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
@@ -1336,7 +1340,7 @@ my_map.add_control(widget_control2)
 
 transparency_label = Label('Transparency:')
 transparency_box = HBox([transparency_label, slider])
-my_map.add_control(WidgetControl(widget=transparency_box, position="bottomright"))
+# my_map.add_control(WidgetControl(widget=transparency_box, position="bottomright"))
 
 # lai_control = WidgetControl(widget=lai_box, position="bottomright")
 # my_map.add_control(lai_control)
