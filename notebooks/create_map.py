@@ -22,7 +22,7 @@ from wofost_utils import ensemble_assimilation
 
 from ipywidgets import Image as ImageWidget
 
-df = pd.read_csv('data/Ghana_ground_data_v2.csv')
+df = pd.read_csv('data/Ghana_ground_data_v3.csv')
 
 yield_df = pd.read_csv('data/Yield_Maize_Biomass_V2.csv').iloc[:, :3]
 codes = np.array([i[:-2] for i in yield_df.FID]).reshape(-1, 3)[:, 0]
@@ -767,10 +767,14 @@ k_slider = FloatSlider(min=0, max=6, value=2,        # Opacity is valid in [0,1]
                orientation='horizontal',       # Vertical slider is what we want
                readout=True,                # No need to show exact value
                layout=Layout(width='80%'),
-               description='K: ', 
+               description='Outliers cutoff: ', 
                style={'description_width': 'initial'}) 
 
-panel_box = VBox([fig_box, k_slider])
+panel_box = VBox([fig_box, k_slider],
+                 layout = Layout(display='flex',
+                                  flex_flow='column',
+                                  align_items='center',
+                                  width='400px'))
 
 names = ['Reflectance fitting', 'Wofost simulation']
 tab = Tab()
@@ -1010,14 +1014,56 @@ def on_click(change):
     cl = st.t.interval(0.95, len(ylds)-1, loc=np.mean(ylds), scale=st.sem(ylds))
     cl = (cl[1] + cl[0]) / 2
     
-    yield_label = Label('%s Field yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
+    
+    district_name = df[df.CODE==field_id].District.iloc[0]
+    
+    yield_label = Label('%s Field (%s district) yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, district_name, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
     yield_label2 = Label('$$Yield [kg/ha]$$')
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
     yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
     # yield_lai_box = VBox([yield_box, lai_box])
-    yield_field_photo_tab = Tab([yield_box, field_image_tab])
+    
+    field_df = df[df.CODE==field_id].dropna(subset='COMMENTS')
+
+    comment_labels = []
+    for i in range(len(field_df)):
+        row = field_df.iloc[i]
+        date = datetime.datetime(2021, int(row.DATE.split('/')[1]), int(row.DATE.split('/')[0])).strftime('%Y-%m-%d (DOY: %j)')
+        commment = row.COMMENTS
+        comment_str = '%s: %s'%(date, commment)
+        comment_label = Label(value = comment_str)
+        comment_labels.append(comment_label)
+    field_comments_tab = VBox(comment_labels)
+
+  
+    comment_labels = []
+    for i in range(len(field_df)):
+        row = field_df.iloc[i]
+        date = datetime.datetime(2021, int(row.DATE.split('/')[1]), int(row.DATE.split('/')[0])).strftime('%Y-%m-%d (DOY: %j)')
+        commment = row.COMMENTS
+        comment_str = '%s: %s'%(date, commment)
+        comment_label = Label(value = comment_str)
+        comment_labels.append(comment_label)
+    field_comments_tab = VBox(comment_labels)
+
+    field_df = df[df.CODE==field_id].dropna(subset='Phynology Data')
+
+    pheo_labels = []
+    for i in range(len(field_df)):
+        row = field_df.iloc[i]
+        date = datetime.datetime(2021, int(row.DATE.split('/')[1]), int(row.DATE.split('/')[0])).strftime('%Y-%m-%d (DOY: %j)')
+        pheo = row.loc['Phynology Data']
+        pheo_str = '%s: %s'%(date, pheo)
+        pheo_label = Label(value = pheo_str)
+        pheo_labels.append(pheo_label)
+    field_pheos_tab = VBox(pheo_labels)
+
+
+    yield_field_photo_tab = Tab([yield_box, field_image_tab, field_pheos_tab, field_comments_tab])
     yield_field_photo_tab.set_title(0, 'Field Yield')
     yield_field_photo_tab.set_title(1, 'Field Photos')
+    yield_field_photo_tab.set_title(2, 'Phenology')
+    yield_field_photo_tab.set_title(3, 'Comments')
     
     if yield_control is not None:        
         my_map.remove_control(yield_control)
@@ -1558,7 +1604,8 @@ def on_change_k_slider(change):
         good_ref_line.scales = line.scales
         good_ref_line.x = doys[u_mask]
         good_ref_line.y = ndvi[u_mask]
-
+        lai_dot.scales = var_line.scales
+        field_med_lai_line.scales = var_line.scales
 
 k_slider.observe(on_change_k_slider)
 my_map.on_interaction(handle_interaction)
