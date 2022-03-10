@@ -122,7 +122,7 @@ fig_layout = Layout(width='auto', height='auto', max_height='120px', max_width='
 sels = np.zeros((6, len(doys), 10))
 
 tick_style = {'font-size': 8}
-names = ['B1', 'B2', 'B3', 'B4', 'NDVI', 'Lai']
+names = ['Blue', 'Green', 'Red', 'NIR', 'NDVI', 'Lai']
 line_axs = []
 for ii in range(6):
     y_scale = LinearScale(min = sels[ii].T.min(), max = sels[ii].T.max())

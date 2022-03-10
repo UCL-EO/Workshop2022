@@ -1,6 +1,9 @@
 from ipywidgets import SelectionRangeSlider, Layout, Accordion, Tab, Text, DatePicker, VBox, Button, Label, FloatSlider, Dropdown
-from ipyleaflet import Map, DrawControl, TileLayer, WidgetControl, ImageOverlay
+from ipyleaflet import Map, DrawControl, TileLayer, WidgetControl, ImageOverlay, GeoJSON
 from ipywidgets import Image as widgetIMG
+from ipywidgets import Checkbox
+from ipyevents import Event
+
 
 from pyproj import Proj, Transformer
 
@@ -178,8 +181,8 @@ draw_control.polyline = {}
 
 defaultLayout=Layout(width='100%', height='760px')
 my_map = Map(center=(9.3771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zoom = 18, layout=defaultLayout)
-dark_matter_layer = TileLayer(url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}')
-my_map.add_layer(dark_matter_layer)
+Google_layer = TileLayer(url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', name = 'Google satellite')
+my_map.add_layer(Google_layer)
 my_map.add_control(draw_control)
 
 lai_line_x = np.arange(180, 365)
@@ -290,6 +293,7 @@ def create_ndvi_thumbs(surs, aoi):
     ndvi_cmap = cm.RdYlGn
     dest_folder = os.path.dirname(surs[0])
     ndvi_thumbs = []
+    ndvis = []
     for filename in surs:
         data = gdal.Warp('', filename, format = 'MEM', 
                          resampleAlg = gdal.GRIORA_NearestNeighbour, 
@@ -302,6 +306,7 @@ def create_ndvi_thumbs(surs, aoi):
                           cropToCutline=False, cutlineDSName=aoi).ReadAsArray()
 
         ndvi = (data[6] - data[2]) / (data[6] + data[2])
+        ndvis.append(ndvi)
         valid_mask = (np.isfinite(ndvi)) & (cloud < 40)
 
 
@@ -331,6 +336,53 @@ def create_ndvi_thumbs(surs, aoi):
         fname = dest_folder + '/S2_ndvi_%s.png'%(date)
         img.save(fname)
         ndvi_thumbs.append(fname)
+    
+    ndvi_med = np.nanmedian(ndvis, axis=0)
+    valid_mask = np.isfinite(valid_mask)
+    alpha = (valid_mask * 255.).astype(np.uint8)
+
+    greyscale = ndvi_cmap(ndvi_med / 1., bytes=True)
+    greyscale[:, :, -1] = alpha
+
+    img = Image.fromarray(greyscale, mode='RGBA')
+
+    scale = 256 / img.height
+    new_height = int(scale * img.height)
+    new_width = int(scale * img.width)
+
+    img = img.resize(( new_width, new_height), resample = Image.NEAREST)
+    this_alpha = img.getchannel('A')
+    img = img.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+    mask = Image.eval(this_alpha, lambda a: 255 if a <= 5 else 0)
+
+    # Paste the color of index 255 and use alpha as a mask
+    img.paste(255, mask)
+    img.info['transparency'] = 255
+
+    fname = dest_folder + '/S2_ndvi_med.png'
+    img.save(fname)
+    ndvi_thumbs.append(fname)
+
+    home = os.getcwd()
+    cwd = '/files/' + '/'.join(home.split('/')[3:])
+    base_url = my_map.window_url.split('/lab/')[0] + cwd + '/'
+
+    # url = 'data/S2_thumbs/S2_%s_lai_%03d.png'%(field_id, value)
+    url = dest_folder + '/S2_ndvi_med.png'
+    url = base_url + url
+
+    x_min, y_min, x_max, y_max = bounds
+
+    img_bounds = (y_min, x_max), (y_max, x_min)
+
+    ndvi_med = ImageOverlay(
+        url=url,
+        bounds = img_bounds,
+        name = 'S2 NDVI median'
+        )
+    my_map.add_layer(ndvi_med)
+
+
     return ndvi_thumbs
 
 daily_img = None
@@ -356,11 +408,14 @@ def on_change_date_slider(change):
 
         img_bounds = (y_min, x_max), (y_max, x_min)
 
+        date_str = ndvi_thumbs[ind].split('/')[-1].split('_')[-1][:8]
+        date_str = '-'.join([date_str[:4], date_str[4:6], date_str[6:8]])
+
         if daily_img is None:
             daily_img = ImageOverlay(
             url=url,
             bounds = img_bounds,
-            # name = 'S2_%s_lai_png'%(field_id)
+            name = 'S2 NDVI: ' + date_str
             )
             my_map.add_layer(daily_img)
             daily_img.url = url
@@ -368,6 +423,7 @@ def on_change_date_slider(change):
         else:
             daily_img.url = url
             daily_img.bounds = img_bounds
+            daily_img.name = 'S2 NDVI: ' + date_str
 
 def get_colorbar(vmin, vmax, label, colorbar_control = None):
     fig = plt.figure(figsize=(5, 2))
@@ -565,7 +621,7 @@ def assimilate_me(b):
     t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
               for x in doys])
     
-    wofost_status_info.description = 'Fitting to Planet LAI'
+    wofost_status_info.description = 'Fitting to LAI'
     est_yield, est_yield_sd, parameters, _, _ , ensemble_lai_time, lai_fitted_ensembles = ensemble_assimilation(
         param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
     
@@ -680,7 +736,7 @@ for i in range(len(paras)):
                    step = step,
                    orientation='horizontal',       # Vertical slider is what we want
                    readout=True,                # No need to show exact value
-                   layout=Layout(width='100%'),
+                   layout=Layout(width='80%'),
                    description='%s: '%para_name, 
                    description_tooltip= para_meaning[para_name],
                    style={'description_width': 'initial'}) 
@@ -771,7 +827,7 @@ wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
     
 # obs_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, colors = ['red'])
 obs_lai_line  = Scatter(x=lai_line.x, y=lai_line.y, scales=wofost_out_dict['LAI'].marks[0].scales, 
-                        default_size=4, colors = ['green'], display_legend=True, labels=['Planet LAI'])    
+                        default_size=4, colors = ['green'], display_legend=True, labels=['Empirical LAI'])    
 ens_lai_line = Lines(x=lai_line.x, y=lai_line.y, scales=wofost_out_dict['LAI'].marks[0].scales, 
                      colors = ['#cccccc'], display_legend=False, labels=['Ensemble LAI'])
 
@@ -881,13 +937,15 @@ def on_change_dropdown1(change):
                                   align_items='center',
                                   width='100%'))
     
-    wofost_widgets[-1] = VBox([left_output, right_output])
+    wofost_widgets[-2] = VBox([left_output, right_output])
     wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
                                   width='400px'))
-    tab.children = [panel_box, wofost_box]
+    
+    wofost_control.widget = wofost_box
+    # tab.children = [panel_box, wofost_box]
 
 def on_change_dropdown2(change):
     global wofost_widgets
@@ -900,19 +958,21 @@ def on_change_dropdown2(change):
                                   flex_flow='column',
                                   align_items='center',
                                   width='100%'))
-    wofost_widgets[-1] = VBox([left_output, right_output])
+    wofost_widgets[-2] = VBox([left_output, right_output])
 
     wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
                                   align_items='center',
                                   width='400px'))
-    tab.children = [panel_box, wofost_box]
+    
+    wofost_control.widget = wofost_box
+    # tab.children = [panel_box, wofost_box]
 
-wofost_status_info = Button(description = '', button_style='info', layout=Layout(width='80%'), disabled=True)
+wofost_status_info = Button(description = '', button_style='info', layout=Layout(width='100%'), disabled=True)
 wofost_status_info.style.button_color = '#999999'
 wofost_out_panel = VBox([left_output, right_output])
-wofost_widgets = wofost_sliders + [wofost_status_info, assimilate_me_button, wofost_out_panel]
+wofost_widgets = wofost_sliders + [assimilate_me_button, wofost_out_panel, wofost_status_info,]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
@@ -1044,7 +1104,7 @@ def mouse_click(**kwargs):
         print(point)
         
         if marker is None:
-            marker = Marker(location=location, rotation_angle=0, draggable=False)
+            marker = Marker(location=location, rotation_angle=0, draggable=False, name = 'Pixel location')
             my_map.add_layer(marker) 
         else:
             marker.location = location
@@ -1112,14 +1172,108 @@ download_button.on_click(download)
 
 maize_imgCol = ee.ImageCollection('users/xianda19/classification_result/2021/Ghana/maize_20210501_20211011_100percentSamples')
 maize_img = maize_imgCol.mosaic().selfMask()
-classification_layer = my_map.add_ee_layer(my_map, ee_image_object = maize_img, vis_params = {}, name = 'classification')
+classification_layer = my_map.add_ee_layer(my_map, ee_image_object = maize_img, vis_params = {'palette': ['green']}, name = 'classification')
 
-slider = FloatSlider(min=0, max=1, value=1,        # Opacity is valid in [0,1] range
-               orientation='horizontal',       # Vertical slider is what we want
-               readout=False,                # No need to show exact value
-               layout=Layout(height='2em', width='200px')) # Fine tune display layout: make it thinner
+# slider = FloatSlider(min=0, max=1, value=1,        # Opacity is valid in [0,1] range
+#                orientation='horizontal',       # Vertical slider is what we want
+#                readout=False,                # No need to show exact value
+#                layout=Layout(height='2em', width='200px')) # Fine tune display layout: make it thinner
 
-transparency_label = Label('Transparency:')
-transparency_box = HBox([transparency_label, slider])
-my_map.add_control(WidgetControl(widget=transparency_box, position="bottomright"))
-jslink((slider, 'value'), (classification_layer, 'opacity') )
+# transparency_label = Label('Transparency:')
+# transparency_box = HBox([transparency_label, slider])
+# my_map.add_control(WidgetControl(widget=transparency_box, position="bottomright"))
+# jslink((slider, 'value'), (classification_layer, 'opacity') )
+
+def random_color(feature):
+    return {
+        'color': 'black',
+        'fillColor': np.random.choice(['red', 'yellow', 'green', 'orange']),
+    }
+
+with open('./data/Biophysical_Data_Collection_Polygons_V1.geojson', 'r') as f:
+    data = json.load(f)
+    
+fields = GeoJSON(
+    data=data,
+    style={
+        'opacity': 1, 'dashArray': '0', 'fillOpacity': 0, 'weight': 1
+    },
+    hover_style={
+        'color': 'white', 'dashArray': '0', 'fillOpacity': 0
+    },
+    name = 'Field boundaries',
+    style_callback=random_color
+)
+
+
+with open('./data/Biophysical_Data_Collection_Points_V1.geojson', 'r') as f:
+    data2 = json.load(f)
+
+points = GeoJSON(
+    data=data2,
+    point_style={'radius': 5, 'color': 'blue', 'fillOpacity': 0.5, 'fillColor': 'blue', 'weight': 0.1},
+    # style={
+    #     'opacity': 1, 'dashArray': '0', 'fillOpacity': 0.2, 'weight': 0.01
+    # },
+    hover_style={
+        'color': 'white', 'dashArray': '0', 'fillOpacity': 1
+    },
+    name = 'Field measurement points',
+    # style_callback=random_color
+)
+
+
+my_map.add_layer(fields)
+my_map.add_layer(points)
+
+def get_layer_control(my_map):
+    check_boxs = []
+    labels = []
+    sliders = []
+    for layer in my_map.layers[1:]:
+        check_box = Checkbox(value=True, disabled=False,indent=False, layout=Layout(width='20px'))
+        check_boxs.append(check_box)
+        label = Label(value = layer.name)
+        labels.append(label)
+        
+        if not isinstance(layer, GeoJSON):
+            slider = FloatSlider(min=0, max=1, value=layer.opacity, layout=Layout(width='180px'))
+            sliders.append(slider)
+
+            jslink((slider, 'value'), (layer, 'opacity'))
+            jslink((check_box, 'value'), (layer, 'visible'))
+            slider.style.handle_color = '#3399ff'
+        else:
+            slider = FloatSlider(min=0, max=1, value=1, layout=Layout(width='180px'))
+            sliders.append(slider)
+        
+            slider.disabled=True
+            slider.style.handle_color = '#c0c0c0'
+            
+            # slider.observe(change_geojson_opacity)
+    layer_control_widget = HBox([VBox(check_boxs), VBox(labels), VBox(sliders)])
+    return layer_control_widget
+
+layers_button = Button(description='Layers',disabled=False,tooltip='Layers',  layout = Layout(width='120px'))
+
+layer_control_title_widget = VBox([layers_button], layout = Layout(align_items='center', justify_content="center",))
+layer_control_title_widget_event = Event(source=layer_control_title_widget, watched_events=['mouseenter', 'mouseleave'])
+
+
+@debounce(0.2)
+def layer_control_title_widget_event_handler(event):
+    if event['event'] == 'mouseenter':
+        layer_control_widget = get_layer_control(my_map)
+        layers_button.button_style = 'danger'
+        layers_button.style.button_color = '#3399ff'
+        layers_button.layout = Layout(width='100%')
+        layer_control_title_widget.children =  [layers_button, layer_control_widget]
+        
+    if event['event'] == 'mouseleave':
+        layers_button.style.button_color = '#EEEEEE'
+        layers_button.button_style = ''
+        layers_button.layout = Layout(width='120px')
+        layer_control_title_widget.children =  [layers_button]
+
+layer_control_title_widget_event.on_dom_event(layer_control_title_widget_event_handler)
+my_map.add_control(WidgetControl(widget=layer_control_title_widget, position="bottomleft"))
