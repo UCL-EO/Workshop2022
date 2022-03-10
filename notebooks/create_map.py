@@ -13,6 +13,7 @@ from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON,
 from ipywidgets import Image as widgetIMG
 from ipyevents import Event
 from bqplot import ColorScale, FlexLine, ColorAxis
+from bqplot import Label as bqLabel
 
 sys.path.insert(0, './python/')
 from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
@@ -24,7 +25,7 @@ from ipywidgets import Image as ImageWidget
 
 df = pd.read_csv('data/Ghana_ground_data_v3.csv')
 
-yield_df = pd.read_csv('data/Yield_Maize_Biomass_V2.csv').iloc[:, :3]
+yield_df = pd.read_csv('data/Yield_Maize_Biomass_V3.csv').iloc[:, :3]
 codes = np.array([i[:-2] for i in yield_df.FID]).reshape(-1, 3)[:, 0]
 yields = np.array(yield_df.iloc[:, 1]).reshape(-1, 3)
 field_yields = dict(zip(codes, yields.tolist()))
@@ -330,9 +331,9 @@ def assimilate_me(b):
     
     ensemble_lai_time = [int(i.strftime('%j')) for i in ensemble_lai_time]
     
-    wofost_out_dict['LAI'].marks[3].x = ensemble_lai_time
-    wofost_out_dict['LAI'].marks[3].y = lai_fitted_ensembles
-    wofost_out_dict['LAI'].marks[3].display_legend = False
+    wofost_out_dict['LAI'].marks[5].x = ensemble_lai_time
+    wofost_out_dict['LAI'].marks[5].y = lai_fitted_ensembles
+    wofost_out_dict['LAI'].marks[5].display_legend = False
     print(est_yield)
     # est_yield: mean estimated yield for this LAI set of observations
     # est_yield_sd: standard deviation for the yield estimate
@@ -492,12 +493,23 @@ def on_change_wofost_slider(change):
                 twso = real_twso / np.nanmax(twso) * twso
                 wofost_out_dict[wofost_out_para].marks[1].x = doys
                 wofost_out_dict[wofost_out_para].marks[1].y = np.array(twso)
-        wofost_out_dict['LAI'].marks[2].x = line_axs[-1].x
-        wofost_out_dict['LAI'].marks[2].y = line_axs[-1].y
+        wofost_out_dict['LAI'].marks[4].x = line_axs[-1].x
+        wofost_out_dict['LAI'].marks[4].y = line_axs[-1].y
         colored_dvs_line.x = doys
         colored_dvs_line.y = wofost_out_dict['DVS'].marks[0].y
         colored_dvs_line.color = wofost_out_dict['DVS'].marks[0].y
         wofost_status_info.description = 'Done'
+        
+        dvs = np.array(df.loc[:, 'DVS'])
+        dvs2_ind = np.nanargmax(dvs)
+        dvs1_ind = np.nanargmin(abs(dvs-1))
+        print(dvs1_ind)  
+        print(dvs2_ind)
+        
+        for wofost_out_para in wofost_out_paras:
+            wofost_fig_dsv1_vlines[wofost_out_para].x = [doys[dvs1_ind], doys[dvs1_ind]]
+            wofost_fig_dsv2_vlines[wofost_out_para].x = [doys[dvs2_ind], doys[dvs2_ind]]
+            
         # wofost_out_dict['TWSO'].marks[0].x = doys
         # wofost_out_dict['TWSO'].marks[0].y = np.array(df.TWSO)
         
@@ -545,6 +557,9 @@ wofost_sliders_dict = dict(zip(paras, wofost_sliders))
 
 
 wofost_fig_vlines = {}
+wofost_fig_dsv1_vlines = {}
+wofost_fig_dsv2_vlines = {}
+
 def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     global wofost_fig_vlines
     x = np.array(x)
@@ -578,14 +593,22 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     
     vline = Lines(x=[xmin, xmin], y=[0, ymax], scales={"x": x_scale, "y": y_scale},
                        line_style='solid', colors=['gray'], stroke_width=1)
+    
+    dvs1_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales={"x": x_scale, "y": y_scale},
+                       line_style='solid', colors=['#31a354'], stroke_width=1)
+    
+    dvs2_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales={"x": x_scale, "y": y_scale},
+                       line_style='solid', colors=['#feb24c'], stroke_width=1)
     wofost_fig_vlines[wofost_out_para] = vline
+    wofost_fig_dsv1_vlines[wofost_out_para] = dvs1_vline
+    wofost_fig_dsv2_vlines[wofost_out_para] = dvs2_vline
     
     ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
     ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
     
     fig_layout = Layout(width='400px', height='160px', max_height='160px', max_width='400px')
     
-    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, vline], 
+    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, vline, dvs1_vline, dvs2_vline], 
                        title=para_name, 
                        animation_duration=500, 
                        title_style = {'font-size': '8'},
@@ -704,7 +727,7 @@ dvs_yax = Axis(
 colored_dvs_line = FlexLine(x=dvs_line.x, y=dvs_line.y, color=dvs_line.y,
                              scales=scales, labels = ['Wofost DVS'], display_legend=False,)
 
-wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:2] + [twso_hline, colored_dvs_line,twso_shade_temp]
+wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:4] + [twso_hline, colored_dvs_line,twso_shade_temp]
 wofost_out_dict['TWSO'].legend_location = 'bottom-left'
 wofost_out_dict['TWSO'].marks[1].display_legend=True
 
@@ -715,7 +738,7 @@ for wofost_out_para in ['TAGP', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLO
     wofost_out_dict[wofost_out_para].marks = wofost_out_dict[wofost_out_para].marks + [colored_dvs_line,]
 
     
-wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:2] + [obs_lai_line, ens_lai_line, lai_dot_wofost, colored_dvs_line, ens_lai_line_temp]
+wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:4] + [obs_lai_line, ens_lai_line, lai_dot_wofost, colored_dvs_line, ens_lai_line_temp]
     
     
 wofost_output_dropdown1 = Dropdown(
@@ -1118,7 +1141,8 @@ def on_click(change):
 
     url = 'data/S2_thumbs/S2_%s_yield.png'%(field_id)
     print(url)
-    dates = [(datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(i-1))).strftime('%Y-%m-%d') for i in doys]
+    # dates = [(datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(i-1))).strftime('%Y-%m-%d') for i in doys]
+    dates = [(datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(i-1))).strftime('%Y-%m-%d (DOY: %j)') for i in doys]
     slider2.options = dates
     field_bounds = bounds
     url = base_url + url
@@ -1347,8 +1371,8 @@ play = Play(
     disabled=False
 )
 
-dates = [(datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(i-1))).strftime('%Y-%m-%d') for i in doys]
-slider2 = SelectionSlider(options = dates, description='Date: ', style={'description_width': 'initial'}) 
+dates = [(datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(i-1))).strftime('%Y-%m-%d (DOY: %j)') for i in doys]
+slider2 = SelectionSlider(options = dates, description='Date: ', style={'description_width': 'initial'}, layout = Layout(width='340px')) 
 slider2.observe(on_change_slider2)
 # widget_control2 = WidgetControl(widget=slider2, position="bottomright")
 jslink((play, 'value'), (slider2, 'index'))
@@ -1562,8 +1586,8 @@ def handle_interaction(**kwargs):
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = ndvi[u_mask]
             
-            wofost_out_dict['LAI'].marks[2].x = line_axs[-1].x
-            wofost_out_dict['LAI'].marks[2].y = line_axs[-1].y
+            wofost_out_dict['LAI'].marks[4].x = line_axs[-1].x
+            wofost_out_dict['LAI'].marks[4].y = line_axs[-1].y
 
     
 
