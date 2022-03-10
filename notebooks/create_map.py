@@ -25,7 +25,7 @@ from ipywidgets import Image as ImageWidget
 
 df = pd.read_csv('data/Ghana_ground_data_v3.csv')
 
-yield_df = pd.read_csv('data/Yield_Maize_Biomass_V3.csv').iloc[:, :3]
+yield_df = pd.read_csv('data/Yield_Maize_Biomass_V2.csv').iloc[:, :3]
 codes = np.array([i[:-2] for i in yield_df.FID]).reshape(-1, 3)[:, 0]
 yields = np.array(yield_df.iloc[:, 1]).reshape(-1, 3)
 field_yields = dict(zip(codes, yields.tolist()))
@@ -218,7 +218,23 @@ field_med_lai_line = Lines(x=doys, y=np.zeros_like(doys)*np.nan,
                            scales = lai_fig.marks[1].scales,  
                            colors = ['#20b2aa'], display_legend=True, labels = ['Field LAI median'])
 
-lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai, field_med_lai_line]
+
+lai_fig_dvs_labels = bqLabel(x = [0, 0], 
+                     y = [0, 0],  
+                     text=["DVS=1", "DVS=2"], 
+                     default_size=0,
+                     scales=lai_fig.marks[1].scales,
+                     colors = ['#31a354','#feb24c'])
+
+
+lai_fig_dvs1_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales=lai_fig.marks[1].scales,
+                   line_style='solid', colors=['#31a354'], stroke_width=1)
+
+lai_fig_dvs2_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales=lai_fig.marks[1].scales,
+                   line_style='solid', colors=['#feb24c'], stroke_width=1)
+
+
+lai_fig.marks = lai_fig.marks[:2] + [field_lai_boxes, lai_dot, wofost_lai, field_med_lai_line, lai_fig_dvs1_vline, lai_fig_dvs2_vline, lai_fig_dvs_labels]
 var_line = line_axs[-1]
 
 var_line.labels = ['Pixel LAI']
@@ -331,9 +347,9 @@ def assimilate_me(b):
     
     ensemble_lai_time = [int(i.strftime('%j')) for i in ensemble_lai_time]
     
-    wofost_out_dict['LAI'].marks[5].x = ensemble_lai_time
-    wofost_out_dict['LAI'].marks[5].y = lai_fitted_ensembles
-    wofost_out_dict['LAI'].marks[5].display_legend = False
+    wofost_out_dict['LAI'].marks[6].x = ensemble_lai_time
+    wofost_out_dict['LAI'].marks[6].y = lai_fitted_ensembles
+    wofost_out_dict['LAI'].marks[6].display_legend = False
     print(est_yield)
     # est_yield: mean estimated yield for this LAI set of observations
     # est_yield_sd: standard deviation for the yield estimate
@@ -441,6 +457,7 @@ lon = -2.7
 lat = 8.20
 year = 2021
 
+
 @debounce(0.2)
 def on_change_wofost_slider(change):
     
@@ -493,8 +510,8 @@ def on_change_wofost_slider(change):
                 twso = real_twso / np.nanmax(twso) * twso
                 wofost_out_dict[wofost_out_para].marks[1].x = doys
                 wofost_out_dict[wofost_out_para].marks[1].y = np.array(twso)
-        wofost_out_dict['LAI'].marks[4].x = line_axs[-1].x
-        wofost_out_dict['LAI'].marks[4].y = line_axs[-1].y
+        wofost_out_dict['LAI'].marks[5].x = line_axs[-1].x
+        wofost_out_dict['LAI'].marks[5].y = line_axs[-1].y
         colored_dvs_line.x = doys
         colored_dvs_line.y = wofost_out_dict['DVS'].marks[0].y
         colored_dvs_line.color = wofost_out_dict['DVS'].marks[0].y
@@ -506,10 +523,35 @@ def on_change_wofost_slider(change):
         print(dvs1_ind)  
         print(dvs2_ind)
         
+        
+        lai_fig_dvs1_vline.x = [doys[dvs1_ind], doys[dvs1_ind]]
+        lai_fig_dvs2_vline.x = [doys[dvs1_ind], doys[dvs1_ind]]
+        
         for wofost_out_para in wofost_out_paras:
             wofost_fig_dsv1_vlines[wofost_out_para].x = [doys[dvs1_ind], doys[dvs1_ind]]
             wofost_fig_dsv2_vlines[wofost_out_para].x = [doys[dvs2_ind], doys[dvs2_ind]]
+        
+        for wofost_out_para in wofost_out_paras:
+            scales =  wofost_out_dict[wofost_out_para].marks[1].scales
+            ymin = scales['y'].min
+            ymax = scales['y'].max
+            y = ymin + (ymax - ymin) * 0.1
+            dvs_labels_dict[wofost_out_para].scales = scales
             
+            dvs_labels_dict[wofost_out_para].x = [doys[dvs1_ind], doys[dvs2_ind]]
+            dvs_labels_dict[wofost_out_para].y = [y, y]
+            dvs_labels_dict[wofost_out_para].default_size= 8
+            
+        scales = line_axs[-1].scales
+        lai_fig_dvs_labels.scales = scales
+        
+        ymin = scales['y'].min
+        ymax = scales['y'].max
+        y = ymin + (ymax - ymin) * 0.1
+        lai_fig_dvs_labels.x = [doys[dvs1_ind], doys[dvs2_ind]]
+        lai_fig_dvs_labels.y = [y, y]
+        lai_fig_dvs_labels.default_size= 8
+        
         # wofost_out_dict['TWSO'].marks[0].x = doys
         # wofost_out_dict['TWSO'].marks[0].y = np.array(df.TWSO)
         
@@ -559,6 +601,7 @@ wofost_sliders_dict = dict(zip(paras, wofost_sliders))
 wofost_fig_vlines = {}
 wofost_fig_dsv1_vlines = {}
 wofost_fig_dsv2_vlines = {}
+dvs_labels_dict = {}
 
 def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     global wofost_fig_vlines
@@ -599,6 +642,17 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     
     dvs2_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales={"x": x_scale, "y": y_scale},
                        line_style='solid', colors=['#feb24c'], stroke_width=1)
+    
+    
+
+    dvs_labels = bqLabel(x = [0, 0], 
+                         y = [0, 0],  
+                         text=["DVS=1", "DVS=2"], 
+                         default_size=0,
+                         scales={"x": x_scale, "y": y_scale},
+                         colors = ['#31a354','#feb24c'])
+    dvs_labels_dict[wofost_out_para] = dvs_labels
+    
     wofost_fig_vlines[wofost_out_para] = vline
     wofost_fig_dsv1_vlines[wofost_out_para] = dvs1_vline
     wofost_fig_dsv2_vlines[wofost_out_para] = dvs2_vline
@@ -608,7 +662,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     
     fig_layout = Layout(width='400px', height='160px', max_height='160px', max_width='400px')
     
-    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, vline, dvs1_vline, dvs2_vline], 
+    para_fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, vline, dvs1_vline, dvs2_vline, dvs_labels], 
                        title=para_name, 
                        animation_duration=500, 
                        title_style = {'font-size': '8'},
@@ -727,7 +781,7 @@ dvs_yax = Axis(
 colored_dvs_line = FlexLine(x=dvs_line.x, y=dvs_line.y, color=dvs_line.y,
                              scales=scales, labels = ['Wofost DVS'], display_legend=False,)
 
-wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:4] + [twso_hline, colored_dvs_line,twso_shade_temp]
+wofost_out_dict['TWSO'].marks = [twso_shade] +  wofost_out_dict['TWSO'].marks[:5] + [twso_hline, colored_dvs_line,twso_shade_temp]
 wofost_out_dict['TWSO'].legend_location = 'bottom-left'
 wofost_out_dict['TWSO'].marks[1].display_legend=True
 
@@ -738,7 +792,7 @@ for wofost_out_para in ['TAGP', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLO
     wofost_out_dict[wofost_out_para].marks = wofost_out_dict[wofost_out_para].marks + [colored_dvs_line,]
 
     
-wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:4] + [obs_lai_line, ens_lai_line, lai_dot_wofost, colored_dvs_line, ens_lai_line_temp]
+wofost_out_dict['LAI'].marks = wofost_out_dict['LAI'].marks[:5] + [obs_lai_line, ens_lai_line, lai_dot_wofost, colored_dvs_line, ens_lai_line_temp]
     
     
 wofost_output_dropdown1 = Dropdown(
@@ -1072,7 +1126,10 @@ def on_click(change):
     wofost_out_dict['TWSO'].axes[1].tick_values = np.linspace(0, ymax, 5)
     wofost_out_dict['TWSO'].marks[1].scales = scales
     
-    
+    # for wofost_out_para in wofost_out_paras:
+    #     scales =  wofost_out_dict[wofost_out_para].marks[1].scales
+    #     dvs_labels_dict[wofost_out_para].scales = scales
+
     for wofost_out_para in wofost_out_paras:
         wofost_fig_vlines[wofost_out_para].x = [scales['x'].min, scales['x'].min]
 
@@ -1586,8 +1643,8 @@ def handle_interaction(**kwargs):
             good_ref_line.x = doys[u_mask]
             good_ref_line.y = ndvi[u_mask]
             
-            wofost_out_dict['LAI'].marks[4].x = line_axs[-1].x
-            wofost_out_dict['LAI'].marks[4].y = line_axs[-1].y
+            wofost_out_dict['LAI'].marks[5].x = line_axs[-1].x
+            wofost_out_dict['LAI'].marks[5].y = line_axs[-1].y
 
     
 
