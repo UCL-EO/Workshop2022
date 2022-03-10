@@ -227,10 +227,10 @@ lai_fig_dvs_labels = bqLabel(x = [0, 0],
                      colors = ['#31a354','#feb24c'])
 
 
-lai_fig_dvs1_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales=lai_fig.marks[1].scales,
+lai_fig_dvs1_vline = Lines(x=[np.nan, np.nan], y=[0, 0], scales=lai_fig.marks[1].scales,
                    line_style='solid', colors=['#31a354'], stroke_width=1)
 
-lai_fig_dvs2_vline = Lines(x=[xmin*np.nan, xmin*np.nan], y=[0, ymax], scales=lai_fig.marks[1].scales,
+lai_fig_dvs2_vline = Lines(x=[np.nan, np.nan], y=[0, 0], scales=lai_fig.marks[1].scales,
                    line_style='solid', colors=['#feb24c'], stroke_width=1)
 
 
@@ -524,8 +524,7 @@ def on_change_wofost_slider(change):
         print(dvs2_ind)
         
         
-        lai_fig_dvs1_vline.x = [doys[dvs1_ind], doys[dvs1_ind]]
-        lai_fig_dvs2_vline.x = [doys[dvs1_ind], doys[dvs1_ind]]
+
         
         for wofost_out_para in wofost_out_paras:
             wofost_fig_dsv1_vlines[wofost_out_para].x = [doys[dvs1_ind], doys[dvs1_ind]]
@@ -542,8 +541,17 @@ def on_change_wofost_slider(change):
             dvs_labels_dict[wofost_out_para].y = [y, y]
             dvs_labels_dict[wofost_out_para].default_size= 8
             
+        
         scales = line_axs[-1].scales
         lai_fig_dvs_labels.scales = scales
+        lai_fig_dvs1_vline.scales = scales
+        lai_fig_dvs2_vline.scales = scales
+        
+        lai_fig_dvs1_vline.y = [0, 5]
+        lai_fig_dvs2_vline.y = [0, 5]
+        lai_fig_dvs1_vline.x = [doys[dvs1_ind], doys[dvs1_ind]]
+        lai_fig_dvs2_vline.x = [doys[dvs2_ind], doys[dvs2_ind]]
+        
         
         ymin = scales['y'].min
         ymax = scales['y'].max
