@@ -220,6 +220,8 @@ def get_lai_gif(field_name):
     lai = f.f.mean_bios_all[:, 4]
     lai_scale = f.f.mean_bio_scales_all[:, 4]
     
+    med_lai = np.nanmedian(lai, axis=0)
+
     max_lai = np.zeros(valid_mask.shape)
     max_lai[valid_mask] = lai_scale
     
@@ -339,7 +341,7 @@ def get_lai_gif(field_name):
     
     frames[0].save(fp_out, save_all=True, append_images=frames[1:], loop=0, duration=200, optimize=False)
     
-    return 'data/S2_thumbs/S2_%s_lai.gif'%field_name, bounds, doys, yield_colorbar_f
+    return 'data/S2_thumbs/S2_%s_lai.gif'%field_name, bounds, doys, yield_colorbar_f, med_lai
     # print(bounds)
     
 def get_field_bounds(field_name):
