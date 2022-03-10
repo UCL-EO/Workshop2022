@@ -51,7 +51,7 @@ ndvi_colorized_vis = {
 }
 lai_colorized_vis = {
             'min': 0.0,
-            'max': 2.5,
+            'max': 5.5,
             'palette': ['e1e4b4', '999d60', '2ec409', '0a4b06']
 }
 fpar_colorized_vis = {
@@ -327,8 +327,10 @@ def load_modis_band(band, year, aoi, TIME_REDUCER, applyQA=False):
     collection_all, annual_mean = load_modis_collection(year, aoi, \
                                                         collection=collection, band=band, scale=scale, \
                                                         TIME_REDUCER=TIME_REDUCER,
-                                                        DISPLAY_REDUCED_ON_MAP=(TIME_REDUCER != 'None'),
+                                                        DISPLAY_REDUCED_ON_MAP=False,
                                                         onlyGoodQA=applyQA)
+    #DISPLAY_REDUCED_ON_MAP=(TIME_REDUCER != 'None')
+
     # print(collection_all.getInfo(), '--'*20)
     # print(annual_mean.getInfo(), '=='*20)
 
