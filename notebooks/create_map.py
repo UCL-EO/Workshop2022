@@ -616,7 +616,36 @@ for wofost_out_para in wofost_out_paras:
     para_figs.append(para_fig)
 wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
+wofost_out_para_meaning = ['Wofost Development stage', 
+                           'Leaf area index of the crop (m2/m2)', 
+                           'Total dry above-ground biomass (dry weight kg/ha)',
+                           'Total dry weight of storage organs (the yield) (kg/ha)',
+                           'Total dry weight of leaves (kg/ha)',
+                           'Total dry weight of stems (kg/ha)',
+                           'Total dry weight of roots (kg/ha)',
+                           'Crop transpiration (excluding soil evaporation) (cm/day)',
+                           'Crop rooting depth (cm)',
+                           'Root zone soil moisture as a volumetric fraction',
+                           'Amount of available water in the rooted and unrooted zone (cm)'
+                          ]
 
+wofost_out_para_meaning = dict(zip(wofost_out_paras, wofost_out_para_meaning))
+
+def create_tooltip(wofost_out_para):
+    para_event = Event(source=wofost_out_dict[wofost_out_para], watched_events=['mouseenter', 'mouseleave'])
+    def figure_tooltip_event_handler(event):
+        old_decription = wofost_status_info.description
+        if event['event'] == 'mouseenter':
+            wofost_status_info.description = wofost_out_para_meaning[wofost_out_para]
+        if event['event'] == 'mouseleave':
+            wofost_status_info.description = old_decription
+    para_event.on_dom_event(figure_tooltip_event_handler)
+
+
+
+for wofost_out_para in wofost_out_paras:
+    create_tooltip(wofost_out_para)
+    
 # wofost_fig_vlines = {}
 # for wofost_out_para in wofost_out_paras:
 #     vline = Lines(x=[180, 180], y=[0, wofost_out_dict[wofost_out_para].marks[0].scales['x'].max], scales=wofost_out_dict[wofost_out_para].marks[0], 
