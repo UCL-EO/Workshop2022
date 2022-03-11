@@ -469,7 +469,7 @@ def create_ensemble(
             return retval
 
 
-    en_size = 50 # Reduce number of simulations
+    # en_size = 50 # Reduce number of simulations
 
     meteo_file = get_era5_gee(year, lat, lon, dest_folder="data/ERA5_weather/")
     print(meteo_file)

@@ -267,9 +267,9 @@ var_line.display_legend = True
 def read_wofost_data(lat, lon, year):
     """Reads ensemble from JASMIN"""
     # lat, lon = my_map.center
-    lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
+    # lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
     print(lat, lon, year)
-    f = create_ensemble(lat, lon, year)
+    f = create_ensemble(lat, lon, year, 200)
     max_lai = np.nanmax(f.f.LAI, axis=1)
     y = f.f.Yields.astype(float)
     lai = f.f.LAI.astype(float)
@@ -279,7 +279,7 @@ def read_wofost_data(lat, lon, year):
                             for i in param_names]).astype(float)
 
     pred_yield = max_lai * 1500 - 700
-    passer = np.abs(pred_yield - y) < 100.
+    passer = np.abs(pred_yield - y) < 60000.
     sim_yields = y[passer]
     sim_lai = lai[passer, :]
     param_array = param_array[:, passer]
@@ -340,7 +340,7 @@ def assimilate_me(b):
     
     wofost_status_info.description = 'Fitting to Planet LAI'
     est_yield, est_yield_sd, parameters, _, _ , ensemble_lai_time, lai_fitted_ensembles = ensemble_assimilation(
-        param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis)
+        param_array, sim_times, sim_lai, sim_yields, pix_lai, t_axis, sel_n_best=5)
     
     for i, para in enumerate(paras):
         wofost_sliders_dict[para].value = np.mean(parameters[i])
