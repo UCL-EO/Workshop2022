@@ -574,17 +574,24 @@ all_paras, para_mins, para_maxs = np.array(prior_df.loc[:, ['#PARAM_CODE', 'Min'
 para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
 
-para_meaning = {'TDWI': 'Initial total crop dry weight [kg ha-1]',
-                'SDOY': 'Sowing day of year',
-                'SPAN': 'Life span of leaves growing at 35 Celsius [d]',
+para_meaning = {'TDWI': 'TDWI: Initial total crop dry weight [kg ha-1]',
+                'SDOY': 'SDOY: Sowing day of year',
+                'SPAN': 'SPAN: Life span of leaves growing at 35 Celsius [d]',
                 #'CVO' : 'Efficiency of conversion into storage org. [kg kg-1]',
                 #'AMAXTB_000': 'Max. leaf CO2 assim. rate at development stage of 0',
                 #'AMAXTB_125': 'Max. leaf CO2 assim. rate at development stage of 1.25',
                 #'AMAXTB_150': 'Max. leaf CO2 assim. rate at development stage of 1.5',
-                "AMAX_SCALAR": "Scalar on Max. lead CO2 assim. rate"
+                "AMAX_SCALAR": "AMAX_SCALAR: Scalar on Max. lead CO2 assim. rate"
                }
 
 
+para_simple_name = {'TDWI': 'Seeds amount',
+                    'SDOY': 'Sowing date',
+                    'SPAN': 'Leaf life span',
+                    'AMAX_SCALAR': 'Assimilation rate'
+                   }
+
+para_labels = []
 for i in range(len(paras)):
     para_ind = para_inds[i]
     para_name = all_paras[para_ind]
@@ -592,19 +599,41 @@ for i in range(len(paras)):
     para_max = para_maxs[para_ind]
     step = (para_max - para_min) / 50
     initial = (para_min + para_max) / 2
+    
+    para_label = Label('%s: '%para_simple_name[para_name])
+    
     wofost_slider = FloatSlider(min=para_min, max=para_max, value=initial,       # Opacity is valid in [0,1] range
                    step = step,
                    orientation='horizontal',       # Vertical slider is what we want
                    readout=True,                # No need to show exact value
-                   layout=Layout(width='100%'),
-                   description='%s: '%para_name, 
+                   layout=Layout(width='280px'),
+                   # description='%s: '%para_simple_name[para_name], 
                    description_tooltip= para_meaning[para_name],
                    style={'description_width': 'initial'}) 
-    wofost_slider.observe(on_change_wofost_slider)
     wofost_sliders.append(wofost_slider)
-
+    para_labels.append(para_label)
+    
+    wofost_slider.observe(on_change_wofost_slider)
+    
+    
+wofost_labels_sliders = [HBox([VBox(para_labels), VBox(wofost_sliders)])]
+    
 wofost_sliders_dict = dict(zip(paras, wofost_sliders))
 
+
+def create_tooltip_inputs(para_name):
+    para_event = Event(source=wofost_sliders_dict[para_name], watched_events=['mouseenter', 'mouseleave'])
+    def figure_tooltip_event_handler(event):
+        old_decription = wofost_status_info.description
+        if event['event'] == 'mouseenter':
+            wofost_status_info.description = para_meaning[para_name]
+        if event['event'] == 'mouseleave':
+            wofost_status_info.description = ''
+    para_event.on_dom_event(figure_tooltip_event_handler)
+
+for para_name in paras:
+    create_tooltip_inputs(para_name)
+    
 
 wofost_fig_vlines = {}
 wofost_fig_dsv1_vlines = {}
@@ -666,7 +695,7 @@ def get_para_plot(para_name, x, y, xmin = 180, xmax = 330):
     wofost_fig_dsv2_vlines[wofost_out_para] = dvs2_vline
     
     ax_x = Axis(label="DOY", scale=x_scale,  num_ticks=5, tick_style=tick_style)
-    ax_y = Axis(label=para_name, scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
+    ax_y = Axis(label=wofost_out_para_simple_name_dict[para_name], scale=y_scale, orientation="vertical", side="left", tick_values=tick_values, tick_style=tick_style)
     
     fig_layout = Layout(width='400px', height='160px', max_height='160px', max_width='400px')
     
@@ -692,8 +721,40 @@ def update_wofost_fig_val(wofost_out_para, x, y, xmin = 180, xmax = 330):
     wofost_out_dict[wofost_out_para].marks[0].y = y
     
 wofost_out_paras = ['DVS', 'LAI', 'TAGP', 'TWSO', 'TWLV', 'TWST', 'TWRT', 'TRA', 'RD', 'SM', 'WWLOW']
-para_figs = []
 
+wofost_out_para_simple_name = ['Development stage',
+                               'LAI',
+                               'Above ground biomass',
+                               'Yield',
+                               'Leaves weight',
+                               'Stems weight',
+                               'Roots weight',
+                               'Transpiration',
+                               'Root depth',
+                               'Soil moisture',
+                               'Available Water'
+                              ]
+
+wofost_out_para_simple_name_dict = dict(zip(wofost_out_paras, wofost_out_para_simple_name))
+
+wofost_out_para_meaning = ['DVS: Wofost Development stage', 
+                           'LAI: Leaf area index of the crop (m2/m2)', 
+                           'TAGP: Total dry above-ground biomass (dry weight kg/ha)',
+                           'TWSO: Total dry weight of storage organs (the yield) (kg/ha)',
+                           'TWLV: Total dry weight of leaves (kg/ha)',
+                           'TWST: Total dry weight of stems (kg/ha)',
+                           'TWRT: Total dry weight of roots (kg/ha)',
+                           'TRA: Crop transpiration (excluding soil evaporation) (cm/day)',
+                           'RD: Crop rooting depth (cm)',
+                           'SM: Root zone soil moisture as a volumetric fraction',
+                           'WWLOW: Amount of available water in the rooted and unrooted zone (cm)'
+                          ]
+
+wofost_out_para_meaning = dict(zip(wofost_out_paras, wofost_out_para_meaning))
+
+
+
+para_figs = []
 x = np.arange(180, 330)
 y = np.zeros_like(x)
 for wofost_out_para in wofost_out_paras:
@@ -701,20 +762,7 @@ for wofost_out_para in wofost_out_paras:
     para_figs.append(para_fig)
 wofost_out_dict = dict(zip(wofost_out_paras, para_figs))
 
-wofost_out_para_meaning = ['Wofost Development stage', 
-                           'Leaf area index of the crop (m2/m2)', 
-                           'Total dry above-ground biomass (dry weight kg/ha)',
-                           'Total dry weight of storage organs (the yield) (kg/ha)',
-                           'Total dry weight of leaves (kg/ha)',
-                           'Total dry weight of stems (kg/ha)',
-                           'Total dry weight of roots (kg/ha)',
-                           'Crop transpiration (excluding soil evaporation) (cm/day)',
-                           'Crop rooting depth (cm)',
-                           'Root zone soil moisture as a volumetric fraction',
-                           'Amount of available water in the rooted and unrooted zone (cm)'
-                          ]
 
-wofost_out_para_meaning = dict(zip(wofost_out_paras, wofost_out_para_meaning))
 
 def create_tooltip(wofost_out_para):
     para_event = Event(source=wofost_out_dict[wofost_out_para], watched_events=['mouseenter', 'mouseleave'])
@@ -723,7 +771,7 @@ def create_tooltip(wofost_out_para):
         if event['event'] == 'mouseenter':
             wofost_status_info.description = wofost_out_para_meaning[wofost_out_para]
         if event['event'] == 'mouseleave':
-            wofost_status_info.description = old_decription
+            wofost_status_info.description = ''
     para_event.on_dom_event(figure_tooltip_event_handler)
 
 
@@ -758,7 +806,7 @@ twso_vline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scale
                    line_style='dashed', colors=['gray'], fill='between')
 
 twso_hline = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
-                   line_style='solid', colors=['#ffa500'], fill='between', display_legend=True, labels = ['Avg. Field Yield'])
+                   line_style='solid', colors=['#ff0000'], fill='between', display_legend=True, labels = ['Avg. Field Yield'])
 
 twso_shade = Lines(x=[0,], y=[0,], scales=wofost_out_dict['TWSO'].marks[0].scales, 
                    line_style='solid', colors=['#cccccc'], fill='between', opacities=[1, 1], display_legend=False, labels = ['1σ'])
@@ -776,7 +824,7 @@ scales['color'] = col_line
 
 dvs_yticks = wofost_out_dict['DVS'].axes[1].tick_values
 dvs_yax = Axis(
-    label="DVS",
+    label=wofost_out_para_simple_name_dict["DVS"],
     scale=scales['y'],
     orientation="vertical",
     side="right",
@@ -880,7 +928,7 @@ def on_change_dropdown2(change):
 wofost_status_info = Button(description = '', button_style='info', layout=Layout(width='100%'), disabled=True)
 wofost_status_info.style.button_color = '#999999'
 wofost_out_panel = VBox([left_output, right_output])
-wofost_widgets = [wofost_status_info, ] + wofost_sliders + [assimilate_me_button, wofost_out_panel]
+wofost_widgets = [wofost_status_info, ] + wofost_labels_sliders + [assimilate_me_button, wofost_out_panel]
 wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
