@@ -5,7 +5,7 @@ from io import BytesIO
 from pathlib import Path
 import os
 import tempfile
-
+import yaml
 import ipywidgets.widgets as widgets
 import numpy as np
 import pandas as pd
@@ -369,6 +369,17 @@ def run_wofost(parameters, agromanagement, wdp, potential=False):
     return df_results, wofsim
 
 
+class AgroManagementLoader(list):
+    """Reads PCSE agromanagement files in the YAML format.
+    :param fname: filename of the agromanagement file. If fname is not provided as a absolute or
+        relative path the file is assumed to be in the current working directory.
+    """
+    def __init__(self, dictionary):
+        list.__init__(self, dictionary['AgroManagement'])
+    def __str__(self):
+        return yaml.dump(self, default_flow_style=False)
+    
+
 def wofost_parameter_sweep_func(
     year,
     ens_parameters,
@@ -402,28 +413,23 @@ def wofost_parameter_sweep_func(
         f"{year}/{sowing_doy}", "%Y/%j"
     ).date()
     crop_end_date = dt.date(year, 11, 30)
-    filename = tempfile.NamedTemporaryFile(dir="data/",
-                                           mode='w',
-                                           delete=False)
-    with open(filename.name, 'w', encoding='utf8', newline='') as fp:
-        fp.write(
-            agromanagement_contents.format(
+
+    agro_dictionary = agromanagement_contents.format(
                 year=crop_start_date.year,
                 crop="maize",
                 variety="Ghana",
                 crop_start_date=crop_start_date,
                 crop_end_date=crop_end_date,
-            )
-        )
+            )   
+    agro_dictionary = yaml.safe_load(agro_dictionary)
+    agromanagement = AgroManagementLoader(agro_dictionary)
 
-    agromanagement = YAMLAgroManagementReader(filename.name)
-    os.remove(filename.name)
-    agromanagement[0][dt.date(year, 1, 1)
-                      ]["CropCalendar"]["crop_start_date"] = \
-                          crop_start_date
-    agromanagement[0][dt.date(year, 1, 1)
-                      ]["CropCalendar"]["crop_end_date"] = \
-                          crop_end_date
+    # agromanagement[0][dt.date(year, 1, 1)
+    #                   ]["CropCalendar"]["crop_start_date"] = \
+    #                       crop_start_date
+    # agromanagement[0][dt.date(year, 1, 1)
+    #                   ]["CropCalendar"]["crop_end_date"] = \
+    #                       crop_end_date
     wdp = CSVWeatherDataProvider(meteo, dateformat="%Y-%m-%d", delimiter=",")
 
     df_results, simulator = run_wofost(
