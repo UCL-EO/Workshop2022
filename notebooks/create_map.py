@@ -491,7 +491,7 @@ def on_change_wofost_slider(change):
         #                           ]
         wofost_status_info.description = 'Running model...'
         df = wofost_parameter_sweep_func(year, ens_parameters = ens_parameters.copy(), meteo=meteo_file)
-        print(df)
+#         print(df)
         
         dates = df.index
         doys = [int(i.strftime('%j')) for i in dates]
