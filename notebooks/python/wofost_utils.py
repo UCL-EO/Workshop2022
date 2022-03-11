@@ -433,6 +433,7 @@ def wofost_parameter_sweep_func(
     # df_results.to_csv(key, encoding="utf-8", index=False)
 
 
+
 def create_ensemble(
     lat,
     lon,
@@ -500,7 +501,7 @@ def create_ensemble(
                 dd["AMAXTB"] = amaxtb
 
         ensemble_parameters.append(dd)
-    
+
     results = []
     wrapper = partial(
         wofost_parameter_sweep_func,
@@ -527,8 +528,50 @@ def create_ensemble(
     ####        potential=potential,
     ####    )
     ###results.append(wrapper(sample))
+    fname = save_ensemble(ensemble_fname, results, z_start,
+                         param_list)
+    f = np.load(ensemble_fname, allow_pickle=True)
 
-    return results
+    return f
+
+
+def save_ensemble(output_fname, outputs, ensemble_parameters,
+                param_list):
+    comm_idx = outputs[0].index
+    for df in outputs[1:]:
+        comm_idx = comm_idx | df.index
+    results = []
+    for df in outputs:
+        results.append(df.reindex(comm_idx))
+    # Sort out the outputs into numpy arrays
+
+    #sim_times = np.array([[x.day.min(), x.day.max()]
+    #                     for x in results])
+
+    lai = np.array(
+            [x.LAI.values.astype(np.float32) for x in results],
+            dtype=object)
+
+    dvs = np.array(
+                [x.DVS.values.astype(np.float32) for x in results]
+            ).astype(np.float32)
+
+    Yields = np.array([x.TWSO.max() for x in results]).astype(np.float32)
+    agb = np.array([x.TAGP.max() for x in results]).astype(np.float32)
+
+    output_dict = {"Yields":Yields, "AGB":agb, "LAI":lai,
+                    "sim_times":comm_idx.tolist(),
+                    "DVS":dvs
+                    }
+        # Now, store the parameters are numpy arrays too
+    ts = {p:ensemble_parameters[i,:] for i,p in enumerate(param_list)}
+
+
+
+    big_dict = {**ts, **output_dict}
+    np.savez(output_fname, **big_dict)
+    return output_fname
+
 
 
 def subsample_lai_observations(obs_dates, obs_lai, step=10):
@@ -658,3 +701,4 @@ def ensemble_assimilation(
     fit_lai = sim_lai[:, time_index].astype(float)[ilocs, :]
     return (est_yield, est_yield_sd, parameters, 
             obs_dates, obs_lai_sub, work_sim_times, fit_lai)
+
