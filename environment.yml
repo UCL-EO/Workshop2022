@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - nodejs
+  - nodejs>=12
   - geemap
   - cartopy
   - folium
