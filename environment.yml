@@ -41,6 +41,7 @@ dependencies:
   - scipy
   - dask
   - pyproj
+  - retry 
   - pip:
     - sphinx_rtd_theme
     - urlpath
