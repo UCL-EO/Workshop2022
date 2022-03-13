@@ -1105,6 +1105,9 @@ def on_click(change):
     home = os.getcwd()
     cwd = '/files/' + '/'.join(home.split('/')[3:])
     base_url = my_map.window_url.split('/lab/')[0] + cwd + '/'
+    
+    base_url = '/'.join(my_map.window_url.replace('/lab/tree/', '/files/').split('/')[:-1]) + '/'
+    base_url
 
     if yield_control is not None:
         
@@ -1346,6 +1349,9 @@ def on_change_slider2(change):
         home = os.getcwd()
         cwd = '/files/' + '/'.join(home.split('/')[3:])
         base_url = my_map.window_url.split('/lab/')[0] + cwd + '/'
+        
+        base_url = '/'.join(my_map.window_url.replace('/lab/tree/', '/files/').split('/')[:-1]) + '/'
+        base_url
 
         url = 'data/S2_thumbs/S2_%s_lai_%03d.png'%(field_id, value)
         url = base_url + url
