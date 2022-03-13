@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - mamba
   - nodejs>=12
   - geemap
   - cartopy
