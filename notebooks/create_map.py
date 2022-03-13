@@ -1106,7 +1106,9 @@ def on_click(change):
     cwd = '/files/' + '/'.join(home.split('/')[3:])
     base_url = my_map.window_url.split('/lab/')[0] + cwd + '/'
     
-    base_url = '/'.join(my_map.window_url.replace('/lab/tree/', '/files/').split('/')[:-1]) + '/'
+    i_lab, i_tree = my_map.window_url.find('/lab/'),  my_map.window_url.find('/tree/')
+    to_replace = my_map.window_url[i_lab:i_tree+6]
+    base_url = '/'.join(my_map.window_url.replace(to_replace, '/files/').split('/')[:-1]) + '/'
     base_url
 
     if yield_control is not None:
@@ -1350,7 +1352,9 @@ def on_change_slider2(change):
         cwd = '/files/' + '/'.join(home.split('/')[3:])
         base_url = my_map.window_url.split('/lab/')[0] + cwd + '/'
         
-        base_url = '/'.join(my_map.window_url.replace('/lab/tree/', '/files/').split('/')[:-1]) + '/'
+        i_lab, i_tree = my_map.window_url.find('/lab/'),  my_map.window_url.find('/tree/')
+        to_replace = my_map.window_url[i_lab:i_tree+6]
+        base_url = '/'.join(my_map.window_url.replace(to_replace, '/files/').split('/')[:-1]) + '/'
         base_url
 
         url = 'data/S2_thumbs/S2_%s_lai_%03d.png'%(field_id, value)
