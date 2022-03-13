@@ -9,7 +9,7 @@ jupyter labextension install @jupyterlab/geojson-extension
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
 jupyter labextension install jupyter-leaflet
 jupyter trust *.ipynb
-jupyter trust ntoebooks/*.ipynb
+jupyter trust notebooks/*.ipynb
 
 # kernel setup
 python -m ipykernel install --name=conda-env-uclnceo  --display-name 'conda env:uclnceo' --user

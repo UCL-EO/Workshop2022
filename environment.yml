@@ -3,6 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - mamba
+  - nodejs>=12
   - geemap
   - cartopy
   - folium
@@ -40,6 +42,7 @@ dependencies:
   - scipy
   - dask
   - pyproj
+  - retry 
   - pip:
     - sphinx_rtd_theme
     - urlpath
