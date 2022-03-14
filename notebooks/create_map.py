@@ -269,7 +269,7 @@ def read_wofost_data(lat, lon, year):
     # lat, lon = my_map.center
     # lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
     print(lat, lon, year)
-    f = create_ensemble(lat, lon, year, 200)
+    f = create_ensemble(lat, lon, year, 10000)
     max_lai = np.nanmax(f.f.LAI, axis=1)
     y = f.f.Yields.astype(float)
     lai = f.f.LAI.astype(float)
@@ -575,7 +575,7 @@ para_inds = [all_paras.tolist().index(i) for i in paras]
 wofost_sliders = []
 
 para_meaning = {'TDWI': 'TDWI: Initial total crop dry weight [kg ha-1]',
-                'SDOY': 'SDOY: Sowing day of year',
+                'SDOY': 'SDOY: Sowing day of year [days]',
                 'SPAN': 'SPAN: Life span of leaves growing at 35 Celsius [d]',
                 #'CVO' : 'Efficiency of conversion into storage org. [kg kg-1]',
                 #'AMAXTB_000': 'Max. leaf CO2 assim. rate at development stage of 0',
@@ -585,7 +585,7 @@ para_meaning = {'TDWI': 'TDWI: Initial total crop dry weight [kg ha-1]',
                }
 
 
-para_simple_name = {'TDWI': 'Seeds amount',
+para_simple_name = {'TDWI': 'Seed mass',
                     'SDOY': 'Sowing date',
                     'SPAN': 'Leaf life span',
                     'AMAX_SCALAR': 'Assimilation rate'
