@@ -789,7 +789,7 @@ for wofost_out_para in wofost_out_paras:
 obs_lai_line  = Scatter(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
                         default_size=4, colors = ['green'], display_legend=True, labels=['Planet LAI'])    
 ens_lai_line = Lines(x=line_axs[-1].x, y=line_axs[-1].y, scales=wofost_out_dict['LAI'].marks[0].scales, 
-                     colors = ['#cccccc'], display_legend=False, labels=['Ensemble LAI'])
+                     colors = ['#cccccc'], display_legend=False, labels=['Ensemble LAI'], opacities = [0.6,])
 
 ens_lai_line_temp = Lines(x=line_axs[-1].x, y=line_axs[-1].y*np.nan, scales=wofost_out_dict['LAI'].marks[0].scales, 
                      colors = ['#cccccc'], display_legend=True, labels=['Ensemble LAI'])
@@ -1205,7 +1205,7 @@ def on_click(change):
     yield_label = Label('%s Field (%s district) yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, district_name, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
     yield_label2 = Label('$$Yield [kg/ha]$$')
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
+    yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output],layout=Layout(width='100%', height='50%', object_fit='contain'))
     # yield_lai_box = VBox([yield_box, lai_box])
     
     field_df = df[df.CODE==field_id].dropna(subset=['COMMENTS'])
@@ -1229,7 +1229,7 @@ def on_click(change):
         comment_str = '%s: %s'%(date, commment)
         comment_label = Label(value = comment_str)
         comment_labels.append(comment_label)
-    field_comments_tab = VBox(comment_labels)
+    field_comments_tab = VBox(comment_labels, layout=Layout(min_height='250px'))
 
     field_df = df[df.CODE==field_id].dropna(subset=['Phynology Data'])
 
@@ -1241,7 +1241,7 @@ def on_click(change):
         pheo_str = '%s: %s'%(date, pheo)
         pheo_label = Label(value = pheo_str)
         pheo_labels.append(pheo_label)
-    field_pheos_tab = VBox(pheo_labels)
+    field_pheos_tab = VBox(pheo_labels, layout=Layout(min_height='250px'))
 
 
     yield_field_photo_tab = Tab([yield_box, field_image_tab, field_pheos_tab, field_comments_tab])
@@ -1797,6 +1797,9 @@ def on_change_k_slider(change):
         good_ref_line.y = ndvi[u_mask]
         lai_dot.scales = var_line.scales
         field_med_lai_line.scales = var_line.scales
+        
+        wofost_out_dict['LAI'].marks[5].x = line_axs[-1].x
+        wofost_out_dict['LAI'].marks[5].y = line_axs[-1].y
 
 k_slider.observe(on_change_k_slider)
 my_map.on_interaction(handle_interaction)
