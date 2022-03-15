@@ -429,6 +429,7 @@ def da_pix(sels, planet_sur, u_thresh = 2):
 
 
 
+
 def load_s2_bios(field_id):
     npz_name = '%s_bios_planet_prior_v1.npz'%field_id
     if not os.path.exists('./data/' + npz_name):
@@ -444,7 +445,8 @@ def load_s2_bios(field_id):
     valid_mask = f.f.valid_mask
     temp = np.zeros(bios.shape[:2] + valid_mask.shape) * np.nan
     temp[:, :, valid_mask] = bios
-    return temp
+    doys = f.f.doys
+    return temp, doys
 
 def get_field_geo_transform_S2_30PYR(field_id):
     temp_file_url = '/vsicurl/https://gws-access.jasmin.ac.uk/public/nceo_ard/S2/30/P/YR/S2B_MSIL1C_20180914T102019_N0206_R065_T30PYR_20180914T173602.SAFE/GRANULE/L1C_T30PYR_A007956_20180914T102951/IMG_DATA/T30PYR_20180914T102019_B02_sur.tif'
@@ -462,13 +464,18 @@ def get_field_geo_transform_S2_30PYR(field_id):
     
     projectionRef, geo_trans = gg.GetProjectionRef(), gg.GetGeoTransform()
     
+
+    
+    return projectionRef, geo_trans
+
+def get_s2_bounds(projectionRef, geo_trans, shape):
     pj1 = Proj(projectionRef)
     transformer = Transformer.from_crs(pj1.crs, 'EPSG:4326', always_xy=True)
-
+    
     x_min = geo_trans[0]
     y_max = geo_trans[3]
-    x_max = geo_trans[0] + valid_mask.shape[1] * geo_trans[1]
-    y_min = geo_trans[3] + valid_mask.shape[0] * geo_trans[5]
+    x_max = geo_trans[0] + shape[1] * geo_trans[1]
+    y_min = geo_trans[3] + shape[0] * geo_trans[5]
 
     coords = np.array([[x_min, y_min], [x_max, y_max]])
 
@@ -477,19 +484,28 @@ def get_field_geo_transform_S2_30PYR(field_id):
 
     (x_min, x_max), (y_min, y_max) = transformer.transform(x_coords,y_coords)
 
-    bounds = ((x_min, y_min), (x_max, y_max))
-    
-    return projectionRef, geo_trans, bounds
+    bounds = ((y_min, x_min), (y_max, x_max))
+    return bounds
 
 def latlon_2_xy(lat, lon, projectionRef, geo_trans):
     
     pj1 = Proj(projectionRef)
     transformer = Transformer.from_crs('EPSG:4326', pj1.crs)
     x, y = transformer.transform(lat, lon)
-    inds = np.where(valid_mask)
+    # inds = np.where(valid_mask)
     pix_y = int((x - geo_trans[0]) / geo_trans[1])
     pix_x = int((y - geo_trans[3]) / geo_trans[5])
     return pix_x, pix_y
+
+
+def get_pixel_s2_bios(lat, lon, s2_projectionRef, s2_geo_trans, s2_bios):
+    s2_pix_x, s2_pix_y = latlon_2_xy(lat, lon, s2_projectionRef, s2_geo_trans )
+    print(s2_pix_x, s2_pix_y)
+    s2_pixel_bios = s2_bios[:, :, s2_pix_x, s2_pix_y].T
+
+    s2_bio_names = ['n', 'cab', 'cm', 'cw', 'lai', 'ala', 'cbrown']
+    s2_pix_bio_dict = dict(zip(s2_bio_names, s2_pixel_bios))
+    return s2_pix_bio_dict
 
 
 # from PIL import Image

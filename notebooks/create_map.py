@@ -17,7 +17,7 @@ from bqplot import Label as bqLabel
 
 sys.path.insert(0, './python/')
 from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
-from map_utils import debounce
+from map_utils import debounce, load_s2_bios, get_field_geo_transform_S2_30PYR, get_s2_bounds, latlon_2_xy, get_pixel_s2_bios
 from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_gee
 from wofost_utils import ensemble_assimilation
 
@@ -950,6 +950,52 @@ wofost_output_dropdown1.observe(on_change_dropdown1, 'value')
 wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
 
+
+s2_bio_names = ['n', 'cab', 'cm', 'cw', 'lai', 'ala', 'cbrown']
+s2_bios_min_max = [[1, 2.5], [10, 80], [0, 0.02], [0, 0.05], [0, 3], [30, 80], [0, 1]]
+s2_bios_min_max_dict = dict(zip(s2_bio_names, s2_bios_min_max))
+
+s2_bio_simple_name = ['Leaf layers [-]', 'Chlorophyll a+b [ug/cm2]', 'Lead dry matter [g/cm2]', 
+                      'Leaf water content [g/cm2]', 'Leaf area index [m2/m2]', 'Leaf angle distribution [d]', 'Leaf senescence [-]']
+s2_bio_simple_name_dict = dict(zip(s2_bio_names, s2_bio_simple_name))
+
+s2_bios_to_plot = ['n', 'cab', 'cm', 'cw', 'lai',  'cbrown']
+
+fig_layout = Layout(width='auto', height='auto', max_height='150px', max_width='200px')
+tick_style = {'font-size': 8, }
+x_scale = LinearScale(min = 200, max = 365)
+
+s2_bio_plot_dict = {}
+s2_bio_plot_line_dict = {}
+for s2_bio_name in s2_bios_to_plot:
+    y_scale = LinearScale(min = s2_bios_min_max_dict[s2_bio_name][0], max = s2_bios_min_max_dict[s2_bio_name][1])
+    
+    y_ticks = np.linspace(y_scale.min, y_scale.max, 5)
+    ax_x = Axis(label="DOY", scale=x_scale, num_ticks=5, tick_style=tick_style)
+    
+    ax_y = Axis(label=s2_bio_simple_name_dict[s2_bio_name], scale=y_scale, orientation="vertical", 
+                tick_format='0.2f', side="left", tick_values=y_ticks, tick_style=tick_style)
+    
+    ax_y.min = s2_bios_min_max_dict[s2_bio_name][0]
+    ax_y.max = s2_bios_min_max_dict[s2_bio_name][1]
+    
+    line = Lines(x=np.arange(200, 365), y=np.arange(200, 365)*np.nan, scales={"x": x_scale, "y": y_scale})
+    line.colors = ['#81d8d0']
+    line.stroke_width = 3
+    fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line], 
+                       title=s2_bio_simple_name_dict[s2_bio_name], 
+                       animation_duration=500, 
+                       title_style = {'font-size': '8'},
+                       fig_margin = dict(top=16, bottom=17, left=26, right=16))
+    
+    s2_bio_plot_line_dict[s2_bio_name] = line
+    s2_bio_plot_dict[s2_bio_name] = fig
+
+left_box  = VBox([s2_bio_plot_dict['lai'], s2_bio_plot_dict['cm'], s2_bio_plot_dict['n']])
+right_box = VBox([s2_bio_plot_dict['cab'], s2_bio_plot_dict['cw'], s2_bio_plot_dict['cbrown']])
+s2_bio_box = HBox([left_box, right_box])
+
+
 wofost_box = VBox(wofost_widgets, 
                   layout = Layout(display='flex',
                                   flex_flow='column',
@@ -970,9 +1016,11 @@ panel_box = VBox([fig_box, k_slider],
                                   align_items='center',
                                   width='400px'))
 
-names = ['Reflectance fitting', 'Wofost simulation']
+
+
+names = ['Planet Ref. fitting', 'Wofost simulation', 'Sentinel 2 bios']
 tab = Tab()
-tab.children = [panel_box, wofost_box]
+tab.children = [panel_box, wofost_box, s2_bio_box]
 [tab.set_title(i, title) for i, title in enumerate(names)]
 
 
@@ -1093,7 +1141,9 @@ def on_click(change):
     global doys
     global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img, maize_markers
     global wofost_out_dict
+    global s2_projectionRef, s2_geo_trans, s2_bounds, s2_bios, s2_bio_doys
     field_id = change["new"]
+
 
     ind = field_ids.index(field_id)
 
@@ -1140,9 +1190,15 @@ def on_click(change):
     loading_label = Label('Loading data over field %s'%field_id)
     loading_info = HBox([loading_bar_img, loading_label])
     yield_control = WidgetControl(widget=loading_info, position='bottomleft')
-
+    
     my_map.add_control(yield_control)
-        
+
+    
+    s2_bios, s2_bio_doys = load_s2_bios(field_id)
+    s2_projectionRef, s2_geo_trans = get_field_geo_transform_S2_30PYR(field_id)
+    s2_bounds = get_s2_bounds(s2_projectionRef, s2_geo_trans, s2_bios.shape[2:])
+    
+
     url, bounds, doys, yield_colorbar_f, med_lai = get_lai_gif(field_id)
     field_med_lai_line.x = doys
     field_med_lai_line.y = med_lai
@@ -1729,7 +1785,12 @@ def handle_interaction(**kwargs):
             wofost_out_dict['LAI'].marks[5].x = line_axs[-1].x
             wofost_out_dict['LAI'].marks[5].y = line_axs[-1].y
 
-    
+            s2_pix_bio_dict = get_pixel_s2_bios(marker_lon, marker_lat, s2_projectionRef, s2_geo_trans, s2_bios)
+
+            for s2_bio_name in s2_bios_to_plot:
+                s2_bio_plot_line_dict[s2_bio_name].x = s2_bio_doys
+                s2_bio_plot_line_dict[s2_bio_name].y = s2_pix_bio_dict[s2_bio_name]
+
 
         else:
             label.value = 'Not in field: %s'%field_id
