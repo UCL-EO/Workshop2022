@@ -16,7 +16,7 @@ from bqplot import ColorScale, FlexLine, ColorAxis
 from bqplot import Label as bqLabel
 
 sys.path.insert(0, './python/')
-from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar
+from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar, get_wofost_yield
 from map_utils import debounce, load_s2_bios, get_field_geo_transform_S2_30PYR, get_s2_bounds, latlon_2_xy, get_pixel_s2_bios
 from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_gee
 from wofost_utils import ensemble_assimilation
@@ -1147,7 +1147,7 @@ yield_img = None
 yield_control = None
 daily_img = None
 maize_markers = []
-
+wofost_yield_img = None
 
 lai_colorbar_f = get_lai_color_bar()
 image = lai_colorbar_f.getvalue()
@@ -1299,10 +1299,42 @@ def on_click(change):
     
     district_name = df[df.CODE==field_id].District.iloc[0]
     
-    yield_label = Label('%s Field (%s district) yield: %.02f [%.02f, %.02f, %.02f]'%(field_id, district_name, np.mean(ylds), ylds[0], ylds[1], ylds[2]))
-    yield_label2 = Label('$$Yield [kg/ha]$$')
+    wofost_yield_img_fname, wofost_yield_colorbar_f = get_wofost_yield(field_id)
+    
+    image = wofost_yield_colorbar_f.getvalue()
+    wofost_yield_colorbar = widgetIMG(value=image, format='png',)
+    
+    encoded = base64.b64encode(open(wofost_yield_img_fname, 'rb').read())
+    wofost_yield_img_url = "data:image/png;base64,%s"%encoded.decode()
+    
+    yield_label1 = Label('Field: %s (%s district)'%(field_id, district_name))
+    yield_label2 = Label('Yield: %.02f [%.02f, %.02f, %.02f]'%(np.mean(ylds), ylds[0], ylds[1], ylds[2]))
+    yield_label3 = Label('$$Empirical Yield [kg/ha]$$')
+    
+    wofost_yield_label = Label('$$Yield [kg/ha]$$')
+    
+    colorbar_dropdown = Dropdown(
+        options=['Wofost yield colorbar', 'Emprical yield colorbar', 'LAI colorbar'],
+        value='Wofost yield colorbar',
+        layout={'width': 'max-content'}
+    )
+    
+    
+    colorbar_box = VBox([wofost_yield_label, wofost_yield_colorbar], 
+                        layout=Layout(display='flex',flex_flow='column',align_items='center')
+                       )
+    colorbar_dropdown_box = VBox([colorbar_dropdown, colorbar_box], 
+                        layout=Layout(display='flex',flex_flow='column',align_items='center')
+                       )
+    
+    yield_box = VBox([yield_label1, yield_label2, colorbar_dropdown_box],
+                     layout=Layout(object_fit='contain'))
+    
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
-    yield_box = VBox([yield_label, yield_label2, output, lai_colorbar_label, lai_colorbar_output],layout=Layout(width='100%', height='50%', object_fit='contain'))
+    # yield_box = VBox([yield_label1, yield_label2, yield_label3, output, 
+    #                   wofost_yield_label, wofost_yield_colorbar, 
+    #                   lai_colorbar_label, lai_colorbar_output],
+    #                  layout=Layout(width='100%', height='50%', object_fit='contain'))
     # yield_lai_box = VBox([yield_box, lai_box])
     
     field_df = df[df.CODE==field_id].dropna(subset=['COMMENTS'])
@@ -1386,8 +1418,11 @@ def on_click(change):
 #         name = 'S2_%s_lai_movie'%(field_id)
 #     )
     # my_map.add_layer(field_movie)
-    global yield_img
+    
 
+    
+    global yield_img, wofost_yield_img
+    
     if yield_img is None:
         # print(url)
         # print(field_bounds)
@@ -1410,6 +1445,30 @@ def on_click(change):
         my_map.add_layer(yield_img)
         # daily_img.url = url
         # daily_img.bounds = field_bounds
+        
+    if wofost_yield_img is None:
+        # print(url)
+        # print(field_bounds)
+        # print('S2_%s_lai_png'%(field_id))
+        wofost_yield_img = ImageOverlay(
+            url=wofost_yield_img_url,
+            bounds = field_bounds,
+            name = 'Wofost Yield map'#%('#%(field_id)
+        )
+        my_map.add_layer(wofost_yield_img)
+        wofost_yield_img.url = wofost_yield_img_url
+        wofost_yield_img.bounds = field_bounds
+    else:
+        my_map.remove_layer(wofost_yield_img)
+        wofost_yield_img = ImageOverlay(
+            url=wofost_yield_img_url,
+            bounds = field_bounds,
+            name = 'Wofost Yield map'#%(field_id)
+        )
+        my_map.add_layer(wofost_yield_img)
+        # daily_img.url = url
+        # daily_img.bounds = field_bounds
+        
 
     jslink((slider, 'value'), (yield_img, 'opacity') )
     
@@ -1589,7 +1648,7 @@ def on_change_slider2(change):
             daily_img.bounds = field_bounds
             daily_img.name = 'LAI map'#%(field_id)
         # print(url)
-        jslink((slider, 'value'), (daily_img, 'opacity') )
+        # jslink((slider, 'value'), (daily_img, 'opacity') )
 
 play = Play(
     value=0,
