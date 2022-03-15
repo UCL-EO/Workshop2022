@@ -952,12 +952,16 @@ wofost_output_dropdown2.observe(on_change_dropdown2, 'value')
 
 
 s2_bio_names = ['n', 'cab', 'cm', 'cw', 'lai', 'ala', 'cbrown']
-s2_bios_min_max = [[1, 2.5], [10, 80], [0, 0.02], [0, 0.05], [0, 3], [30, 80], [0, 1]]
+s2_bios_min_max = [[1, 2.5], [10, 80], [0, 0.02], [0, 0.04], [0, 3], [30, 80], [0, 1]]
 s2_bios_min_max_dict = dict(zip(s2_bio_names, s2_bios_min_max))
 
 s2_bio_simple_name = ['Leaf layers [-]', 'Chlorophyll a+b [ug/cm2]', 'Lead dry matter [g/cm2]', 
                       'Leaf water content [g/cm2]', 'Leaf area index [m2/m2]', 'Leaf angle distribution [d]', 'Leaf senescence [-]']
 s2_bio_simple_name_dict = dict(zip(s2_bio_names, s2_bio_simple_name))
+
+s2_bio_colors = ['#407294', '#008080', '#b86a4b', '#1874cd', '#9acd32', '#800080', '#ffa500']
+colors_dict = dict(zip(s2_bio_names, s2_bio_colors))
+
 
 s2_bios_to_plot = ['n', 'cab', 'cm', 'cw', 'lai',  'cbrown']
 
@@ -967,6 +971,13 @@ x_scale = LinearScale(min = 200, max = 365)
 
 s2_bio_plot_dict = {}
 s2_bio_plot_line_dict = {}
+s2_bio_plot_fied_avg_line_dict = {}
+
+    
+s2_bio_vline = Lines(x=[0, 1], y=[0, 1], scales={"x": x_scale, "y": LinearScale(min = 0, max = 1)},
+                   line_style='solid', colors=['gray'], stroke_width=1)
+
+
 for s2_bio_name in s2_bios_to_plot:
     y_scale = LinearScale(min = s2_bios_min_max_dict[s2_bio_name][0], max = s2_bios_min_max_dict[s2_bio_name][1])
     
@@ -980,9 +991,20 @@ for s2_bio_name in s2_bios_to_plot:
     ax_y.max = s2_bios_min_max_dict[s2_bio_name][1]
     
     line = Lines(x=np.arange(200, 365), y=np.arange(200, 365)*np.nan, scales={"x": x_scale, "y": y_scale})
-    line.colors = ['#81d8d0']
+    line.colors = [colors_dict[s2_bio_name]]
+    
+    field_avg_box = Boxplot(x=np.arange(200, 365), y=np.arange(200, 365)[None]*np.nan, 
+                          scales=line.scales, box_fill_color='gray')
+    field_avg_box.auto_detect_outliers=False
+    field_avg_box.stroke = 'red'
+    field_avg_box.box_fill_color = colors_dict[s2_bio_name]
+    field_avg_box.opacities = [0.4]
+    field_avg_box.box_width=5
+    
+    bio_dot = Lines(x=[np.nan,], y=[np.nan,], scales=lai_fig.marks[1].scales,line_style='dotted', marker='circle', marker_size=45, colors = ['red'])
+
     line.stroke_width = 3
-    fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line], 
+    fig = Figure(layout=fig_layout, axes=[ax_x, ax_y], marks=[line, field_avg_box, s2_bio_vline], 
                        title=s2_bio_simple_name_dict[s2_bio_name], 
                        animation_duration=500, 
                        title_style = {'font-size': '8'},
@@ -990,6 +1012,7 @@ for s2_bio_name in s2_bios_to_plot:
     
     s2_bio_plot_line_dict[s2_bio_name] = line
     s2_bio_plot_dict[s2_bio_name] = fig
+    s2_bio_plot_fied_avg_line_dict[s2_bio_name] = field_avg_box
 
 left_box  = VBox([s2_bio_plot_dict['lai'], s2_bio_plot_dict['cm'], s2_bio_plot_dict['n']])
 right_box = VBox([s2_bio_plot_dict['cab'], s2_bio_plot_dict['cw'], s2_bio_plot_dict['cbrown']])
@@ -1532,6 +1555,8 @@ def on_change_slider2(change):
             
             for wofost_out_para in wofost_out_paras:
                 wofost_fig_vlines[wofost_out_para].x = [doys[ind], doys[ind]]
+                
+            s2_bio_vline.x = [doys[ind], doys[ind]]
             # lai_vline.x = 
             # lai_vline.y = [0, 3]
     
@@ -1750,6 +1775,14 @@ def handle_interaction(**kwargs):
             field_lai_boxes.scales = var_line.scales
             field_lai_boxes.x = field_doys
             field_lai_boxes.y = field_lais
+            
+            s2_bio_plot_fied_avg_line_dict['lai'].x = field_doys
+            s2_bio_plot_fied_avg_line_dict['lai'].y = field_lais
+            
+
+            s2_bio_plot_fied_avg_line_dict['cab'].x = field_doys
+            s2_bio_plot_fied_avg_line_dict['cab'].y = field_cabs
+            
             lai_dot.scales = var_line.scales
             field_med_lai_line.scales = var_line.scales
                 
