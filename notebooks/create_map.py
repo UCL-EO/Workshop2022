@@ -22,6 +22,7 @@ from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_
 from wofost_utils import ensemble_assimilation
 
 from ipywidgets import Image as ImageWidget
+import base64
 
 df = pd.read_csv('data/Ghana_ground_data_v3.csv')
 
@@ -1359,8 +1360,12 @@ def on_click(change):
     dates = [(datetime.datetime(2021, 1, 1) + datetime.timedelta(days=int(i-1))).strftime('%Y-%m-%d (DOY: %j)') for i in doys]
     slider2.options = dates
     field_bounds = bounds
-    url = base_url + url
-    print(url)
+    
+    encoded = base64.b64encode(open(url, 'rb').read())
+    url = "data:image/png;base64,%s"%encoded.decode()
+    
+    # url = base_url + url
+    # print(url)
     field_mask = df.CODE == field_id
 
     field_doys = [int(datetime.datetime(2021, int(i.split('/')[1]), int(i.split('/')[0])).strftime('%j')) for i in df[field_mask].DATE]
@@ -1454,7 +1459,11 @@ def on_change_slider2(change):
         base_url
 
         url = 'data/S2_thumbs/S2_%s_lai_%03d.png'%(field_id, value)
-        url = base_url + url
+        
+        encoded = base64.b64encode(open(url, 'rb').read())
+        url = "data:image/png;base64,%s"%encoded.decode()
+
+        # url = base_url + url
         field_bounds, _ = get_field_bounds(field_id)
 
 #         if daily_img is not None:
