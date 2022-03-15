@@ -3,8 +3,6 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - mamba
-  - nodejs>=12
   - geemap
   - cartopy
   - folium
@@ -25,6 +23,8 @@ dependencies:
   - jupyter_contrib_nbextensions
   - python=3.9
   - nomkl
+  - statsmodels
+  - distributed
   - netCDF4
   - scipy
   - numpy
@@ -42,8 +42,10 @@ dependencies:
   - scipy
   - dask
   - pyproj
-  - retry 
+  - seaborn
+  - nodejs
   - pip:
+    - nbgitpuller
     - sphinx_rtd_theme
     - urlpath
     - mknotebooks
@@ -54,3 +56,5 @@ dependencies:
     - pygeotile
     - pystac-client
     - stackstac
+    - cdsapi
+    - retry
