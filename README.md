@@ -4,7 +4,48 @@ Workshop materials for crop monitoring in Ghana
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jgomezdans/binder-sandbox/master?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCL-EO%252FWorkshop2022%26urlpath%3Dlab%252Ftree%252FWorkshop2022%252Fnotebooks%26branch%3Dmain)
 
 [docs](https://ucl-eo.github.io/Workshop2022/docs/index.html)
-  
+
+
+Installation
+============
+
+1. Install Anaconda: https://docs.anaconda.com/anaconda/install/index.html
+
+2. Download the repository:
+```
+git clone https://github.com/UCL-EO/Workshop2022.git
+```
+3. Install packages:
+```
+cd Workshop2022/
+conda env create -f environment.yml
+```
+4. Enable extensions
+
+```
+#!/bin/bash
+
+# activate uclnceo envrionment
+conda activate uclnceo
+
+jupyter serverextension enable --py nbgitpuller --sys-prefix
+jupyter contrib nbextension install --user
+jupyter nbextension enable --py widgetsnbextension
+jupyter nbextension enable python-markdown/main
+
+# Install a JupyterLab extension for demonstration purposes
+jupyter labextension install @jupyterlab/geojson-extension 
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install jupyter-leaflet
+jupyter trust notebooks/*.ipynb *.ipynb
+
+# kernel setup
+python -m ipykernel install --name=conda-env-uclnceo  --display-name 'conda env:uclnceo' --user
+```
+
+
+
+
 Welcome to the Using Earth observation for Crop Monitoring (iEOCM) Workshop! You will find the following content:  
 
 Tamale Workshop
