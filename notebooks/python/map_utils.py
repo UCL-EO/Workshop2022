@@ -18,6 +18,8 @@ from ipyleaflet import ImageOverlay, GeoJSON, WidgetControl
 from ipywidgets import Dropdown
 from shapely import geometry
 import asyncio
+from osgeo import gdal, ogr
+gdal.SetConfigOption("GDALWARP_IGNORE_BAD_CUTLINE", "YES")
 
 class Timer:
     def __init__(self, timeout, callback):
@@ -186,8 +188,8 @@ def get_pixel(location, field_name):
     transformer = Transformer.from_crs('EPSG:4326', pj1.crs)
     x, y = transformer.transform(lat, lon)
     inds = np.where(valid_mask)
-    pix_x = int((x - geo_trans[0]) / geo_trans[1])
-    pix_y = int((y - geo_trans[3]) / geo_trans[5])
+    pix_x = int((x - geo_trans[0]) / geo_trans[1] + 0.5)
+    pix_y = int((y - geo_trans[3]) / geo_trans[5] + 0.5)
     mm = (inds[0] == pix_y) & (inds[1] == pix_x)
     
     inds = f.f.unique_neighbour_inverse_inds[mm][0][:200]
@@ -424,6 +426,87 @@ def da_pix(sels, planet_sur, u_thresh = 2):
     std_bios       = np.sqrt(np.sum((sels[4:][:, :, sel_inds] - mean_bios[:, :, None])**2 * weight[None, None], axis=2))
 
     return mean_ref, mean_bios, std_ref, std_bios, sel_inds, u_mask
+
+
+
+
+def load_s2_bios(field_id):
+    npz_name = '%s_bios_planet_prior_v1.npz'%field_id
+    if not os.path.exists('./data/' + npz_name):
+        tsen_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Tsen/'
+        url = tsen_url + npz_name
+        r = requests.get(url)
+        if r.status_code != 200:
+            r.raise_for_status()
+        with open('./data/' + npz_name, 'wb') as f:
+            f.write(r.content)
+    f = np.load('./data/' + npz_name)
+    bios = f.f.mean_bios_all.transpose(2,1,0)
+    valid_mask = f.f.valid_mask
+    temp = np.zeros(bios.shape[:2] + valid_mask.shape) * np.nan
+    temp[:, :, valid_mask] = bios
+    doys = f.f.doys
+    return temp, doys
+
+def get_field_geo_transform_S2_30PYR(field_id):
+    temp_file_url = '/vsicurl/https://gws-access.jasmin.ac.uk/public/nceo_ard/S2/30/P/YR/S2B_MSIL1C_20180914T102019_N0206_R065_T30PYR_20180914T173602.SAFE/GRANULE/L1C_T30PYR_A007956_20180914T102951/IMG_DATA/T30PYR_20180914T102019_B02_sur.tif'
+    field_polys = 'data/Biophysical_Data_Collection_Polygons_V1.geojson'
+
+
+    g = ogr.Open(field_polys)
+    l = g.GetLayer(0)
+    layername = l.GetName()
+    csql = "SELECT * FROM %s WHERE Field_ID='%s'"%(layername, field_id)
+
+    gg = gdal.Warp('', temp_file_url, format='MEM', outputType=gdal.GDT_Float32, dstNodata=np.nan, 
+                    cutlineDSName=field_polys, 
+                    cropToCutline=True, cutlineSQL =csql)
+    
+    projectionRef, geo_trans = gg.GetProjectionRef(), gg.GetGeoTransform()
+    
+
+    
+    return projectionRef, geo_trans
+
+def get_s2_bounds(projectionRef, geo_trans, shape):
+    pj1 = Proj(projectionRef)
+    transformer = Transformer.from_crs(pj1.crs, 'EPSG:4326', always_xy=True)
+    
+    x_min = geo_trans[0]
+    y_max = geo_trans[3]
+    x_max = geo_trans[0] + shape[1] * geo_trans[1]
+    y_min = geo_trans[3] + shape[0] * geo_trans[5]
+
+    coords = np.array([[x_min, y_min], [x_max, y_max]])
+
+    x_coords = [x_min, x_max]
+    y_coords = [y_min, y_max]
+
+    (x_min, x_max), (y_min, y_max) = transformer.transform(x_coords,y_coords)
+
+    bounds = ((y_min, x_min), (y_max, x_max))
+    return bounds
+
+def latlon_2_xy(lat, lon, projectionRef, geo_trans):
+    
+    pj1 = Proj(projectionRef)
+    transformer = Transformer.from_crs('EPSG:4326', pj1.crs)
+    x, y = transformer.transform(lat, lon)
+    # inds = np.where(valid_mask)
+    pix_y = int((x - geo_trans[0]) / geo_trans[1])
+    pix_x = int((y - geo_trans[3]) / geo_trans[5])
+    return pix_x, pix_y
+
+
+def get_pixel_s2_bios(lat, lon, s2_projectionRef, s2_geo_trans, s2_bios):
+    s2_pix_x, s2_pix_y = latlon_2_xy(lat, lon, s2_projectionRef, s2_geo_trans )
+    print(s2_pix_x, s2_pix_y)
+    s2_pixel_bios = s2_bios[:, :, s2_pix_x, s2_pix_y].T
+
+    s2_bio_names = ['n', 'cab', 'cm', 'cw', 'lai', 'ala', 'cbrown']
+    s2_pix_bio_dict = dict(zip(s2_bio_names, s2_pixel_bios))
+    return s2_pix_bio_dict
+
 
 # from PIL import Image
 
