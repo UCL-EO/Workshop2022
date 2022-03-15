@@ -43,7 +43,6 @@ dependencies:
   - dask
   - pyproj
   - seaborn
-  - nodejs
   - pip:
     - nbgitpuller
     - sphinx_rtd_theme

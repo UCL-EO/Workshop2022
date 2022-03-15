@@ -278,11 +278,15 @@ def read_wofost_data(lat, lon, year):
     param_array = np.array([f[i]
                             for i in param_names]).astype(float)
 
-    pred_yield = max_lai * 1500 - 700
-    passer = np.abs(pred_yield - y) < 60000.
-    sim_yields = y[passer]
-    sim_lai = lai[passer, :]
-    param_array = param_array[:, passer]
+    # pred_yield = max_lai * 1500 - 700
+    # passer = np.abs(pred_yield - y) < 60000.
+    # sim_yields = y[passer]
+    # sim_lai = lai[passer, :]
+    # param_array = param_array[:, passer]
+    sim_yields = y
+    sim_lai = lai
+    
+    
     sim_times = f.f.sim_times
 
     doys = [int(x.strftime("%j")) for x in sim_times]
@@ -304,9 +308,11 @@ assimilate_me_button = Button(
                     justify_content="center",
                     width='30%'))
 
+ensemble_at_location = {}
 def assimilate_me(b):
     # Needs obs LAI & obs LAI times
     # global pix_lai, doys
+    global ensemble_at_location
     doys = line_axs[-1].x
     pix_lai = line_axs[-1].y
     
@@ -330,11 +336,22 @@ def assimilate_me(b):
     lat, lon = my_map.center
     lat, lon = (lat // 0.1) * 0.1, (lon // 0.1) * 0.1
     year = 2021
+    
+    
+    
     # Read ensemble
     wofost_status_info.description = 'Getting Wofost ensembles...'
-    param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data(lat, lon, year)
     
-
+    if '%.02f_%.02f'%(lat, lon) not in ensemble_at_location.keys():
+        ensemble_at_location = {}
+        param_array, sim_times, sim_lai, sim_yields, sim_doys = read_wofost_data(lat, lon, year)
+        ensemble_at_location['%.02f_%.02f'%(lat, lon)] = param_array, sim_times, sim_lai, sim_yields, sim_doys
+    else:
+        wofost_status_info.description = 'Using cached ensembles'
+        param_array, sim_times, sim_lai, sim_yields, sim_doys = ensemble_at_location['%.02f_%.02f'%(lat, lon)]
+    
+    print(ensemble_at_location.keys())
+    
     t_axis = np.array([datetime.datetime.strptime(f"{year}/{x}", "%Y/%j").date()
               for x in doys])
     
