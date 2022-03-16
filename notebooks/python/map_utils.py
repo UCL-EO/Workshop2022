@@ -507,6 +507,57 @@ def get_pixel_s2_bios(lat, lon, s2_projectionRef, s2_geo_trans, s2_bios):
     s2_pix_bio_dict = dict(zip(s2_bio_names, s2_pixel_bios))
     return s2_pix_bio_dict
 
+def get_wofost_yield(field_id):
+    
+    f = np.load('data/pixel_yield.npz')
+    yld = f[field_id]
+    valid_mask = np.isfinite(yld)
+    alpha = (valid_mask * 255.).astype(np.uint8)
+    
+    yld_max, yld_min = yld[valid_mask].max(), yld[valid_mask].min()
+    
+    norm_yld = (yld - yld_min) / (yld_max - yld_min)
+    cmap = plt.cm.RdYlGn
+    greyscale = cmap(norm_yld, bytes=True)
+    
+    greyscale[:, :, -1] = alpha
+    # greyscale = np.concatenate([greyscale, alpha[:, :, None]])
+    
+    img = Image.fromarray(greyscale, mode='RGBA')
+
+    scale = 256 / img.height
+    new_height = int(scale * img.height)
+    new_width = int(scale * img.width)
+
+    img = img.resize((new_width, new_height), resample = Image.NEAREST)
+    
+    TINT_COLOR = (0, 0, 0)  # Black
+    TRANSPARENCY = 0.25  # Degree of transparency, 0-100%
+    TRANSPARENCY = 0.75  # Degree of transparency, 0-100%
+
+    
+    this_alpha = img.getchannel('A')
+    img = img.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+    mask = Image.eval(this_alpha, lambda a: 255 if a <= 5 else 0)
+
+    # Paste the color of index 255 and use alpha as a mask
+    img.paste(255, mask)
+    img.info['transparency'] = 255
+
+    fig = plt.figure(figsize=(6, 3))
+    ax = fig.add_axes([0.05, 0.8, 0.5, 0.07])
+    
+    norm = mpl.colors.Normalize(vmin=yld_min, vmax=yld_max)
+    cbar = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation='horizontal')
+    lai_colorbar_f = io.BytesIO()
+    plt.savefig(lai_colorbar_f, bbox_inches='tight', format='png', pad_inches=0)
+    plt.close()
+    
+    fname = 'data/S2_thumbs/S2_%s_yield_wofost.png'%(field_id)
+    img.save(fname)
+    
+    return fname, lai_colorbar_f
+
 
 # from PIL import Image
 
