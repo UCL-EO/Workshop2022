@@ -18,7 +18,7 @@ git clone https://github.com/UCL-EO/Workshop2022.git
 3. Install packages:
 ```
 cd Workshop2022/
-conda env create --force -f environment.yml
+conda env create -n uclnceo --force -f environment.yml
 ```
 4. Enable extensions
 
