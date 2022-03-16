@@ -9,7 +9,7 @@ from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot, Scatter
 from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button, HTML
-from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon
+from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon, ScaleControl
 from ipywidgets import Image as widgetIMG
 from ipyevents import Event
 from bqplot import ColorScale, FlexLine, ColorAxis
@@ -71,6 +71,7 @@ field_bounds, doys = get_field_bounds(field_id)
 poly = geometry.Polygon(data['features'][0]['geometry']['coordinates'][0])
 my_map.center = (poly.centroid.y, poly.centroid.x)
 
+my_map.add_control(ScaleControl(position='bottomleft'))
 
 x_scale = LinearScale(min = 200, max = 365)
 y_scale = LinearScale(min = 0, max = 3)
@@ -1158,13 +1159,36 @@ lai_colorbar_label = Label('$$LAI [m^2/m^2]$$')
 loading_bar_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/loading.gif'
 loading_bar = requests.get(loading_bar_url)
 
+colorbar_dropdown = Dropdown(
+    options=['Wofost yield colorbar', 'Empirical yield colorbar', 'LAI colorbar'],
+    value = 'LAI colorbar',
+    layout={'width': 'max-content'}
+)
+
+
+colorbar_box = VBox([lai_colorbar_label, lai_colorbar_output], 
+                    layout=Layout(display='flex',flex_flow='column',align_items='center')
+                   )
+colorbar_dropdown_box = VBox([colorbar_dropdown, colorbar_box], 
+                    layout=Layout(display='flex',flex_flow='column',align_items='center')
+                   )
+
+
+def on_change_colorbar_dropdown(change):
+    global colorbar_box
+    colorbar_box.children = colorbar_box_dict[colorbar_dropdown.value]
+    
+colorbar_dropdown.observe(on_change_colorbar_dropdown, 'value')
+
+colorbar_box_dict = {'LAI colorbar': [lai_colorbar_label, lai_colorbar_output]}
 
 def on_click(change):
     global field_id
     global field_bounds
     global doys
+    global colorbar_box_dict
     global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img, maize_markers
-    global wofost_out_dict
+    global wofost_out_dict, colorbar_box
     global s2_projectionRef, s2_geo_trans, s2_bounds, s2_bios, s2_bio_doys
     field_id = change["new"]
 
@@ -1234,7 +1258,7 @@ def on_click(change):
 
 
     image = yield_colorbar_f.getvalue()
-    output = widgetIMG(value=image, format='png',)
+    empirical_colorbar = widgetIMG(value=image, format='png',)
     field_pics_base_url = 'https://github.com/UCL-EO/Ghana_field_images/raw/main/fields/'
     if field_id in Ghana_field_photo_dict.keys():
         urls = [field_pics_base_url + '/%s/%s'%(field_id, i) for i in Ghana_field_photo_dict[field_id]['files']]
@@ -1301,33 +1325,36 @@ def on_click(change):
     
     wofost_yield_img_fname, wofost_yield_colorbar_f = get_wofost_yield(field_id)
     
+
+    wofost_yield_label = Label('$$Yield [kg/ha]$$')
+
     image = wofost_yield_colorbar_f.getvalue()
     wofost_yield_colorbar = widgetIMG(value=image, format='png',)
+    
+#     wofost_colorbar_box = VBox(, 
+#                     layout=Layout(display='flex',flex_flow='column',align_items='center')
+#                    )
+    
+    colorbar_box_dict['Wofost yield colorbar'] = [wofost_yield_label, wofost_yield_colorbar]
+    
+    
+    empirical_yield_label = Label('$$Yield [kg/ha]$$')
+    # empirical_colorbar_box = VBox([empirical_yield_label, empirical_colorbar], 
+    #                 layout=Layout(display='flex',flex_flow='column',align_items='center')
+    #                )
+    colorbar_box_dict['Empirical yield colorbar'] = [empirical_yield_label, empirical_colorbar]
+    
+    
+    colorbar_dropdown.value = 'Wofost yield colorbar'
     
     encoded = base64.b64encode(open(wofost_yield_img_fname, 'rb').read())
     wofost_yield_img_url = "data:image/png;base64,%s"%encoded.decode()
     
-    yield_label1 = Label('Field: %s (%s district)'%(field_id, district_name))
-    yield_label2 = Label('Yield: %.02f [%.02f, %.02f, %.02f]'%(np.mean(ylds), ylds[0], ylds[1], ylds[2]))
-    yield_label3 = Label('$$Empirical Yield [kg/ha]$$')
+    yield_label1 = Label('%s (%s district)'%(field_id, district_name))
+    yield_label2 = Label('Lat, Lon: %.05f, %.05f'%(lat, lon))
     
-    wofost_yield_label = Label('$$Yield [kg/ha]$$')
-    
-    colorbar_dropdown = Dropdown(
-        options=['Wofost yield colorbar', 'Emprical yield colorbar', 'LAI colorbar'],
-        value='Wofost yield colorbar',
-        layout={'width': 'max-content'}
-    )
-    
-    
-    colorbar_box = VBox([wofost_yield_label, wofost_yield_colorbar], 
-                        layout=Layout(display='flex',flex_flow='column',align_items='center')
-                       )
-    colorbar_dropdown_box = VBox([colorbar_dropdown, colorbar_box], 
-                        layout=Layout(display='flex',flex_flow='column',align_items='center')
-                       )
-    
-    yield_box = VBox([yield_label1, yield_label2, colorbar_dropdown_box],
+    yield_label3 = Label('Yield: %.02f [%.02f, %.02f, %.02f]'%(np.mean(ylds), ylds[0], ylds[1], ylds[2]))
+    yield_box = VBox([yield_label1, yield_label2, yield_label3, colorbar_dropdown_box],
                      layout=Layout(object_fit='contain'))
     
     # label_box = HBox([play_label, maize_img], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
@@ -1430,7 +1457,7 @@ def on_click(change):
         yield_img = ImageOverlay(
         url=url,
         bounds = field_bounds,
-        name = 'Yield map'#%(field_id)
+        name = 'Empirical yield map'#%(field_id)
         )
         my_map.add_layer(yield_img)
         yield_img.url = url
@@ -1440,7 +1467,7 @@ def on_click(change):
         yield_img = ImageOverlay(
             url=url,
             bounds = field_bounds,
-            name = 'Yield map'#%(field_id)
+            name = 'Empirical yield map'#%(field_id)
         )
         my_map.add_layer(yield_img)
         # daily_img.url = url
