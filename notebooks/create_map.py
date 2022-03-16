@@ -9,7 +9,7 @@ from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot, Scatter
 from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button, HTML
-from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon, ScaleControl
+from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon, ScaleControl, basemaps, DivIcon, MarkerCluster
 from ipywidgets import Image as widgetIMG
 from ipyevents import Event
 from bqplot import ColorScale, FlexLine, ColorAxis
@@ -41,11 +41,16 @@ field_yields = dict(zip(codes, yields.tolist()))
 #   height='20',
 # )
 
-zoom = 17
+zoom = 10
 
+basemap = basemaps.OpenStreetMap.Mapnik
+basemap['url'] = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+basemap['name'] = 'Google satellite'
+basemap['html_attribution'] = 'Google satellite'
+basemap['attribution'] = 'Google satellite'
 
 defaultLayout=Layout(width='100%', height='760px')
-my_map = Map(center=(9.3771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zoom = 19, layout=defaultLayout)
+my_map = Map(center=(9.8771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zoom = 19, layout=defaultLayout, basemap=basemap)
 
 
 
@@ -1063,17 +1068,17 @@ slider = FloatSlider(min=0, max=1, value=1,        # Opacity is valid in [0,1] r
 tile = Tile.for_latitude_longitude(*my_map.center, zoom)
 x, y = tile.tms
 
-for i in range(x-3, x + 4):
-    for j in range(y - 3, y + 4):
-        tile = Tile.from_tms(i, j, zoom)
-        url = "http://ecn.t3.tiles.virtualearth.net/tiles/a%s.png?g=1"%tile.quad_tree
-        ul, br = tile.bounds
-        image = ImageOverlay(
-            url=url,
-            bounds = tile.bounds,
-            name = '' #'bing_basemap_%d'%zoom
-        )
-        my_map.add_layer(image)  
+# for i in range(x-3, x + 4):
+#     for j in range(y - 3, y + 4):
+#         tile = Tile.from_tms(i, j, zoom)
+#         url = "http://ecn.t3.tiles.virtualearth.net/tiles/a%s.png?g=1"%tile.quad_tree
+#         ul, br = tile.bounds
+#         image = ImageOverlay(
+#             url=url,
+#             bounds = tile.bounds,
+#             name = '' #'bing_basemap_%d'%zoom
+#         )
+#         my_map.add_layer(image)  
 
 
 def on_change_zoom(change):
@@ -2057,3 +2062,36 @@ my_map.add_control(layer_control)
 
 my_map.add_control(info_control)
 # my_map
+
+
+font_size = '12'
+font_color = 'white'
+font_family = 'arial'
+font_weight = 'normal'
+labels = []
+for i in fields.data['features']:
+    field_name = i['properties']['Field_ID']
+    coords = i['geometry']['coordinates'][0]
+    x,y = geometry.Polygon(coords).centroid.xy
+    # from https://github.com/giswqs/geemap/blob/master/geemap/geemap.py#L6583
+    html = f'<div style="font-size: {font_size};color:{font_color};font-family:{font_family};font-weight: {font_weight}">{field_name}</div>'
+    marker = Marker(
+                location=[y[0], x[0]],
+                icon=DivIcon(
+                    icon_size=(1, 1),
+                    icon_anchor=(10, 10),
+                    html=html,
+                ),
+                draggable=False
+            )
+    
+    labels.append(marker)
+    
+marker_cluster = MarkerCluster(
+    markers=labels,
+    # disable_clustering_at_zoom=15,
+    # max_cluster_radius=100,
+    
+)
+
+my_map.add_layer(marker_cluster)
