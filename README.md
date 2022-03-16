@@ -58,7 +58,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * Cropping issues in North of Ghana: ADRA Kankam Boadu [20 mins]
 * [Overview and achievements](https://www.icloud.com/iclouddrive/0e1R9349W8AsJQnPBx4ppBBqw#Workshop_2022_Lewis_Nr_Final): Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
-* [Weather and yield in-season forecast](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/Assimila%20status%20and%20ouputs.pptx): Nicola Pounder, Assimila [20 mins]
+* [Weather and yield in-season forecast](https://assimila.egnyte.com/dl/ABShXrvth8/weather_and_in-season_forecasting.pptx_): Nicola Pounder, Assimila [20 mins]
 * Discussion and future priorities [GSSTI to chair] [15 mins]
 
 
@@ -72,7 +72,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * [Overview and achievements](https://www.icloud.com/iclouddrive/0e1R9349W8AsJQnPBx4ppBBqw#Workshop_2022_Lewis_Nr_Final): Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
 * Climate and yield: Dilys MacCarthy [20 mins]
-* [Weather and yield in-season forecast](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/Assimila%20status%20and%20ouputs.pptx): Nicola Pounder, Assimila [20 mins]
+* [Weather and yield in-season forecast](https://assimila.egnyte.com/dl/ABShXrvth8/weather_and_in-season_forecasting.pptx_): Nicola Pounder, Assimila [20 mins]
 * Discussion and future priorities [GSSTI to chair] [15 mins]
 
 
