@@ -338,7 +338,7 @@ def create_ndvi_thumbs(surs, aoi):
         ndvi_thumbs.append(fname)
     
     ndvi_med = np.nanmedian(ndvis, axis=0)
-    valid_mask = np.isfinite(valid_mask)
+    valid_mask = np.isfinite(ndvi_med)
     alpha = (valid_mask * 255.).astype(np.uint8)
 
     greyscale = ndvi_cmap(ndvi_med / 1., bytes=True)
@@ -361,7 +361,7 @@ def create_ndvi_thumbs(surs, aoi):
 
     fname = dest_folder + '/S2_ndvi_med.png'
     img.save(fname)
-    ndvi_thumbs.append(fname)
+#     ndvi_thumbs.append(fname)
 
     home = os.getcwd()
     cwd = '/files/' + '/'.join(home.split('/')[3:])
