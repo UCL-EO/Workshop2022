@@ -13,6 +13,8 @@ END_YEAR = 2018
 
 # use Tamale loc of 9.38, -0.68
 tamale_centre = [9.38, -0.68]
+accra_centre = [5.8, 0.172]
+zoom_centre = [8, -1.33]
 # alternatively, start with a GSSTI farm location with high expected yield of 1500 per acre
 farm_7021YAM = [9.70065, -0.54129]
 Map = geemap.Map(center=farm_7021YAM, zoom=9)

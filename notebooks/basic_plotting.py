@@ -27,6 +27,7 @@ cities = ee.FeatureCollection("FAO/GAUL/2015/level2")
 ghana_district = cities.filter(ee.Filter.eq('ADM0_NAME', 'Ghana'))
 northern_district = ghana_district.filter(ee.Filter.eq('ADM1_NAME', 'Northern'))
 aoi_bole = northern_district.filter(ee.Filter.eq('ADM2_NAME', 'Bole'))
+aoi_tamale = northern_district.filter(ee.Filter.eq('ADM2_NAME', 'Tamale North Sub Metro'))
 
 outline = ee.Image().byte().paint(**{
   'featureCollection': northern_district,
@@ -191,7 +192,7 @@ def load_modis_collection(year, aoi,
         end_date = f'{year}-12-31'
     else:
         start_date = f'{year}-06-01'  # start of maize growing season
-        end_date = f'{year}-10-31'  # end of maize growing season
+        end_date = f'{year}-11-30'  # end of maize growing season
 
     all_image = ee.ImageCollection(f"MODIS/006/{collection}") \
         .filterBounds(aoi) \
