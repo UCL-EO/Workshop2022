@@ -600,7 +600,7 @@ para_meaning = {'TDWI': 'TDWI: Initial total crop dry weight [kg ha-1]',
                 #'AMAXTB_000': 'Max. leaf CO2 assim. rate at development stage of 0',
                 #'AMAXTB_125': 'Max. leaf CO2 assim. rate at development stage of 1.25',
                 #'AMAXTB_150': 'Max. leaf CO2 assim. rate at development stage of 1.5',
-                "AMAX_SCALAR": "AMAX_SCALAR: Scalar on Max. lead CO2 assim. rate"
+                "AMAX_SCALAR": "AMAX_SCALAR: Scalar on Max. leaf CO2 assim. rate"
                }
 
 
@@ -957,7 +957,7 @@ s2_bio_names = ['n', 'cab', 'cm', 'cw', 'lai', 'ala', 'cbrown']
 s2_bios_min_max = [[1, 2.5], [10, 80], [0, 0.02], [0, 0.04], [0, 3], [30, 80], [0, 1]]
 s2_bios_min_max_dict = dict(zip(s2_bio_names, s2_bios_min_max))
 
-s2_bio_simple_name = ['Leaf layers [-]', 'Chlorophyll a+b [ug/cm2]', 'Lead dry matter [g/cm2]', 
+s2_bio_simple_name = ['Leaf layers [-]', 'Chlorophyll a+b [ug/cm2]', 'Leaf dry matter [g/cm2]', 
                       'Leaf water content [g/cm2]', 'Leaf area index [m2/m2]', 'Leaf angle distribution [d]', 'Leaf senescence [-]']
 s2_bio_simple_name_dict = dict(zip(s2_bio_names, s2_bio_simple_name))
 
