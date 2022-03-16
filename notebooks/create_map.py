@@ -1732,6 +1732,9 @@ fields = GeoJSON(
     style_callback=random_color
 )
 
+def mouse_click_field(**kwarg):
+    dropdown.value = kwarg['feature']['properties']['Field_ID']
+fields.on_click(mouse_click_field)
 
 with open('./data/Biophysical_Data_Collection_Points_V1.geojson', 'r') as f:
     data2 = json.load(f)
