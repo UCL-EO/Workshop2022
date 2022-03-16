@@ -89,7 +89,7 @@ era5TemperatureVis = {
 
 era5PrecipitationVis = {
   'min': 0.0,
-  'max': 0.04,
+  'max': 4.0,
   'palette': [
     "#000080","#0000D9","#4000FF","#8000FF","#0080FF","#00FFFF",
     "#00FF80","#80FF00","#DAFF00","#FFFF00","#FFF500","#FFDA00",
@@ -236,8 +236,23 @@ def bitwiseExtract(qa_value, fromBit, toBit=-1):
 
 def filterqa(image):
     qa = image.select('FparLai_QC')
-    good = bitwiseExtract(qa, 0) # returns 0 for good quality
-    return image.updateMask(not(good))
+    # always keep b00000000 and b00000010 for FparLai_QC (0 and 2, respectively)
+    good0 = qa.eq(ee.Image.constant(0))
+    good2 = qa.eq(ee.Image.constant(2))
+    good = good0.Or(good2)
+
+    qa.get
+    # [  0,   2,   8,  10,  16,  18,  32,  34,  40,  42,  48,  50,  97,
+    #         99, 105, 107, 113, 115, 157]
+
+    additional_good_values = []
+
+    for v in additional_good_values:
+        good_v = qa.eq(ee.Image.constant(v))
+        good = good.Or(good_v)
+
+    qa = qa.mask(good)
+    return image.mask(qa)
 
 
 def load_modis_collection(year, aoi,
@@ -270,7 +285,7 @@ def load_modis_collection(year, aoi,
 
     if onlyGoodQA:
         all_image = all_image.map(filterqa).select(band)
-        print('QA Filter applied.')
+        print(f'QA Filter applied for {year}.')
     else:
         all_image = all_image.select(band)
     # .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 10)
