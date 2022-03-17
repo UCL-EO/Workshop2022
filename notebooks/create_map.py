@@ -9,14 +9,14 @@ from pygeotile.tile import Tile
 from shapely import geometry
 from bqplot import Lines, Figure, LinearScale, DateScale, Axis, Boxplot, Scatter
 from ipywidgets import Dropdown, FloatSlider, HBox, VBox, Layout, Label, jslink, Layout, SelectionSlider, Play, Tab, Box, Button, HTML
-from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon, ScaleControl
+from ipyleaflet import Map, WidgetControl, LayersControl, ImageOverlay, GeoJSON, Marker, Icon, ScaleControl, basemaps, DivIcon, MarkerCluster
 from ipywidgets import Image as widgetIMG
 from ipyevents import Event
 from bqplot import ColorScale, FlexLine, ColorAxis
 from bqplot import Label as bqLabel
 
 sys.path.insert(0, './python/')
-from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar, get_wofost_yield
+from map_utils import get_lai_gif, get_pixel, get_field_bounds, da_pix, get_lai_color_bar, get_wofost_yield, get_wofost_yield_unc
 from map_utils import debounce, load_s2_bios, get_field_geo_transform_S2_30PYR, get_s2_bounds, latlon_2_xy, get_pixel_s2_bios
 from wofost_utils import create_ensemble, wofost_parameter_sweep_func, get_era5_gee
 from wofost_utils import ensemble_assimilation
@@ -41,11 +41,16 @@ field_yields = dict(zip(codes, yields.tolist()))
 #   height='20',
 # )
 
-zoom = 17
+zoom = 10
 
+basemap = basemaps.OpenStreetMap.Mapnik
+basemap['url'] = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+basemap['name'] = 'Google satellite'
+basemap['html_attribution'] = 'Google satellite'
+basemap['attribution'] = 'Google satellite'
 
 defaultLayout=Layout(width='100%', height='760px')
-my_map = Map(center=(9.3771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zoom = 19, layout=defaultLayout)
+my_map = Map(center=(9.8771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zoom = 19, layout=defaultLayout, basemap=basemap)
 
 
 
@@ -1063,17 +1068,17 @@ slider = FloatSlider(min=0, max=1, value=1,        # Opacity is valid in [0,1] r
 tile = Tile.for_latitude_longitude(*my_map.center, zoom)
 x, y = tile.tms
 
-for i in range(x-3, x + 4):
-    for j in range(y - 3, y + 4):
-        tile = Tile.from_tms(i, j, zoom)
-        url = "http://ecn.t3.tiles.virtualearth.net/tiles/a%s.png?g=1"%tile.quad_tree
-        ul, br = tile.bounds
-        image = ImageOverlay(
-            url=url,
-            bounds = tile.bounds,
-            name = '' #'bing_basemap_%d'%zoom
-        )
-        my_map.add_layer(image)  
+# for i in range(x-3, x + 4):
+#     for j in range(y - 3, y + 4):
+#         tile = Tile.from_tms(i, j, zoom)
+#         url = "http://ecn.t3.tiles.virtualearth.net/tiles/a%s.png?g=1"%tile.quad_tree
+#         ul, br = tile.bounds
+#         image = ImageOverlay(
+#             url=url,
+#             bounds = tile.bounds,
+#             name = '' #'bing_basemap_%d'%zoom
+#         )
+#         my_map.add_layer(image)  
 
 
 def on_change_zoom(change):
@@ -1149,7 +1154,7 @@ yield_control = None
 daily_img = None
 maize_markers = []
 wofost_yield_img = None
-
+wofost_yield_unc_img = None
 lai_colorbar_f = get_lai_color_bar()
 image = lai_colorbar_f.getvalue()
 lai_colorbar_output = widgetIMG(value=image, format='png',)
@@ -1160,7 +1165,7 @@ loading_bar_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/loading
 loading_bar = requests.get(loading_bar_url)
 
 colorbar_dropdown = Dropdown(
-    options=['Wofost yield colorbar', 'Empirical yield colorbar', 'LAI colorbar'],
+    options=['Wofost yield colorbar', 'Wofost yield unc. colorbar', 'Empirical yield colorbar', 'LAI colorbar'],
     value = 'LAI colorbar',
     layout={'width': 'max-content'}
 )
@@ -1247,7 +1252,7 @@ def on_click(change):
     s2_bounds = get_s2_bounds(s2_projectionRef, s2_geo_trans, s2_bios.shape[2:])
     
 
-    url, bounds, doys, yield_colorbar_f, med_lai = get_lai_gif(field_id)
+    url, bounds, doys, yield_colorbar_f, med_lai, empirical_yield_min, empirical_yield_max = get_lai_gif(field_id)
     field_med_lai_line.x = doys
     field_med_lai_line.y = med_lai
 
@@ -1323,20 +1328,24 @@ def on_click(change):
     
     district_name = df[df.CODE==field_id].District.iloc[0]
     
-    wofost_yield_img_fname, wofost_yield_colorbar_f = get_wofost_yield(field_id)
+    wofost_yield_img_fname, wofost_yield_colorbar_f = get_wofost_yield(field_id, empirical_yield_min, empirical_yield_max )
     
-
+    wofost_yield_unc_img_fname, wofost_yield_unc_colorbar_f = get_wofost_yield_unc(field_id)
+    
     wofost_yield_label = Label('$$Yield [kg/ha]$$')
 
     image = wofost_yield_colorbar_f.getvalue()
     wofost_yield_colorbar = widgetIMG(value=image, format='png',)
+    
+    image = wofost_yield_unc_colorbar_f.getvalue()
+    wofost_yield_unc_colorbar = widgetIMG(value=image, format='png',)
     
 #     wofost_colorbar_box = VBox(, 
 #                     layout=Layout(display='flex',flex_flow='column',align_items='center')
 #                    )
     
     colorbar_box_dict['Wofost yield colorbar'] = [wofost_yield_label, wofost_yield_colorbar]
-    
+    colorbar_box_dict['Wofost yield unc. colorbar'] = [wofost_yield_label, wofost_yield_unc_colorbar]
     
     empirical_yield_label = Label('$$Yield [kg/ha]$$')
     # empirical_colorbar_box = VBox([empirical_yield_label, empirical_colorbar], 
@@ -1349,6 +1358,9 @@ def on_click(change):
     
     encoded = base64.b64encode(open(wofost_yield_img_fname, 'rb').read())
     wofost_yield_img_url = "data:image/png;base64,%s"%encoded.decode()
+    
+    encoded = base64.b64encode(open(wofost_yield_unc_img_fname, 'rb').read())
+    wofost_yield_unc_img_url = "data:image/png;base64,%s"%encoded.decode()
     
     yield_label1 = Label('%s (%s district)'%(field_id, district_name))
     yield_label2 = Label('Lat, Lon: %.05f, %.05f'%(lat, lon))
@@ -1448,7 +1460,7 @@ def on_click(change):
     
 
     
-    global yield_img, wofost_yield_img
+    global yield_img, wofost_yield_img, wofost_yield_unc_img
     
     if yield_img is None:
         # print(url)
@@ -1470,6 +1482,29 @@ def on_click(change):
             name = 'Empirical yield map'#%(field_id)
         )
         my_map.add_layer(yield_img)
+        # daily_img.url = url
+        # daily_img.bounds = field_bounds
+        
+    if wofost_yield_unc_img is None:
+        # print(url)
+        # print(field_bounds)
+        # print('S2_%s_lai_png'%(field_id))
+        wofost_yield_unc_img = ImageOverlay(
+            url=wofost_yield_unc_img_url,
+            bounds = field_bounds,
+            name = 'Wofost Yield uncertainty map'#%('#%(field_id)
+        )
+        my_map.add_layer(wofost_yield_unc_img)
+        wofost_yield_unc_img.url = wofost_yield_unc_img_url
+        wofost_yield_unc_img.bounds = field_bounds
+    else:
+        my_map.remove_layer(wofost_yield_unc_img)
+        wofost_yield_unc_img = ImageOverlay(
+            url=wofost_yield_unc_img_url,
+            bounds = field_bounds,
+            name = 'Wofost Yield uncertainty map'#%(field_id)
+        )
+        my_map.add_layer(wofost_yield_unc_img)
         # daily_img.url = url
         # daily_img.bounds = field_bounds
         
@@ -1496,7 +1531,7 @@ def on_click(change):
         # daily_img.url = url
         # daily_img.bounds = field_bounds
         
-
+        
     jslink((slider, 'value'), (yield_img, 'opacity') )
     
     try:
@@ -1777,6 +1812,9 @@ def handle_interaction(**kwargs):
         ind = field_ids.index(field_id)
         feature = data['features'][ind]
         poly = geometry.Polygon(feature['geometry']['coordinates'][0])
+        field_mask = df.CODE == field_id
+
+        field_doys = [int(datetime.datetime(2021, int(i.split('/')[1]), int(i.split('/')[0])).strftime('%j')) for i in df[field_mask].DATE]
 
         if poly.contains(point):    
             global sels, planet_sur, doys
@@ -2057,3 +2095,36 @@ my_map.add_control(layer_control)
 
 my_map.add_control(info_control)
 # my_map
+
+
+font_size = '12'
+font_color = 'white'
+font_family = 'arial'
+font_weight = 'normal'
+labels = []
+for i in fields.data['features']:
+    field_name = i['properties']['Field_ID']
+    coords = i['geometry']['coordinates'][0]
+    x,y = geometry.Polygon(coords).centroid.xy
+    # from https://github.com/giswqs/geemap/blob/master/geemap/geemap.py#L6583
+    html = f'<div style="font-size: {font_size};color:{font_color};font-family:{font_family};font-weight: {font_weight}">{field_name}</div>'
+    marker = Marker(
+                location=[y[0], x[0]],
+                icon=DivIcon(
+                    icon_size=(1, 1),
+                    icon_anchor=(10, 10),
+                    html=html,
+                ),
+                draggable=False
+            )
+    
+    labels.append(marker)
+    
+marker_cluster = MarkerCluster(
+    markers=labels,
+    # disable_clustering_at_zoom=15,
+    # max_cluster_radius=100,
+    
+)
+
+my_map.add_layer(marker_cluster)
