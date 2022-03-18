@@ -90,7 +90,7 @@ Groups of 5, run each session x 4
 -   [Biophysical binder (Feng)](https://github.com/UCL-EO/Workshop2022/issues/13#issue-1150356786): EO & field data explorer
 -   [Weather data and within-season demonstrator??] (Nicola)
 -   [Model data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan): Crop model sliders, DA-Me, yield context plot
--   [Maize mapper](notebooks/Q2_Interface.ipynb)  **** CAU classification,  MOFA yield (GEE) Qingling
+-   [Maize mapper](notebooks/Q2_Maize_Mapper.ipynb)  **** CAU classification,  MOFA yield (GEE) Qingling
 -   [Field measurements demo] Kenneth
 
 

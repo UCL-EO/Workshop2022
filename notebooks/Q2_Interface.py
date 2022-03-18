@@ -69,7 +69,8 @@ data_source = widgets.Dropdown(
         'CAU Maize Map',
         'MOFA yield statistics (1000 kg/ha)',        
         'Empirical Yield = MaxLAI*1500-700 (kg/ha)',
-        'Maize Planting Area (ha)'
+        'Maize Planting Area (ha)',
+        'Max NDVI over growing season, between Jun and Nov'
     ],
     style = style,
     value='Max LAI over growing season, between Jun and Nov'
@@ -550,7 +551,21 @@ def submit_clicked(button):
                 }
         title = f'Maize Planting area'
         legend_label = 'maize area, ha' # TO-DO: double check if this is ha?
-    
+
+    elif iData == 7:  # NDVI
+        band_yearly, band_reduced = load_modis_band('NDVI', year, aoi, 'max')
+        data = band_reduced.clip(aoi)
+        # vis = colorized_vis['NDVI']
+        vis = {
+            'min': 0.4,
+            'max': 1.0,
+            'palette': [
+                'FFFFFF', 'CE7E45', 'DF923D', 'F1B555', 'FCD163', '99B718', '74A901',
+                '66A000', '529400', '3E8601', '207401', '056201', '004C00', '023B01',
+                '012E01', '011D01', '011301']}
+        title = f'Max NDVI {year}'
+        legend_label = 'Max NDVI over growing season'
+        
     if checkbox_mask.value:
         if iMask == 0: #LC_Type1 Grassland
             lc_crop, lc_all = load_modis_lc('LC_Type1', year, aoi, cropclasses=[10])
