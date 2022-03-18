@@ -1,9 +1,10 @@
 # Workshop2022
-Workshop materials for crop monitoring in Ghana
+
+Online practicals:
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jgomezdans/binder-sandbox/master?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCL-EO%252FWorkshop2022%26urlpath%3Dlab%252Ftree%252FWorkshop2022%252Fnotebooks%26branch%3Dmain)
 
-[docs](https://ucl-eo.github.io/Workshop2022/docs/index.html)
+[Workshop information webpage](https://ucl-eo.github.io/Workshop2022)
 
 
 Installation
@@ -56,7 +57,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * Welcome: Structure of the workshop: Kofi Asare GSSTI [5 mins]
 * Perspectives and needs: MOFA regional director [20 mins]
 * Cropping issues in North of Ghana: ADRA Kankam Boadu [20 mins]
-* [Overview and achievements](https://www.icloud.com/iclouddrive/077Lxrc0OH6fvxq-9wYa4OhPg#Workshop_2022_Lewis_Nr_FinalV2): Prof Lewis [20 mins]
+* [Overview and achievements](https://www.icloud.com/iclouddrive/071-Ewsowz1xVjf694rdhIa7g#Workshop_2022_Lewis_Nr_FinalV3): Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
 * [Weather and yield in-season forecast](https://assimila.egnyte.com/dl/ABShXrvth8/weather_and_in-season_forecasting.pptx_): Nicola Pounder, Assimila [20 mins]
 * Discussion and future priorities [GSSTI to chair] [15 mins]
@@ -69,7 +70,7 @@ MORNING SESSION  [09:00-11:00 2 hours]
 * Welcome: GSSTI Director [5 mins]
 * Welcome: Structure of the workshop: Kofi Asare GSSTI [5 mins]
 * Perspectives and needs: MOFA yield estimation director [20 mins]
-* [Overview and achievements](https://www.icloud.com/iclouddrive/077Lxrc0OH6fvxq-9wYa4OhPg#Workshop_2022_Lewis_Nr_FinalV2): Prof Lewis [20 mins]
+* [Overview and achievements](https://www.icloud.com/iclouddrive/071-Ewsowz1xVjf694rdhIa7g#Workshop_2022_Lewis_Nr_FinalV3): Prof Lewis [20 mins]
 * Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
 * Climate and yield: Dilys MacCarthy [20 mins]
 * [Weather and yield in-season forecast](https://assimila.egnyte.com/dl/ABShXrvth8/weather_and_in-season_forecasting.pptx_): Nicola Pounder, Assimila [20 mins]
