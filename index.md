@@ -1,3 +1,29 @@
+<div style="float:right">
+<table>
+<tr>
+    <td> 
+        <img src="figures/nceo_logo.png" alt="NCEO logo" style="width:200px;height:40px;"/> 
+    </td>
+    <td> 
+        <img src="figures/ucl_logo.png" alt="UCL logo" /> 
+    </td>
+    <td> 
+        <img src="figures/gssti_logo.png" alt="GSSTI logo" style="width:200px;height:40px;"/> 
+    </td>
+    <td> 
+        <img src="figures/Assimila-Logo-Sm.png" alt="Assimila logo" /> 
+    </td>
+    <td> 
+        <img src="figures/Newton_Fund_logo.jpg" alt="Newton Prize logo"/> 
+    </td>
+    <td> 
+        <img src="figures/stfc-logo.png" alt="STFC logo"/> 
+    </td>
+
+  </tr>
+</table>
+</div>
+
 # Tamale Workshop (Tuesday, 22 March 2022)
 
 Venue: [Modern City Hotel, Tamale](https://www.facebook.com/Modern-City-Hotel-Tamale-187750064906695/)
