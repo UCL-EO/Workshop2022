@@ -2,13 +2,13 @@
 <table>
 <tr>
     <td> 
-        <img src="figures/nceo_logo.png" alt="NCEO logo" style="width:200px;height:40px;"/> 
+        <img src="figures/nceo_logo.png" alt="NCEO logo" /> 
     </td>
     <td> 
         <img src="figures/ucl_logo.png" alt="UCL logo" /> 
     </td>
     <td> 
-        <img src="figures/gssti_logo.png" alt="GSSTI logo" style="width:200px;height:40px;"/> 
+        <img src="figures/gssti_logo.png" alt="GSSTI logo"/> 
     </td>
     <td> 
         <img src="figures/Assimila-Logo-Sm.png" alt="Assimila logo" /> 
