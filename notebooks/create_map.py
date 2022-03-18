@@ -56,6 +56,13 @@ my_map = Map(center=(9.8771, -0.6062), zoom=zoom, scroll_wheel_zoom=True, max_zo
 
 with open('./data/Biophysical_Data_Collection_Polygons_V1.geojson', 'r') as f:
     data = json.load(f)
+features_with_yield = []
+for feature in data['features']:
+    if feature['properties']['Field_ID'] in codes:
+        features_with_yield.append(feature)
+data['features'] = features_with_yield
+
+
 field_ids = [feat['properties']['Field_ID'] for feat in data['features']]
 
 dropdown = Dropdown(
@@ -1187,13 +1194,14 @@ colorbar_dropdown.observe(on_change_colorbar_dropdown, 'value')
 
 colorbar_box_dict = {'LAI colorbar': [lai_colorbar_label, lai_colorbar_output]}
 
+bing_images = []
 def on_click(change):
     global field_id
     global field_bounds
     global doys
     global colorbar_box_dict
     global field_movie, field_lais, field_doys, field_cabs, yield_control, daily_img, maize_markers
-    global wofost_out_dict, colorbar_box
+    global wofost_out_dict, colorbar_box, bing_images
     global s2_projectionRef, s2_geo_trans, s2_bounds, s2_bios, s2_bio_doys
     field_id = change["new"]
 
@@ -1208,8 +1216,11 @@ def on_click(change):
     my_map.zoom = zoom
     tile = Tile.for_latitude_longitude(*my_map.center, zoom)
     x, y = tile.tms
-
-
+    
+    if len(bing_images)!= 0:
+        for image in bing_images:
+            my_map.remove_layer(image)
+        bing_images = []
     for i in range(x- 3, x + 4):
         for j in range(y - 2, y + 3):
             tile = Tile.from_tms(i, j, zoom)
@@ -1220,6 +1231,8 @@ def on_click(change):
                 #name = 'bing_basemap_%d'%zoom
             )
             my_map.add_layer(image)   
+            bing_images.append(image)
+    
     print(field_id)
     play_label.value = 'Click to play LAI movie over field: %s'%field_id
     home = os.getcwd()
@@ -1301,6 +1314,7 @@ def on_click(change):
     twso_shade.y = [[yld_mean - yld_std, yld_mean - yld_std], [yld_mean + yld_std, yld_mean + yld_std]]
     
     ymax = (yld_mean + 3 * yld_std)
+    ymax = empirical_yield_max
     scales = twso_vline.scales
     scales['y'] = LinearScale(max=ymax, min=0)
     
@@ -1755,6 +1769,7 @@ def random_color(feature):
         'fillColor': np.random.choice(['red', 'yellow', 'green', 'orange']),
     }
 
+
 fields = GeoJSON(
     data=data,
     style={
@@ -1773,6 +1788,11 @@ fields.on_click(mouse_click_field)
 
 with open('./data/Biophysical_Data_Collection_Points_V1.geojson', 'r') as f:
     data2 = json.load(f)
+features_with_yield = []
+for feature in data2['features']:
+    if feature['properties']['Code_1'][:7] in codes:
+        features_with_yield.append(feature)
+data2['features'] = features_with_yield
 
 points = GeoJSON(
     data=data2,
