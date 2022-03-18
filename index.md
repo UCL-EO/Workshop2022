@@ -50,41 +50,4 @@ Practical sessions can be accessed by clicking in the icon below:
 
 ## Installation
 
-Although you sould be able to run the practicals using Binder on yor browser without installing anything, if you want to run practicals on your computer, you can follow the following instructions.
-
-1. Install Anaconda: https://docs.anaconda.com/anaconda/install/index.html
-
-2. Download the repository:
-```
-git clone https://github.com/UCL-EO/Workshop2022.git
-```
-3. Install packages:
-```
-cd Workshop2022/
-conda env create -n uclnceo --force -f environment.yml
-```
-4. Enable extensions
-
-```
-#!/bin/bash
-
-# activate uclnceo envrionment
-conda activate uclnceo
-
-jupyter serverextension enable --py nbgitpuller --sys-prefix
-jupyter contrib nbextension install --user
-jupyter nbextension enable --py widgetsnbextension
-jupyter nbextension enable python-markdown/main
-
-# Install a JupyterLab extension for demonstration purposes
-jupyter labextension install @jupyterlab/geojson-extension 
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
-jupyter labextension install jupyter-leaflet
-jupyter trust notebooks/*.ipynb *.ipynb
-
-# kernel setup
-python -m ipykernel install --name=conda-env-uclnceo  --display-name 'conda env:uclnceo' --user
-```
-
-5. Run `jupyter-lab` and load the notebooks.
-
+Although you sould be able to run the practicals using Binder on yor browser without installing anything, if you want to run practicals on your computer, you can [follow these instructions](https://github.com/UCL-EO/Workshop2022/wiki/Installation).
