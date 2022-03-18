@@ -1,0 +1,20 @@
+--2022-03-18 12:03:35--  https://github.com/UCL-EO/Workshop2022/blob/main/figures/Assimila-Logo-Sm.png?raw=true
+Resolving github.com (github.com)... 140.82.121.3
+Connecting to github.com (github.com)|140.82.121.3|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://github.com/UCL-EO/Workshop2022/raw/main/figures/Assimila-Logo-Sm.png [following]
+--2022-03-18 12:03:36--  https://github.com/UCL-EO/Workshop2022/raw/main/figures/Assimila-Logo-Sm.png
+Reusing existing connection to github.com:443.
+HTTP request sent, awaiting response... 302 Found
+Location: https://raw.githubusercontent.com/UCL-EO/Workshop2022/main/figures/Assimila-Logo-Sm.png [following]
+--2022-03-18 12:03:36--  https://raw.githubusercontent.com/UCL-EO/Workshop2022/main/figures/Assimila-Logo-Sm.png
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.110.133, 185.199.111.133, 185.199.108.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.110.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 23669 (23K) [image/png]
+Saving to: ‘Assimila-Logo-Sm.png?raw=true’
+
+     0K .......... .......... ...                             100% 2.14M=0.01s
+
+2022-03-18 12:03:36 (2.14 MB/s) - ‘Assimila-Logo-Sm.png?raw=true’ saved [23669/23669]
+

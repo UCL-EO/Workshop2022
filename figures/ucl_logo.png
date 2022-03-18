@@ -1,0 +1,20 @@
+--2022-03-18 12:02:53--  https://github.com/UCL-EO/Workshop2022/blob/main/figures/ucl_logo.png?raw=true
+Resolving github.com (github.com)... 140.82.121.3
+Connecting to github.com (github.com)|140.82.121.3|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://github.com/UCL-EO/Workshop2022/raw/main/figures/ucl_logo.png [following]
+--2022-03-18 12:02:53--  https://github.com/UCL-EO/Workshop2022/raw/main/figures/ucl_logo.png
+Reusing existing connection to github.com:443.
+HTTP request sent, awaiting response... 302 Found
+Location: https://raw.githubusercontent.com/UCL-EO/Workshop2022/main/figures/ucl_logo.png [following]
+--2022-03-18 12:02:53--  https://raw.githubusercontent.com/UCL-EO/Workshop2022/main/figures/ucl_logo.png
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.110.133, 185.199.108.133, 185.199.111.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.110.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 2802 (2.7K) [image/png]
+Saving to: ‘ucl_logo.png?raw=true’
+
+     0K ..                                                    100% 27.8M=0s
+
+2022-03-18 12:02:54 (27.8 MB/s) - ‘ucl_logo.png?raw=true’ saved [2802/2802]
+
