@@ -101,7 +101,7 @@ Workshop technical presentations 2:30-4:00
 
 -  DEA classification in Ghana (Digital Earth Africa)
 -  [Classification](https://drive.google.com/drive/folders/13wvLgg3MMVh6GNf0JJ7uuOyaPGhOeR0y) (China Agricultural University)
--  [Crop modelling & ensembles](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/WOFOST%20Crop%20Model%20and%20Ensemble%20Generation-Hongyuan.pptx): (Hongyuan)
+-  [Crop modelling & ensembles](https://1drv.ms/p/s!AhqI0UmA43o2gbVbrN3Al42lOIgovQ): (Hongyuan)
 -  [EO interpretation](https://liveuclac-my.sharepoint.com/:p:/g/personal/ucfafyi_ucl_ac_uk/EVlH9lVhJnlKi4oHdItIhLkBoSCtOasAouhNuseoSlaVeg?e=7egrDY) (talk on issues and methods) (feng)
 -  [Introduction to data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan/CAU)
 -  [Ensemble Crop DA](https://docs.google.com/presentation/d/1S3TkJICEMmKcBnz8WcAWNWjOXrDoAWFizELSg1VRELg/edit?usp=sharing) (jose)
