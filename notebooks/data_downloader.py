@@ -20,3 +20,10 @@ p = Pool(4)
 p.map(downloader, ens_urls)
 p.close()
 p.join()
+
+
+s2_bios_urls = np.loadtxt('data/s2_bios_urls.txt', dtype='str')
+p = Pool(4)
+p.map(downloader, s2_bios_urls)
+p.close()
+p.join()

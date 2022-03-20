@@ -1856,7 +1856,7 @@ def handle_interaction(**kwargs):
 
             mean_ref, mean_bios, std_ref, std_bios, sel_inds, u_mask = da_pix(sels, planet_sur, u_thresh = k_slider.value)
 
-            show_inds = np.random.choice(range(200), 50)
+            show_inds = np.random.choice(range(sels.shape[2]), 50)
             sels_to_show = sels[:, :, show_inds]
 
             pix_cab, pix_lai = mean_bios
