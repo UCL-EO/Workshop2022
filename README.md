@@ -10,7 +10,7 @@ Online practicals:
 Installation
 ============
 
-1. Install Anaconda: https://docs.anaconda.com/anaconda/install/index.html
+1. Install Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
 2. Download the repository:
 ```
