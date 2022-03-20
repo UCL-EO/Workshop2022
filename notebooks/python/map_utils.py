@@ -203,7 +203,7 @@ def get_pixel(location, field_name):
     return doys, lai[mm].ravel(), cab[mm].ravel(), sels, lai, planet_sur
 
 def get_lai_gif(field_name):
-    npz_name = '%s_bios_planet_only_v6.npz'%field_name
+    npz_name = '%s_bios_planet_only_v7.npz'%field_name
     if not os.path.exists('./data/' + npz_name):
         tsen_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/Tsen/'
         url = tsen_url + npz_name

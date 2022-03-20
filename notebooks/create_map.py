@@ -230,7 +230,7 @@ wofost_lai = Lines(x=doys, y=np.zeros_like(doys)*np.nan, scales = lai_fig.marks[
 
 field_med_lai_line = Lines(x=doys, y=np.zeros_like(doys)*np.nan, 
                            scales = lai_fig.marks[1].scales,  
-                           colors = ['#20b2aa'], display_legend=True, labels = ['Field LAI median'])
+                           colors = ['#fe217f'], display_legend=True, labels = ['Field LAI median'])
 
 
 lai_fig_dvs_labels = bqLabel(x = [0, 0], 
