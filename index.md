@@ -49,4 +49,4 @@ Venue: [Mensvic Grand Hotel, East Legon, Accra](https://www.mensvichotels.com/)
 
 # Installation
 
-Although you sould be able to run the practicals using Binder on yor browser without installing anything, if you want to run practicals on your computer, you can [follow these instructions](https://github.com/UCL-EO/Workshop2022/wiki/Installation).
+Although you sould be able to run the practicals using Binder on your browser without installing anything, if you want to run practicals on your computer, you can [follow these instructions](https://github.com/UCL-EO/Workshop2022/wiki/Installation).
