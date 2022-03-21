@@ -1166,7 +1166,7 @@ lai_colorbar_f = get_lai_color_bar()
 image = lai_colorbar_f.getvalue()
 lai_colorbar_output = widgetIMG(value=image, format='png',)
 # lai_colorbar_output.layout.object_fit = 'contain'
-lai_colorbar_label = Label('$$LAI [m^2/m^2]$$')
+lai_colorbar_label = Label('LAI [m2/m2]')
 # lai_box = VBox([lai_label, output], align_content = 'stretch', layout=Layout(width='100%', height='50%'))
 loading_bar_url = 'https://gws-access.jasmin.ac.uk/public/nceo_ard/Ghana/loading.gif'
 loading_bar = requests.get(loading_bar_url)
@@ -1346,7 +1346,7 @@ def on_click(change):
     
     wofost_yield_unc_img_fname, wofost_yield_unc_colorbar_f = get_wofost_yield_unc(field_id)
     
-    wofost_yield_label = Label('$$Yield [kg/ha]$$')
+    wofost_yield_label = Label('Yield [kg/ha]')
 
     image = wofost_yield_colorbar_f.getvalue()
     wofost_yield_colorbar = widgetIMG(value=image, format='png',)
@@ -1361,7 +1361,7 @@ def on_click(change):
     colorbar_box_dict['Wofost yield colorbar'] = [wofost_yield_label, wofost_yield_colorbar]
     colorbar_box_dict['Wofost yield unc. colorbar'] = [wofost_yield_label, wofost_yield_unc_colorbar]
     
-    empirical_yield_label = Label('$$Yield [kg/ha]$$')
+    empirical_yield_label = Label('Yield [kg/ha]')
     # empirical_colorbar_box = VBox([empirical_yield_label, empirical_colorbar], 
     #                 layout=Layout(display='flex',flex_flow='column',align_items='center')
     #                )
