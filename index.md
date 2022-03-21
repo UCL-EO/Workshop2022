@@ -1,54 +1,51 @@
 
 # Tamale Workshop (Tuesday, 22 March 2022)
 
-Venue: [Modern City Hotel, Tamale](https://www.facebook.com/Modern-City-Hotel-Tamale-187750064906695/)
+* Venue: [Modern City Hotel, Tamale](https://www.facebook.com/Modern-City-Hotel-Tamale-187750064906695/)
+* Tamale Workshop [Schedule](#tamale-workshop)
+
 
 # Accra Workshop (Thursday 24 March 2022)
 
 Venue: [Mensvic Grand Hotel, East Legon, Accra](https://www.mensvichotels.com/)
 
-# Workshop schedule
+# <a name="tamale-workshop">Tamale Workshop schedule</a>
 
-## Morning session  [09:00-11:00 2 hours]
-* Welcome: GSSTI Director [5 mins]
-* Welcome: Structure of the workshop: Kofi Asare GSSTI [5 mins]
-* Perspectives and needs: MOFA regional director [20 mins]
-* Cropping issues in North of Ghana: ADRA Kankam Boadu [20 mins]
-* [Overview and achievements](https://www.icloud.com/iclouddrive/077Lxrc0OH6fvxq-9wYa4OhPg#Workshop_2022_Lewis_Nr_FinalV2): Prof Lewis [20 mins]
-* Role of ground data and summary findings from 2021: Kofi Asare GSSTI [20 mins]
-* [Weather and yield in-season forecast](https://assimila.egnyte.com/dl/ABShXrvth8/weather_and_in-season_forecasting.pptx_): Nicola Pounder, Assimila [20 mins]
-* Discussion and future priorities [GSSTI to chair] [15 mins]
+| Time          	| Activity                                              	| Presenter         	|
+|---------------	|-------------------------------------------------------	|-------------------	|
+| 08:30 – 08:50 	| Arrival and registration of participants              	|                   	|
+| 08:50 – 08:55 	| Welcome address                                       	| GSSTI Director    	|
+| 08:55 – 09:00 	| Structure of the workshop                             	|   Mr. Kofi Asare  	|
+| 09:00 – 09:15 	|  Introduction of participants                         	|        All        	|
+| 09:15 – 09:35 	| Crop Monitoring, Perspectives and needs               	| Regional Director 	|
+| 09:35 – 09:55 	| Cropping issues in North of Ghana                     	|  Dr Kankam Boadu  	|
+| 09:55 – 10:15 	| Crop modelling and monitoring using Earth Observation 	| Prof Philip Lewis 	|
+| 10:15 – 10:35 	| Role of ground data for crop monitoring               	|   Mr. Kofi Asare  	|
+| 10:35 – 10:55 	| Weather and yield in-season forecasts                 	| Dr Nicola Pounder 	|
+| 10:55 – 11:05 	| Discussion and future priorities                      	|       Chair       	|
+| 11:05 – 11:20 	| Cocoa Break                                           	|                   	|
 
-## Practical Session [11:20:12:40] [1:40-2:00]
+## Practical Session
 
-Practical sessions can be accessed by clicking in the icon below:
+| Time          	| Activity                                                                           	| Presenter                 	|
+|---------------	|------------------------------------------------------------------------------------	|---------------------------	|
+| 11:35 - 11:55 	| P1: [Earth Observation and field data explorer](https://bit.ly/3N7CTQV)            	|        Mr. Feng Yin       	|
+| 11:55 – 12:15 	| P2: Weather data and Within-Season Demonstration                                   	|     Dr. Nicola Pounder    	|
+| 12:15 – 12:35 	| P3: [Field data explorer: Modelling and Data Assimilation](https://bit.ly/3N7CTQV) 	|       Dr. Jose Gomez      	|
+| 12:35 – 12:55 	| P4: Maize mapper : Crop Classification, MOFA yield                                 	|      Dr. Qingling Wu      	|
+| 12:55 – 13:15 	| P5: Field measurements Demonstration                                               	| Mr. Rahaman/Kenneth Aidoo 	|
+| 13:15 – 14:00 	| Lunch                                                                              	|                           	|
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jgomezdans/binder-sandbox/master?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCL-EO%252FWorkshop2022%26urlpath%3Dlab%252Ftree%252FWorkshop2022%252Fnotebooks%26branch%3Dmain)
+## Workshop technical presentations
 
-• You may want to [register for a GEE account](https://earthengine.google.com/signup/) before starting the practicals.
-
--   [DEA showcase]: DEA Edward Boamah
--   [Biophysical binder (Feng)](https://github.com/UCL-EO/Workshop2022/issues/13#issue-1150356786): EO & field data explorer
--   [Weather data and within-season demonstrator??] (Nicola)
--   [Model data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan): Crop model sliders, DA-Me, yield context plot
--   [Maize mapper](notebooks/Q2_Interface.ipynb)  **** CAU classification,  MOFA yield (GEE) Qingling
--   [Field measurements demo] Kenneth
-
-
-## Workshop technical presentations [2:30-4:00]
--  Classification (CAU)
--  DEA classification in Ghana 
--  [Crop modelling & ensembles](https://github.com/UCL-EO/Workshop2022/blob/main/presentations/WOFOST%20Crop%20Model%20and%20Ensemble%20Generation-Hongyuan.pptx): (Hongyuan)
--  [EO interpretation](https://liveuclac-my.sharepoint.com/:p:/g/personal/ucfafyi_ucl_ac_uk/EVlH9lVhJnlKi4oHdItIhLkBoSCtOasAouhNuseoSlaVeg?e=7egrDY) (talk on issues and methods) (feng)
--  [Introduction to data assimilation](https://docs.google.com/presentation/d/1D8o2c1XbBGy-455h7CiLuMQjWnUDZKK1N10Qq9OO_9g/edit?usp=sharing) (Jose/Hongyuan/CAU)
--  [Ensemble Crop DA](https://docs.google.com/presentation/d/1S3TkJICEMmKcBnz8WcAWNWjOXrDoAWFizELSg1VRELg/edit?usp=sharing) (jose)
--  Discussion and Reflections: GSSTI (Kofi to lead)
-
-
-
-
-
-
+| Time          	| Activity                                                    	| Presenter       	|
+|---------------	|-------------------------------------------------------------	|-----------------	|
+| 14:15 – 14:30 	| Crop Classification from Earth Observation                  	| Dr. Qingling Wu 	|
+| 14:45 – 15:00 	| Introduction to Data Assimilation                           	|  Dr. Jose Gomez 	|
+| 15:00 – 15:15 	| Crop modeling                                               	|  Dr Homgyuan Ma 	|
+| 15:15 – 15:30 	| Interpretation of Earth Observation data                    	|   Mr. Feng Yin  	|
+| 15:30 – 15:45 	| Crop modelling and Data Assimilation:  Application to Ghana 	|  Dr. Jose Gomez 	|
+| 15:45 – 16:00 	| Discussion and Reflections: GSSTI                           	|  Mr. Kofi Asare 	|
 ## Installation
 
 Although you sould be able to run the practicals using Binder on yor browser without installing anything, if you want to run practicals on your computer, you can [follow these instructions](https://github.com/UCL-EO/Workshop2022/wiki/Installation).
