@@ -19,7 +19,7 @@ Venue: [Mensvic Grand Hotel, East Legon, Accra](https://www.mensvichotels.com/)
 | 09:00 – 09:15 	|  Introduction of participants                         	|        All        	|
 | 09:15 – 09:35 	| Crop Monitoring, Perspectives and needs               	| Regional Director 	|
 | 09:35 – 09:55 	| Cropping issues in North of Ghana                     	|  Dr Kankam Boadu  	|
-| 09:55 – 10:15 	| Crop modelling and monitoring using Earth Observation 	| Prof Philip Lewis 	|
+| 09:55 – 10:15 	| [Crop modelling and monitoring using Earth Observation](https://www.icloud.com/iclouddrive/071-Ewsowz1xVjf694rdhIa7g#Workshop_2022_Lewis_Nr_FinalV3) 	| Prof Philip Lewis 	|
 | 10:15 – 10:35 	| Role of ground data for crop monitoring               	|   Mr. Kofi Asare  	|
 | 10:35 – 10:55 	| Weather and yield in-season forecasts                 	| Dr Nicola Pounder 	|
 | 10:55 – 11:05 	| Discussion and future priorities                      	|       Chair       	|
