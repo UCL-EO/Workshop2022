@@ -52,8 +52,8 @@ ndvi_colorized_vis = {
             '012E01', '011D01', '011301']
 }
 lai_colorized_vis = {
-            'min': 0.0,
-            'max': 5.5,
+            'min': 2.0,
+            'max': 5.0,
             'palette': ['e1e4b4', '999d60', '2ec409', '0a4b06']
 }
 fpar_colorized_vis = {
@@ -80,8 +80,8 @@ igbpLandCoverVis3 = {
 
 
 era5TemperatureVis = {
-  'min': 250.0,
-  'max': 320.0,
+  'min': 250.0-273.15,
+  'max': 320.0-273.15,
   'palette': [
     "#000080","#0000D9","#4000FF","#8000FF","#0080FF","#00FFFF",
     "#00FF80","#80FF00","#DAFF00","#FFFF00","#FFF500","#FFDA00",
@@ -795,7 +795,7 @@ def load_era_band(band, year, aoi, ADD_TO_MAP=False, VERBOSE=False):
         print(f'In {year}, {size.getInfo()} image(s) found.')
 
     if ADD_TO_MAP:
-        Map.addLayer(weather_in_season, era5_visualization, "Air temperature [K] at 2m height")
+        Map.addLayer(weather_in_season, era5_visualization, "Air temperature [C] at 2m height")
     return weather_in_season
 
 

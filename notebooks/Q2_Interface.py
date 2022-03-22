@@ -386,14 +386,28 @@ def create_maize_area_map(year, aoi=ghana_district):
 
 
 def clear_clicked(button):
-    Map.clear()
+    #Map.clear()
+    Map = geemap.Map(center=tamale_centre, zoom=8)
     Map.addLayer(outline2, {'palette': '999999'}, 'Ghana districts')
-    Map.addLayer(outline, {'palette': '000000'}, 'Northern & Greater Accra districts')
-    
+    Map.addLayer(outline, {'palette': '000000'}, 'Northern & Accra districts')
+
+    output_widget = widgets.Output(layout={'border': '1px solid black'})
+    output_control = WidgetControl(widget=output_widget, position='bottomleft')
+    Map.add_control(output_control)
+
     for control in [year_range, crop_mask, data_source, region_choice, region_choice]:
         control.index = 0
     checkbox_mask.value = True
     year_range.disabled = False
+
+    output_widget.clear_output()
+    if len(Map.layers) > base_no_layers:  # >3
+        # layers[-1] should be the vector polygpons
+        Map.remove_layer(Map.layers[-2])
+        #Map.remove_layer(Map.find_layer(title))
+    if len(Map.controls) > base_no_controls:  # >8
+        #  to remove pallete
+        Map.remove_control(Map.controls[-1])
     
     
 def checkmask_clicked(button):
@@ -533,7 +547,11 @@ def submit_clicked(button):
                 areas = create_maize_area_map(year, aoi=aoi)
         
         else: # load from pre-made vector layer
-            areas = ee.FeatureCollection(f'projects/ee-qinglingwu/assets/MOFA/MOFA_Yield_and_Area_vector_{year}')
+            if region_choice.index == 0:
+                year_range.disabled = True
+                areas = create_maize_area_map_northern(aoi=aoi)
+            else:
+                areas = ee.FeatureCollection(f'projects/ee-qinglingwu/assets/MOFA/MOFA_Yield_and_Area_vector_{year}')
        
         data = areas.reduceToImage(properties=['maize_area'], reducer=ee.Reducer.first()).rename('area').clip(aoi)
         
@@ -565,7 +583,7 @@ def submit_clicked(button):
                 '012E01', '011D01', '011301']}
         title = f'Max NDVI {year}'
         legend_label = 'Max NDVI over growing season'
-        
+
     if checkbox_mask.value:
         if iMask == 0: #LC_Type1 Grassland
             lc_crop, lc_all = load_modis_lc('LC_Type1', year, aoi, cropclasses=[10])
@@ -596,7 +614,7 @@ def submit_clicked(button):
     if region_choice.index == 3:
         Map.addLayer(outline2, {'palette': '999999'}, 'Ghana districts')
     else:
-        Map.addLayer(outline, {'palette': '000000'}, 'Northern & Greater Accra districts')
+        Map.addLayer(outline, {'palette': '000000'}, 'Northern & Accra districts')
     #Map.addLayer(outline1, {'palette': '000000'}, 'Greater Accra districts')
         
 
@@ -638,7 +656,7 @@ def on_data_changed(change):
                 year_range.disabled = True
             else:
                 year_range.disabled = False
-                year_range.options = [str(x) for x in range(2013, 2018)]
+                year_range.options = [str(x) for x in range(2013, 2017)]
                 if not (year_range.value in year_range.options):
                     year_range.value = '2013'
         elif change['new'] == 'CAU Maize Map':
@@ -654,7 +672,7 @@ def on_region_changed(change):
         if data_source.value == 'Maize Planting Area (ha)':
             if change['new'] != 'Northern Region': 
                 year_range.disabled = False
-                year_range.options = [str(x) for x in range(2013, 2018)]
+                year_range.options = [str(x) for x in range(2013, 2017)]
                 if not (year_range.value in year_range.options):
                     year_range.value = '2013'
             else: # Northern
