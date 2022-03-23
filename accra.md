@@ -1,4 +1,6 @@
-# <a name="tamale-workshop">Tamale Workshop schedule</a>
+# Accra Workshop schedule
+
+Thursday, 24 March 2022
 
 | Time          	| Activity                                              	| Presenter         	|
 |---------------	|-------------------------------------------------------	|-------------------	|
