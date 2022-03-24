@@ -2,7 +2,7 @@
 
 Thursday, 24 March 2022
 
-[**Live webcast**](ttps://fb.watch/bXYSB6Jxcp)
+[**Live webcast**](https://fb.watch/bXYSB6Jxcp)
 
 | Time          	| Activity                                              	| Presenter         	|
 |---------------	|-------------------------------------------------------	|-------------------	|
