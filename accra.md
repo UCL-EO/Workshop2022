@@ -34,6 +34,6 @@ Thursday, 24 March 2022
 |---------------	|-------------------------------------------------------------	|---------------------	|
 | 14:00 – 14:20 	| Digital Earth Africa                                        	| Mr. Edward Boamah     |
 | 14:20 – 14:35 	| Crop Classification from Earth Observation                   	| Dr. Qingling Wu 	    |
-| 14:35 – 14:50 	| Crop modelling and Data Assimilation: Ghana                  	| Dr Jose Gomez-Dans  	|
+| 14:35 – 14:50 	| [Crop modelling and Data Assimilation: Ghana](https://docs.google.com/presentation/d/1S3TkJICEMmKcBnz8WcAWNWjOXrDoAWFizELSg1VRELg/edit?usp=sharing)                  	| Dr Jose Gomez-Dans  	|
 | 14:50 – 15:05 	| Interpretation of Earth Observation data                    	|     Mr. Feng Yin    	|
 | 15:05 – 15:30 	| Discussion and Reflections: GSSTI                           	|    Prof P Lewis & Mr. Kofi Asare   	|
