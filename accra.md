@@ -2,6 +2,8 @@
 
 Thursday, 24 March 2022
 
+[**Live webcast**](ttps://fb.watch/bXYSB6Jxcp)
+
 | Time          	| Activity                                              	| Presenter         	|
 |---------------	|-------------------------------------------------------	|-------------------	|
 | 08:30 – 08:50 	| Arrival and registration of participants              	|                   	|
