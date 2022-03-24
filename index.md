@@ -9,7 +9,7 @@
 
 * Venue: [Mensvic Grand Hotel, East Legon, Accra](https://www.mensvichotels.com/)
 * Accra Workshop [Schedule](https://ucl-eo.github.io/Workshop2022/accra)
-* [Live webcast](https://fb.watch/bXYSB6Jxcp)
+* [Live webcast](https://fb.watch/bXYSB6Jxcp) [Zoom](https://us02web.zoom.us/j/88181792933?pwd=OWxMZnI3cVAydFRtWTJJUjVOQVNDQT09)
 
 # Local software installation instructions
 
