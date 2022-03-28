@@ -40,7 +40,7 @@ region_choice = widgets.Dropdown(
 year_range = widgets.Dropdown(
     description='Year',
     options=[
-        str(x) for x in range(2006, 2021)
+        str(x) for x in range(2006, 2022)
     ],
     style = style,
     value='2006'
@@ -663,7 +663,7 @@ def on_data_changed(change):
             year_range.disabled = True
         else:
             year_range.disabled = False
-            year_range.options = [str(x) for x in range(2006, 2021)]
+            year_range.options = [str(x) for x in range(2006, 2022)]
             
 
 def on_region_changed(change):
@@ -677,7 +677,7 @@ def on_region_changed(change):
                     year_range.value = '2013'
             else: # Northern
                 year_range.disabled = True
-                year_range.options = [str(x) for x in range(2006, 2021)]
+                year_range.options = [str(x) for x in range(2006, 2022)]
         elif data_source.value == 'MOFA yield statistics (1000 kg/ha)':
             year_range.options = [str(x) for x in range(2006, 2021)]
 
