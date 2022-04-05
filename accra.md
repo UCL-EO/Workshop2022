@@ -13,7 +13,7 @@ Thursday, 24 March 2022
 | 09:15 – 09:30 	| Crop Monitoring, Perspectives and needs               	| Director SRID, MOFA |
 | 09:30 – 10:00 	| Climate and yield                                     	|  Dr Dilys MacCarthy	|
 | 09:55 – 10:15 	| [Crop modelling and monitoring using Earth Observation](https://www.icloud.com/iclouddrive/071-Ewsowz1xVjf694rdhIa7g#Workshop_2022_Lewis_Nr_FinalV3) 	| Prof Philip Lewis 	|
-| 10:20 – 10:40 	| Role of ground data for crop monitoring               	|   Mr. Kofi Asare  	|
+| 10:20 – 10:40 	| [Role of ground data for crop monitoring](https://docs.google.com/presentation/d/1ehzk8gtfJ_iY0ZJiMOKyB6U7VhL-5zOX/edit?usp=sharing&ouid=105798234736915232402&rtpof=true&sd=true)               	|   Mr. Kofi Asare  	|
 | 10:40 – 11:00 	| Weather and yield in-season forecasts                 	| Dr Nicola Pounder 	|
 | 11:00 – 11:30 	| Cocoa Break                                           	|                   	|
 
@@ -32,8 +32,8 @@ Thursday, 24 March 2022
 
 | Time          	| Activity                                                    	| Presenter           	|
 |---------------	|-------------------------------------------------------------	|---------------------	|
-| 14:00 – 14:20 	| Digital Earth Africa                                        	| Mr. Edward Boamah     |
-| 14:20 – 14:35 	| Crop Classification from Earth Observation                   	| Dr. Qingling Wu 	    |
+| 14:00 – 14:20 	| [Digital Earth Africa](https://docs.google.com/presentation/d/13FS6_OLYkm_KWMAUpGLQMgMAVijvCfWq/edit?usp=sharing&ouid=105798234736915232402&rtpof=true&sd=true)                                        	| Mr. Edward Boamah     |
+| 14:20 – 14:35 	| [Crop Classification from Earth Observation](https://docs.google.com/presentation/d/1HyEQBMrJ5alQ8uIVjfEmzBDShZQuSwfr/edit?usp=sharing&ouid=105798234736915232402&rtpof=true&sd=true)                   	| Dr. Qingling Wu 	    |
 | 14:35 – 14:50 	| [Crop modelling and Data Assimilation: Ghana](https://docs.google.com/presentation/d/1S3TkJICEMmKcBnz8WcAWNWjOXrDoAWFizELSg1VRELg/edit?usp=sharing)                  	| Dr Jose Gomez-Dans  	|
-| 14:50 – 15:05 	| Interpretation of Earth Observation data                    	|     Mr. Feng Yin    	|
+| 14:50 – 15:05 	| [Interpretation of Earth Observation data](https://docs.google.com/presentation/d/10zTvooKaicPvmMncHX__t5c3dRm3EBiC/edit?usp=sharing&ouid=105798234736915232402&rtpof=true&sd=true)                    	|     Mr. Feng Yin    	|
 | 15:05 – 15:30 	| Discussion and Reflections: GSSTI                           	|    Prof P Lewis & Mr. Kofi Asare   	|
